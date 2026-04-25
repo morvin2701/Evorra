@@ -76,17 +76,18 @@
     </div>
 
     <script>
-        window.CLOUDINARY_CLOUD_NAME = "dpp3e46eh";
-        window.CLOUDINARY_UPLOAD_PRESET = "flutterflow_upload";
-        window.CLOUDINARY_UPLOAD_URL = "https://api.cloudinary.com/v1_1/dpp3e46eh/image/upload";
+        window.CLOUDINARY_CLOUD_NAME = "{{ cloudinary_cloud_name|default('', true)|e }}";
+        window.CLOUDINARY_UPLOAD_PRESET = "{{ cloudinary_upload_preset|default('', true)|e }}";
+        window.CLOUDINARY_UPLOAD_URL = "{{ cloudinary_upload_url|default('', true)|e }}";
+        window.CLOUDINARY_UPLOAD_FOLDER = "{{ cloudinary_upload_folder|default('events', true)|e }}";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyCweE0Uuv94g4HULOF7SXsO77h38sQdVXU",
-            authDomain: "evorra-event-managment-ydnjw4.firebaseapp.com",
-            projectId: "evorra-event-managment-ydnjw4",
-            storageBucket: "evorra-event-managment-ydnjw4.appspot.com",
-            messagingSenderId: "489575101931",
-            appId: "1:489575101931:web:8aa3a02a3198911a6a55ae"
+            apiKey: "{{ firebase_api_key|default('', true)|e }}",
+            authDomain: "{{ firebase_auth_domain|default('', true)|e }}",
+            projectId: "{{ firebase_project_id|default('', true)|e }}",
+            storageBucket: "{{ firebase_storage_bucket|default('', true)|e }}",
+            messagingSenderId: "{{ firebase_messaging_sender_id|default('', true)|e }}",
+            appId: "{{ firebase_app_id|default('', true)|e }}"
         };
 
         firebase.initializeApp(firebaseConfig);

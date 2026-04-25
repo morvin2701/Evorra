@@ -1,9 +1,29 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+
+
+@app.context_processor
+def inject_public_runtime_config():
+    return {
+        'firebase_api_key': os.getenv('FIREBASE_API_KEY', ''),
+        'firebase_auth_domain': os.getenv('FIREBASE_AUTH_DOMAIN', ''),
+        'firebase_project_id': os.getenv('FIREBASE_PROJECT_ID', ''),
+        'firebase_storage_bucket': os.getenv('FIREBASE_STORAGE_BUCKET', ''),
+        'firebase_messaging_sender_id': os.getenv('FIREBASE_MESSAGING_SENDER_ID', ''),
+        'firebase_app_id': os.getenv('FIREBASE_APP_ID', ''),
+        'cloudinary_cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME', ''),
+        'cloudinary_upload_preset': os.getenv('CLOUDINARY_UPLOAD_PRESET', ''),
+        'cloudinary_upload_url': os.getenv('CLOUDINARY_UPLOAD_URL', ''),
+        'cloudinary_upload_folder': os.getenv('CLOUDINARY_UPLOAD_FOLDER', 'events'),
+    }
 
 # --- Routes ---
 
@@ -78,4 +98,7 @@ def edit_profile():
     return render_template('edit_profile.html')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(
+        debug=os.getenv('FLASK_DEBUG', '1') == '1',
+        port=int(os.getenv('PORT', '5001'))
+    )
