@@ -80,6 +80,7 @@
         window.CLOUDINARY_UPLOAD_PRESET = "{{ cloudinary_upload_preset|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_URL = "{{ cloudinary_upload_url|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_FOLDER = "{{ cloudinary_upload_folder|default('events', true)|e }}";
+        window.APP_PUBLIC_URL = "{{ app_public_url|default('', true)|e }}";
 
         const firebaseConfig = {
             apiKey: "{{ firebase_api_key|default('', true)|e }}",

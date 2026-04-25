@@ -23,6 +23,7 @@ def inject_public_runtime_config():
         'cloudinary_upload_preset': os.getenv('CLOUDINARY_UPLOAD_PRESET', ''),
         'cloudinary_upload_url': os.getenv('CLOUDINARY_UPLOAD_URL', ''),
         'cloudinary_upload_folder': os.getenv('CLOUDINARY_UPLOAD_FOLDER', 'events'),
+        'app_public_url': os.getenv('APP_PUBLIC_URL', ''),
     }
 
 # --- Routes ---
