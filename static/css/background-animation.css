@@ -94,7 +94,6 @@ body {
 
 .top-navbar,
 main {
-    position: relative;
     z-index: 3;
 }
 

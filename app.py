@@ -30,7 +30,16 @@ def inject_public_runtime_config():
 
 @app.route('/')
 def home():
+    user_agent = (request.headers.get('User-Agent') or '').lower()
+    ch_mobile = (request.headers.get('sec-ch-ua-mobile') or '').strip()
+    is_mobile = any(token in user_agent for token in ['mobile', 'android', 'iphone', 'ipod', 'windows phone', 'ipad', 'tablet']) or ch_mobile == '?1'
+    if is_mobile:
+        return render_template('home_mobile.html')
     return render_template('home.html')
+
+@app.route('/home-mobile')
+def home_mobile():
+    return render_template('home_mobile.html')
 
 @app.route('/auth')
 def auth():
