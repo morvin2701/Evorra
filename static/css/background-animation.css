@@ -93,10 +93,13 @@ body {
 }
 
 .top-navbar,
-main,
-.bottom-nav {
+main {
     position: relative;
     z-index: 3;
+}
+
+.bottom-nav {
+    z-index: 1200;
 }
 
 @keyframes bgShift {

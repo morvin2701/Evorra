@@ -966,3 +966,127 @@ body {
     border-radius: 20px;
     margin-bottom: 10px;
 }
+
+/* ── Global Responsive Foundation ── */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+img, video, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+main {
+    width: 100%;
+}
+
+.hide-on-desktop {
+    display: none !important;
+}
+
+.hide-on-mobile {
+    display: initial !important;
+}
+
+.bottom-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(9, 18, 34, 0.92);
+    backdrop-filter: blur(16px);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    z-index: 1200;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.bottom-nav .nav-item {
+    min-height: 62px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: rgba(228,236,255,0.64);
+    text-decoration: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.25px;
+}
+
+.bottom-nav .nav-item i {
+    font-size: 1rem;
+}
+
+.bottom-nav .nav-item.active {
+    color: #ffffff;
+}
+
+@media (max-width: 1120px) {
+    .top-navbar {
+        padding: 0 20px;
+    }
+
+    .nav-links {
+        gap: 18px;
+    }
+
+    .nav-link {
+        font-size: 0.86rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .top-navbar {
+        height: 68px;
+        padding: 0 14px;
+    }
+
+    .nav-logo {
+        font-size: 1.38rem;
+        letter-spacing: -0.8px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    #user-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .hide-on-desktop {
+        display: grid !important;
+    }
+
+    .hide-on-mobile {
+        display: none !important;
+    }
+
+    main {
+        padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 640px) {
+    .auth-wrapper {
+        padding: 20px 12px;
+    }
+
+    .auth-card {
+        border-radius: 20px;
+        padding: 22px 16px;
+    }
+
+    .btn-evorra {
+        padding: 14px;
+        font-size: 0.9rem;
+    }
+}
