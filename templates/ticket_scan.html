@@ -5,103 +5,139 @@
 {% block head %}
 <style>
     .scan-bg { min-height: 100vh; background: transparent; }
-    .scan-shell { width: min(760px, calc(100% - 24px)); margin: 0 auto; padding: 28px 0 100px; }
+    .scan-shell { width: min(1080px, calc(100% - 24px)); margin: 0 auto; padding: 26px 0 110px; }
     .scan-card {
-        border-radius: 24px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(160deg, rgba(9, 18, 34, 0.93), rgba(10, 20, 38, 0.85));
-        box-shadow: 0 20px 50px rgba(0,0,0,0.42);
-        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 32px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: linear-gradient(148deg, rgba(7, 16, 32, 0.96), rgba(8, 28, 50, 0.9));
+        box-shadow: 0 34px 70px rgba(0,0,0,0.52);
+        padding: 26px;
+    }
+    .scan-card::before,
+    .scan-card::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(2px);
+    }
+    .scan-card::before {
+        width: 430px;
+        height: 430px;
+        top: -240px;
+        right: -170px;
+        background: radial-gradient(circle, rgba(94, 244, 255, 0.24), transparent 72%);
+    }
+    .scan-card::after {
+        width: 360px;
+        height: 360px;
+        bottom: -210px;
+        left: -130px;
+        background: radial-gradient(circle, rgba(122, 108, 255, 0.2), transparent 72%);
     }
     .scan-status {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         border-radius: 999px;
-        padding: 7px 12px;
-        font-size: .74rem;
-        letter-spacing: .45px;
+        padding: 8px 13px;
+        font-size: .73rem;
+        letter-spacing: .12em;
         text-transform: uppercase;
-        font-weight: 800;
-        border: 1px solid rgba(255,255,255,0.2);
-        background: rgba(255,255,255,0.05);
+        font-weight: 900;
+        border: 1px solid rgba(255,255,255,0.22);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
         color: #dce7ff;
     }
     .scan-status.ok {
-        border-color: rgba(116, 255, 202, 0.35);
-        background: rgba(116, 255, 202, 0.12);
+        border-color: rgba(116, 255, 202, 0.42);
+        background: linear-gradient(145deg, rgba(116, 255, 202, 0.24), rgba(116, 255, 202, 0.08));
         color: #beffe9;
     }
     .scan-status.err {
-        border-color: rgba(255, 122, 146, 0.35);
-        background: rgba(255, 122, 146, 0.12);
+        border-color: rgba(255, 122, 146, 0.44);
+        background: linear-gradient(145deg, rgba(255, 122, 146, 0.24), rgba(255, 122, 146, 0.08));
         color: #ffd0db;
     }
-    .scan-title { margin: 12px 0 8px; color: #fff; font-size: clamp(1.35rem, 2.5vw, 1.75rem); font-weight: 900; }
-    .scan-sub { margin: 0; color: rgba(221, 232, 255, 0.72); line-height: 1.55; font-size: .9rem; }
-    .scan-grid { margin-top: 14px; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    .scan-title { margin: 14px 0 8px; color: #fff; font-size: clamp(1.7rem, 3vw, 2.35rem); font-weight: 900; letter-spacing: -0.025em; }
+    .scan-sub { margin: 0; color: rgba(221, 232, 255, 0.74); line-height: 1.6; font-size: .96rem; max-width: 700px; }
+    .scan-section-label {
+        margin: 0 0 10px;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .14em;
+        color: rgba(211, 228, 255, 0.62);
+        font-weight: 900;
+    }
+    .scan-grid { margin-top: 0; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
     .scan-item {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 10px;
-    }
-    .scan-label { margin: 0 0 3px; color: rgba(221, 232, 255, 0.54); font-size: .72rem; font-weight: 700; }
-    .scan-value { margin: 0; color: #fff; font-size: .9rem; font-weight: 800; word-break: break-word; }
-    .scan-actions { margin-top: 14px; display: flex; gap: 10px; }
-    .scan-btn {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.18);
-        padding: 11px 14px;
-        font-size: .88rem;
-        font-weight: 800;
-        cursor: pointer;
-    }
-    .scan-btn.primary {
-        color: #071224;
-        background: linear-gradient(135deg, #87f4cf, #5ad2ff);
-        border-color: rgba(153, 255, 225, 0.55);
-    }
-    .scan-btn.ghost { color: #e6efff; background: rgba(255,255,255,0.03); }
-    .scan-scanner {
-        margin-top: 14px;
         border-radius: 14px;
         border: 1px solid rgba(255,255,255,0.13);
-        background: rgba(255,255,255,0.03);
-        padding: 10px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 12px 13px;
+    }
+    .scan-label { margin: 0 0 4px; color: rgba(221, 232, 255, 0.56); font-size: .71rem; font-weight: 800; }
+    .scan-value { margin: 0; color: #fff; font-size: .93rem; font-weight: 800; word-break: break-word; }
+    .scan-actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .scan-btn {
+        border-radius: 13px;
+        border: 1px solid rgba(255,255,255,0.22);
+        padding: 11px 16px;
+        font-size: .88rem;
+        font-weight: 900;
+        cursor: pointer;
+        transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+    }
+    .scan-btn:hover { transform: translateY(-1px); }
+    .scan-btn.primary {
+        color: #061225;
+        background: linear-gradient(135deg, #9af8d5, #67d9ff);
+        border-color: rgba(153, 255, 225, 0.55);
+        box-shadow: 0 10px 20px rgba(90, 210, 255, 0.26);
+    }
+    .scan-btn.ghost { color: #e6efff; background: rgba(255,255,255,0.04); }
+    .scan-btn.ghost:hover { border-color: rgba(136, 231, 255, 0.42); background: rgba(255,255,255,0.1); }
+    .scan-scanner {
+        margin-top: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(150deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 13px;
     }
     #reader {
         width: 100%;
-        max-width: 520px;
+        max-width: 620px;
         margin: 0 auto;
-        border-radius: 12px;
+        border-radius: 14px;
         overflow: hidden;
     }
     .scan-log {
-        margin-top: 10px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        padding-top: 10px;
-        max-height: 180px;
+        margin-top: 12px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        padding-top: 11px;
+        max-height: 200px;
         overflow: auto;
         scrollbar-width: thin;
     }
     .scan-log-item {
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
         padding: 8px 10px;
         margin-bottom: 8px;
-        font-size: .8rem;
-        color: rgba(227,236,255,0.82);
+        font-size: .81rem;
+        color: rgba(227,236,255,0.86);
     }
-    .scan-log-item.ok { border-color: rgba(116,255,202,0.35); }
-    .scan-log-item.err { border-color: rgba(255,122,146,0.35); }
+    .scan-log-item.ok { border-color: rgba(116,255,202,0.38); }
+    .scan-log-item.err { border-color: rgba(255,122,146,0.38); }
     .scan-analytics {
-        margin-top: 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: rgba(255,255,255,0.03);
-        padding: 12px;
+        margin-top: 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(148deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 15px;
     }
     .scan-analytics-head {
         display: flex;
@@ -109,91 +145,112 @@
         justify-content: space-between;
         gap: 10px;
         flex-wrap: wrap;
-        margin-bottom: 10px;
+        margin-bottom: 11px;
     }
     .scan-analytics-title {
         margin: 0;
-        color: #eef3ff;
-        font-size: .95rem;
-        letter-spacing: .2px;
+        color: #f3f7ff;
+        font-size: 1.05rem;
+        letter-spacing: .01em;
         font-weight: 900;
     }
     .scan-kpis {
         display: grid;
-        gap: 8px;
+        gap: 9px;
         grid-template-columns: repeat(3, 1fr);
         margin-bottom: 10px;
     }
     .scan-kpi {
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: rgba(255,255,255,0.03);
-        padding: 8px;
+        border-radius: 13px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 9px 10px;
     }
     .scan-kpi-label {
-        margin: 0 0 3px;
+        margin: 0 0 4px;
         color: rgba(221,232,255,0.58);
-        font-size: .68rem;
-        font-weight: 800;
+        font-size: .66rem;
+        font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: .4px;
+        letter-spacing: .08em;
     }
     .scan-kpi-value {
         margin: 0;
         color: #fff;
-        font-size: 1rem;
+        font-size: 1.08rem;
         font-weight: 900;
     }
     .scan-charts {
         display: grid;
         gap: 10px;
         grid-template-columns: 1fr 1fr;
-        margin-bottom: 10px;
+        margin-bottom: 11px;
     }
     .scan-chart-card {
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 8px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 10px;
+    }
+    .scan-chart-wrap {
+        position: relative;
+        height: 220px;
+        width: 100%;
     }
     .scan-chart-title {
-        margin: 0 0 6px;
-        color: rgba(228,236,255,0.8);
-        font-size: .74rem;
+        margin: 0 0 7px;
+        color: rgba(228,236,255,0.82);
+        font-size: .72rem;
         text-transform: uppercase;
-        letter-spacing: .4px;
-        font-weight: 800;
+        letter-spacing: .09em;
+        font-weight: 900;
     }
     .scan-recent-list {
-        border-top: 1px solid rgba(255,255,255,0.11);
+        border-top: 1px solid rgba(255,255,255,0.12);
         margin-top: 8px;
         padding-top: 10px;
-        max-height: 210px;
+        max-height: 230px;
         overflow: auto;
     }
     .scan-recent-item {
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 10px;
-        background: rgba(255,255,255,0.03);
-        padding: 8px 10px;
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 12px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 9px 10px;
         margin-bottom: 8px;
     }
     .scan-recent-main {
         margin: 0;
         color: #f2f6ff;
-        font-size: .84rem;
-        font-weight: 800;
+        font-size: .86rem;
+        font-weight: 900;
     }
     .scan-recent-meta {
         margin: 2px 0 0;
         color: rgba(221,232,255,0.65);
-        font-size: .74rem;
+        font-size: .75rem;
+    }
+    .scan-detail-panel {
+        margin-top: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(148deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        padding: 14px;
+    }
+    @media (max-width: 900px) {
+        .scan-shell { width: calc(100% - 16px); }
+        .scan-kpis { grid-template-columns: 1fr; }
+        .scan-charts { grid-template-columns: 1fr; }
+        .scan-chart-wrap { height: 200px; }
     }
     @media (max-width: 640px) {
         .scan-grid { grid-template-columns: 1fr; }
-        .scan-actions { flex-direction: column; }
-        .scan-kpis { grid-template-columns: 1fr; }
-        .scan-charts { grid-template-columns: 1fr; }
+        .scan-actions { flex-direction: column; align-items: stretch; }
+        .scan-chart-wrap { height: 180px; }
+        .scan-shell { width: calc(100% - 12px); padding-top: 12px; }
+        .scan-card { border-radius: 24px; padding: 15px; }
+        .scan-title { font-size: 1.75rem; }
+        .scan-sub { font-size: .9rem; }
     }
 </style>
 {% endblock %}
@@ -238,32 +295,39 @@
                 <div class="scan-charts">
                     <div class="scan-chart-card">
                         <p class="scan-chart-title">Event-wise scans</p>
-                        <canvas id="event-chart" height="140"></canvas>
+                        <div class="scan-chart-wrap">
+                            <canvas id="event-chart"></canvas>
+                        </div>
                     </div>
                     <div class="scan-chart-card">
                         <p class="scan-chart-title">Hourly scan trend</p>
-                        <canvas id="hour-chart" height="140"></canvas>
+                        <div class="scan-chart-wrap">
+                            <canvas id="hour-chart"></canvas>
+                        </div>
                     </div>
                 </div>
                 <div id="recent-entry-list" class="scan-recent-list"></div>
             </div>
 
-            <div class="scan-grid">
-                <div class="scan-item">
-                    <p class="scan-label">Event</p>
-                    <p id="scan-event" class="scan-value">-</p>
-                </div>
-                <div class="scan-item">
-                    <p class="scan-label">Ticket ID</p>
-                    <p id="scan-ticket-id" class="scan-value">-</p>
-                </div>
-                <div class="scan-item">
-                    <p class="scan-label">Type</p>
-                    <p id="scan-type" class="scan-value">-</p>
-                </div>
-                <div class="scan-item">
-                    <p class="scan-label">Quantity</p>
-                    <p id="scan-qty" class="scan-value">-</p>
+            <div class="scan-detail-panel">
+                <p class="scan-section-label">Last scanned ticket</p>
+                <div class="scan-grid">
+                    <div class="scan-item">
+                        <p class="scan-label">Event</p>
+                        <p id="scan-event" class="scan-value">-</p>
+                    </div>
+                    <div class="scan-item">
+                        <p class="scan-label">Ticket ID</p>
+                        <p id="scan-ticket-id" class="scan-value">-</p>
+                    </div>
+                    <div class="scan-item">
+                        <p class="scan-label">Type</p>
+                        <p id="scan-type" class="scan-value">-</p>
+                    </div>
+                    <div class="scan-item">
+                        <p class="scan-label">Quantity</p>
+                        <p id="scan-qty" class="scan-value">-</p>
+                    </div>
                 </div>
             </div>
 
@@ -331,6 +395,17 @@
         if (hourChart) hourChart.destroy();
         hourChart = new Chart(ctx, config);
         return hourChart;
+    }
+
+    function setScanDetails(ticketData, eventData, fallbackTicketId = '-') {
+        document.getElementById('scan-event').textContent =
+            (ticketData && (ticketData.event_title || eventData?.title)) || '-';
+        document.getElementById('scan-ticket-id').textContent =
+            (ticketData && (ticketData.id || fallbackTicketId)) || fallbackTicketId || '-';
+        document.getElementById('scan-type').textContent =
+            (ticketData && (ticketData.ticket_type_name || ticketData.ticket_type || '-')) || '-';
+        document.getElementById('scan-qty').textContent =
+            (ticketData && Number(ticketData.quantity || 1)) || 1;
     }
 
     async function fetchLatestEntries() {
@@ -423,6 +498,8 @@
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { labels: { color: 'rgba(229,237,255,0.82)' } } },
                     cutout: '58%'
                 }
@@ -444,6 +521,8 @@
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         x: { ticks: { color: 'rgba(226,234,255,0.8)' }, grid: { color: 'rgba(255,255,255,0.08)' } },
                         y: { ticks: { color: 'rgba(226,234,255,0.8)' }, grid: { color: 'rgba(255,255,255,0.08)' } }
@@ -497,6 +576,13 @@
         }
 
         try {
+            const preTicketSnap = await db.collection('tickets').doc(targetTicketId).get();
+            if (!preTicketSnap.exists) throw new Error("Ticket not found.");
+            const preTicket = preTicketSnap.data();
+            const preEventSnap = await db.collection('events').doc(preTicket.event_id).get();
+            const preEvent = preEventSnap.exists ? preEventSnap.data() : null;
+            setScanDetails(preTicket, preEvent, targetTicketId);
+
             const ticketRef = db.collection('tickets').doc(targetTicketId);
             await db.runTransaction(async (txn) => {
                 const ticketSnap = await txn.get(ticketRef);
@@ -652,10 +738,7 @@
             const eventSnap = await db.collection('events').doc(currentTicket.event_id).get();
             currentEvent = eventSnap.exists ? eventSnap.data() : null;
 
-            document.getElementById('scan-event').textContent = currentTicket.event_title || currentEvent?.title || '-';
-            document.getElementById('scan-ticket-id').textContent = currentTicket.id || ticketId;
-            document.getElementById('scan-type').textContent = currentTicket.ticket_type_name || '-';
-            document.getElementById('scan-qty').textContent = currentTicket.quantity || 1;
+            setScanDetails(currentTicket, currentEvent, ticketId);
 
             if (currentTicket.checked_in) {
                 setStatus('err', '<i class="fa-solid fa-clock-rotate-left"></i> Already Used');
