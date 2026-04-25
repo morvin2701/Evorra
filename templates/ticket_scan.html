@@ -63,9 +63,137 @@
         border-color: rgba(153, 255, 225, 0.55);
     }
     .scan-btn.ghost { color: #e6efff; background: rgba(255,255,255,0.03); }
+    .scan-scanner {
+        margin-top: 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+    }
+    #reader {
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .scan-log {
+        margin-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 10px;
+        max-height: 180px;
+        overflow: auto;
+        scrollbar-width: thin;
+    }
+    .scan-log-item {
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        font-size: .8rem;
+        color: rgba(227,236,255,0.82);
+    }
+    .scan-log-item.ok { border-color: rgba(116,255,202,0.35); }
+    .scan-log-item.err { border-color: rgba(255,122,146,0.35); }
+    .scan-analytics {
+        margin-top: 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: rgba(255,255,255,0.03);
+        padding: 12px;
+    }
+    .scan-analytics-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+    .scan-analytics-title {
+        margin: 0;
+        color: #eef3ff;
+        font-size: .95rem;
+        letter-spacing: .2px;
+        font-weight: 900;
+    }
+    .scan-kpis {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, 1fr);
+        margin-bottom: 10px;
+    }
+    .scan-kpi {
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: rgba(255,255,255,0.03);
+        padding: 8px;
+    }
+    .scan-kpi-label {
+        margin: 0 0 3px;
+        color: rgba(221,232,255,0.58);
+        font-size: .68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+    .scan-kpi-value {
+        margin: 0;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 900;
+    }
+    .scan-charts {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: 10px;
+    }
+    .scan-chart-card {
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 8px;
+    }
+    .scan-chart-title {
+        margin: 0 0 6px;
+        color: rgba(228,236,255,0.8);
+        font-size: .74rem;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        font-weight: 800;
+    }
+    .scan-recent-list {
+        border-top: 1px solid rgba(255,255,255,0.11);
+        margin-top: 8px;
+        padding-top: 10px;
+        max-height: 210px;
+        overflow: auto;
+    }
+    .scan-recent-item {
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        padding: 8px 10px;
+        margin-bottom: 8px;
+    }
+    .scan-recent-main {
+        margin: 0;
+        color: #f2f6ff;
+        font-size: .84rem;
+        font-weight: 800;
+    }
+    .scan-recent-meta {
+        margin: 2px 0 0;
+        color: rgba(221,232,255,0.65);
+        font-size: .74rem;
+    }
     @media (max-width: 640px) {
         .scan-grid { grid-template-columns: 1fr; }
         .scan-actions { flex-direction: column; }
+        .scan-kpis { grid-template-columns: 1fr; }
+        .scan-charts { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -77,6 +205,48 @@
             <span id="scan-status" class="scan-status"><i class="fa-solid fa-spinner fa-spin"></i> Validating</span>
             <h1 id="scan-title" class="scan-title">Checking ticket...</h1>
             <p id="scan-sub" class="scan-sub">Please wait while we verify this pass against live booking records.</p>
+
+            <div id="scanner-block" class="scan-scanner hide">
+                <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+                    <button id="start-scan-btn" class="scan-btn primary" onclick="startScanner()">Start Camera Scanner</button>
+                    <button id="stop-scan-btn" class="scan-btn ghost" onclick="stopScanner()">Stop Scanner</button>
+                    <button id="refresh-entries-btn" class="scan-btn ghost" onclick="fetchLatestEntries()">Refresh Latest Entries</button>
+                </div>
+                <div id="reader"></div>
+                <div id="scan-log" class="scan-log"></div>
+            </div>
+
+            <div id="scan-analytics" class="scan-analytics hide">
+                <div class="scan-analytics-head">
+                    <h3 class="scan-analytics-title">Scan Insights</h3>
+                    <span id="analytics-updated" class="scan-status">Waiting for data</span>
+                </div>
+                <div class="scan-kpis">
+                    <div class="scan-kpi">
+                        <p class="scan-kpi-label">Total Entries</p>
+                        <p id="kpi-total" class="scan-kpi-value">0</p>
+                    </div>
+                    <div class="scan-kpi">
+                        <p class="scan-kpi-label">Unique Tickets</p>
+                        <p id="kpi-unique" class="scan-kpi-value">0</p>
+                    </div>
+                    <div class="scan-kpi">
+                        <p class="scan-kpi-label">Events Covered</p>
+                        <p id="kpi-events" class="scan-kpi-value">0</p>
+                    </div>
+                </div>
+                <div class="scan-charts">
+                    <div class="scan-chart-card">
+                        <p class="scan-chart-title">Event-wise scans</p>
+                        <canvas id="event-chart" height="140"></canvas>
+                    </div>
+                    <div class="scan-chart-card">
+                        <p class="scan-chart-title">Hourly scan trend</p>
+                        <canvas id="hour-chart" height="140"></canvas>
+                    </div>
+                </div>
+                <div id="recent-entry-list" class="scan-recent-list"></div>
+            </div>
 
             <div class="scan-grid">
                 <div class="scan-item">
@@ -107,10 +277,18 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
     const ticketId = "{{ ticket_id }}";
+    const scannerMode = "{{ '1' if scanner_mode else '0' }}" === "1";
     let currentTicket = null;
     let currentEvent = null;
+    let html5QrScanner = null;
+    let scanLock = false;
+    const recentScanMap = new Map();
+    let eventChart = null;
+    let hourChart = null;
 
     function setStatus(kind, text) {
         const el = document.getElementById('scan-status');
@@ -118,7 +296,193 @@
         el.innerHTML = text;
     }
 
-    async function verifyAndCheckIn() {
+    function addScanLog(kind, message) {
+        const wrap = document.getElementById('scan-log');
+        if (!wrap) return;
+        const item = document.createElement('div');
+        item.className = `scan-log-item ${kind || ''}`;
+        item.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+        wrap.prepend(item);
+    }
+
+    function toDateSafe(ts) {
+        if (!ts) return null;
+        if (typeof ts.toDate === 'function') return ts.toDate();
+        if (ts.seconds) return new Date(ts.seconds * 1000);
+        const d = new Date(ts);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function updateAnalyticsBadge(text, ok = false) {
+        const el = document.getElementById('analytics-updated');
+        if (!el) return;
+        el.className = `scan-status ${ok ? 'ok' : ''}`;
+        el.innerHTML = `<i class="fa-solid fa-rotate"></i> ${text}`;
+    }
+
+    function buildOrUpdateChart(refName, canvasId, config) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return null;
+        if (refName === 'event') {
+            if (eventChart) eventChart.destroy();
+            eventChart = new Chart(ctx, config);
+            return eventChart;
+        }
+        if (hourChart) hourChart.destroy();
+        hourChart = new Chart(ctx, config);
+        return hourChart;
+    }
+
+    async function fetchLatestEntries() {
+        if (!scannerMode) return;
+        const user = auth.currentUser;
+        if (!user) return;
+        updateAnalyticsBadge('Refreshing...', false);
+        const refreshBtn = document.getElementById('refresh-entries-btn');
+        if (refreshBtn) {
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = 'Refreshing...';
+        }
+        try {
+            let logs = [];
+            try {
+                const groupSnap = await db.collectionGroup('scan_logs')
+                    .where('scanned_by', '==', user.uid)
+                    .limit(120)
+                    .get();
+                logs = groupSnap.docs.map(d => d.data());
+            } catch (e) {
+                const eventsSnap = await db.collection('events')
+                    .where('organizer_id', '==', user.uid)
+                    .limit(25)
+                    .get();
+                const eventDocs = eventsSnap.docs;
+                const nested = await Promise.all(eventDocs.map(async (evDoc) => {
+                    const sub = await db.collection('events').doc(evDoc.id).collection('scan_logs').limit(30).get();
+                    return sub.docs.map(d => d.data());
+                }));
+                logs = nested.flat();
+            }
+
+            logs.sort((a, b) => {
+                const da = toDateSafe(a.scanned_at)?.getTime() || 0;
+                const dbv = toDateSafe(b.scanned_at)?.getTime() || 0;
+                return dbv - da;
+            });
+
+            const topLogs = logs.slice(0, 40);
+            const eventIds = [...new Set(topLogs.map(x => x.event_id).filter(Boolean))];
+            const eventMap = new Map();
+            await Promise.all(eventIds.map(async (id) => {
+                try {
+                    const doc = await db.collection('events').doc(id).get();
+                    if (doc.exists) eventMap.set(id, doc.data().title || id);
+                } catch (e) {}
+            }));
+
+            const uniqueTickets = new Set();
+            const eventCountMap = new Map();
+            const hourCountMap = new Map();
+            const list = document.getElementById('recent-entry-list');
+            if (list) list.innerHTML = '';
+
+            topLogs.forEach((entry) => {
+                const ticket = entry.ticket_id || '-';
+                uniqueTickets.add(ticket);
+                const eventTitle = eventMap.get(entry.event_id) || entry.event_id || 'Unknown event';
+                eventCountMap.set(eventTitle, (eventCountMap.get(eventTitle) || 0) + Number(entry.quantity || 1));
+                const d = toDateSafe(entry.scanned_at);
+                const h = d ? `${String(d.getHours()).padStart(2, '0')}:00` : 'Unknown';
+                hourCountMap.set(h, (hourCountMap.get(h) || 0) + Number(entry.quantity || 1));
+
+                if (list) {
+                    const row = document.createElement('div');
+                    row.className = 'scan-recent-item';
+                    row.innerHTML = `
+                        <p class="scan-recent-main">${eventTitle}</p>
+                        <p class="scan-recent-meta">Ticket: ${ticket} | Qty: ${Number(entry.quantity || 1)} | ${d ? d.toLocaleString() : 'Time unknown'}</p>
+                    `;
+                    list.appendChild(row);
+                }
+            });
+
+            document.getElementById('kpi-total').textContent = String(topLogs.length);
+            document.getElementById('kpi-unique').textContent = String(uniqueTickets.size);
+            document.getElementById('kpi-events').textContent = String(eventCountMap.size);
+
+            const eventPairs = [...eventCountMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+            buildOrUpdateChart('event', 'event-chart', {
+                type: 'doughnut',
+                data: {
+                    labels: eventPairs.map(x => x[0]),
+                    datasets: [{
+                        data: eventPairs.map(x => x[1]),
+                        backgroundColor: ['#7bf4d3', '#58c9ff', '#9c8dff', '#ff8fb0', '#ffd27a', '#89ffa6'],
+                        borderColor: 'rgba(12,22,40,0.85)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: { legend: { labels: { color: 'rgba(229,237,255,0.82)' } } },
+                    cutout: '58%'
+                }
+            });
+
+            const hourPairs = [...hourCountMap.entries()]
+                .filter(([k]) => k !== 'Unknown')
+                .sort((a, b) => a[0].localeCompare(b[0]));
+            buildOrUpdateChart('hour', 'hour-chart', {
+                type: 'bar',
+                data: {
+                    labels: hourPairs.map(x => x[0]),
+                    datasets: [{
+                        label: 'Scans',
+                        data: hourPairs.map(x => x[1]),
+                        backgroundColor: 'rgba(90,210,255,0.68)',
+                        borderColor: '#6ce3ff',
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { ticks: { color: 'rgba(226,234,255,0.8)' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+                        y: { ticks: { color: 'rgba(226,234,255,0.8)' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            updateAnalyticsBadge(`Updated ${new Date().toLocaleTimeString()}`, true);
+        } catch (e) {
+            updateAnalyticsBadge('Refresh failed', false);
+            addScanLog('err', 'Failed to refresh latest entries.');
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = 'Refresh Latest Entries';
+            }
+        }
+    }
+
+    function parseTicketIdFromScan(payload) {
+        const text = String(payload || '').trim();
+        if (!text) return '';
+        try {
+            const url = new URL(text);
+            const parts = url.pathname.split('/').filter(Boolean);
+            const idx = parts.indexOf('scan-pass');
+            if (idx !== -1 && parts[idx + 1]) return parts[idx + 1];
+        } catch (e) {
+            const match = text.match(/scan-pass\/([^/?#]+)/);
+            if (match && match[1]) return match[1];
+        }
+        return '';
+    }
+
+    async function verifyAndCheckIn(targetTicketId = ticketId) {
+        if (!targetTicketId) {
+            throw new Error("No ticket id found in scan.");
+        }
         const user = auth.currentUser;
         if (!user) {
             alert("Please login as organizer to scan tickets.");
@@ -127,11 +491,13 @@
         }
 
         const btn = document.getElementById('checkin-btn');
-        btn.disabled = true;
-        btn.textContent = 'Checking...';
+        if (btn && !scannerMode) {
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+        }
 
         try {
-            const ticketRef = db.collection('tickets').doc(ticketId);
+            const ticketRef = db.collection('tickets').doc(targetTicketId);
             await db.runTransaction(async (txn) => {
                 const ticketSnap = await txn.get(ticketRef);
                 if (!ticketSnap.exists) throw new Error("Ticket not found.");
@@ -170,7 +536,7 @@
                 const logRef = eventRef.collection('scan_logs').doc();
                 txn.set(logRef, {
                     id: logRef.id,
-                    ticket_id: ticket.id || ticketId,
+                    ticket_id: ticket.id || targetTicketId,
                     event_id: ticket.event_id,
                     scanned_by: user.uid,
                     quantity,
@@ -181,19 +547,102 @@
             setStatus('ok', '<i class="fa-solid fa-circle-check"></i> Checked In');
             document.getElementById('scan-title').textContent = 'Entry approved';
             document.getElementById('scan-sub').textContent = 'Ticket marked as checked-in and organizer scan stats updated.';
-            btn.textContent = 'Checked In';
+            if (scannerMode) {
+                addScanLog('ok', `Ticket ${targetTicketId} checked in successfully.`);
+                fetchLatestEntries();
+            } else if (btn) {
+                btn.textContent = 'Checked In';
+            }
         } catch (e) {
             setStatus('err', '<i class="fa-solid fa-circle-xmark"></i> Check-in Failed');
             document.getElementById('scan-title').textContent = 'Unable to check in';
             document.getElementById('scan-sub').textContent = e.message || 'Validation failed.';
-            btn.disabled = false;
-            btn.textContent = 'Check In Ticket';
+            if (scannerMode) {
+                addScanLog('err', e.message || 'Validation failed.');
+            } else if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Check In Ticket';
+            }
+            throw e;
         }
+    }
+
+    async function onScanSuccess(decodedText) {
+        const extracted = parseTicketIdFromScan(decodedText);
+        if (!extracted) {
+            addScanLog('err', 'Invalid QR payload.');
+            return;
+        }
+        const now = Date.now();
+        const last = recentScanMap.get(extracted) || 0;
+        if (now - last < 3000) return;
+        recentScanMap.set(extracted, now);
+        if (scanLock) return;
+        scanLock = true;
+        try {
+            await verifyAndCheckIn(extracted);
+        } catch (e) {
+            // already handled
+        } finally {
+            setTimeout(() => { scanLock = false; }, 600);
+        }
+    }
+
+    async function startScanner() {
+        if (!scannerMode) return;
+        const user = auth.currentUser;
+        if (!user) {
+            const next = encodeURIComponent(window.location.pathname + (window.location.search || ''));
+            location.href = `/auth?next=${next}`;
+            return;
+        }
+        if (!html5QrScanner) {
+            html5QrScanner = new Html5Qrcode('reader');
+        }
+        try {
+            await html5QrScanner.start(
+                { facingMode: 'environment' },
+                { fps: 10, qrbox: { width: 240, height: 240 } },
+                onScanSuccess
+            );
+            setStatus('', '<i class="fa-solid fa-video"></i> Scanner active');
+            document.getElementById('scan-title').textContent = 'Scanning live QR codes';
+            document.getElementById('scan-sub').textContent = 'Point camera at attendee QR. Successful scans are logged below.';
+        } catch (e) {
+            addScanLog('err', 'Unable to start camera scanner.');
+        }
+    }
+
+    async function stopScanner() {
+        if (html5QrScanner) {
+            try { await html5QrScanner.stop(); } catch (e) {}
+            try { await html5QrScanner.clear(); } catch (e) {}
+        }
+        setStatus('', '<i class="fa-solid fa-camera"></i> Scanner stopped');
     }
 
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
-            location.href = '/auth';
+            setStatus('', '<i class="fa-solid fa-lock"></i> Organizer login required');
+            document.getElementById('scan-title').textContent = 'Sign in to verify this pass';
+            document.getElementById('scan-sub').textContent = 'Scan page is open. Please sign in as event organizer to complete check-in.';
+            const btn = document.getElementById('checkin-btn');
+            btn.disabled = false;
+            btn.textContent = 'Sign In as Organizer';
+            btn.onclick = () => {
+                const next = encodeURIComponent(window.location.pathname + (window.location.search || ''));
+                location.href = `/auth?next=${next}`;
+            };
+            return;
+        }
+        if (scannerMode) {
+            document.getElementById('scanner-block').classList.remove('hide');
+            document.getElementById('scan-analytics').classList.remove('hide');
+            setStatus('', '<i class="fa-solid fa-camera"></i> Ready to scan');
+            document.getElementById('scan-title').textContent = 'Organizer Scan Center';
+            document.getElementById('scan-sub').textContent = 'Start scanner and verify multiple attendee QR passes continuously.';
+            document.getElementById('checkin-btn').classList.add('hide');
+            fetchLatestEntries();
             return;
         }
         try {

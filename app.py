@@ -68,6 +68,10 @@ def ticket_details(ticket_id):
 def scan_pass(ticket_id):
     return render_template('ticket_scan.html', ticket_id=ticket_id)
 
+@app.route('/scan-center')
+def scan_center():
+    return render_template('ticket_scan.html', ticket_id='', scanner_mode=True)
+
 @app.route('/profile')
 def profile():
     return render_template('profile.html')
