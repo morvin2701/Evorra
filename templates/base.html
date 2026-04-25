@@ -96,6 +96,7 @@
 
         auth.onAuthStateChanged(user => {
             const userHeader = document.getElementById('user-header');
+            const path = window.location.pathname || '';
             if (user) {
                 document.getElementById('nav-profile').classList.remove('hide');
                 document.getElementById('nav-login').classList.add('hide');
@@ -135,12 +136,12 @@
                         }
                     });
             } else {
-                userHeader.innerHTML = `
-                    <div style="display: flex; gap: 10px;">
-                        <a href="/auth" class="nav-link" style="padding-top: 10px;">Sign In</a>
-                        <a href="/auth" class="btn-evorra" style="padding: 10px 24px; margin: 0; font-size: 0.85rem; width: auto;">Sign Up</a>
-                    </div>
-                `;
+                const isAuthPage = path === '/auth';
+                if (!isAuthPage) {
+                    const next = encodeURIComponent(`${window.location.pathname}${window.location.search || ''}`);
+                    window.location.replace(`/auth?next=${next}`);
+                    return;
+                }
             }
         });
     </script>

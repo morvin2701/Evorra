@@ -4,31 +4,157 @@
 
 {% block head %}
 <style>
-    /* Decorative Rings (CSS Implementation of _SuRingsPainter) */
-    .rings-container {
+    .auth-shell {
+        width: min(1160px, calc(100% - 26px));
+        margin: 0 auto;
+        min-height: calc(100vh - 84px);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        align-items: center;
+        padding: 18px 0 80px;
+        position: relative;
+    }
+    .auth-shell::before {
+        content: "";
         position: absolute;
-        top: 18%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        inset: 0;
         pointer-events: none;
-        z-index: 1;
+        background:
+            radial-gradient(circle at 20% 18%, rgba(108, 120, 255, 0.22), transparent 35%),
+            radial-gradient(circle at 82% 85%, rgba(86, 217, 255, 0.18), transparent 32%);
+        filter: blur(6px);
     }
-    .ring {
+    .auth-stage {
+        position: relative;
+        z-index: 2;
+        width: min(560px, 100%);
+        margin: 0 auto;
+    }
+    .auth-topbar { display: flex; justify-content: center; margin-bottom: 12px; }
+    .auth-switch {
+        width: min(370px, 100%);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(9, 16, 32, 0.64);
+        padding: 4px;
+    }
+    .switch-btn {
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: rgba(224, 235, 255, 0.72);
+        font-size: .85rem;
+        font-weight: 800;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+    .switch-btn.active {
+        color: #08142b;
+        background: linear-gradient(135deg, #89f5d0, #5ad2ff);
+        box-shadow: 0 8px 16px rgba(90, 210, 255, 0.25);
+    }
+    .auth-panel {
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background:
+            radial-gradient(circle at 82% 16%, rgba(104, 118, 255, 0.16), transparent 42%),
+            linear-gradient(160deg, rgba(9, 18, 34, 0.93), rgba(10, 21, 40, 0.87));
+        backdrop-filter: blur(12px);
+        box-shadow: 0 28px 64px rgba(0,0,0,0.42);
+        padding: 22px;
+    }
+    .auth-headline {
+        margin: 0 0 6px;
+        color: #fff;
+        font-size: clamp(1.6rem, 2.8vw, 2.08rem);
+        line-height: 1.08;
+        letter-spacing: -.55px;
+        font-weight: 900;
+    }
+    .auth-subline {
+        margin: 0 0 18px;
+        color: rgba(227, 236, 255, 0.72);
+        font-size: .92rem;
+    }
+    .auth-label {
+        display: block;
+        margin: 0 0 8px;
+        color: rgba(220, 232, 255, 0.72);
+        font-size: .74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .auth-input-group {
+        position: relative;
+        margin-bottom: 14px;
+    }
+    .auth-icon {
         position: absolute;
-        border: 1px solid rgba(127, 119, 221, 0.05);
-        border-radius: 50%;
-        transform: translate(-50%, -50%);
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(215,228,255,0.55);
+        font-size: .9rem;
     }
-    .ring-1 { width: 300px; height: 300px; border-color: rgba(127, 119, 221, 0.1); }
-    .ring-2 { width: 500px; height: 500px; border-color: rgba(127, 119, 221, 0.06); }
-    .ring-3 { width: 700px; height: 700px; border-color: rgba(127, 119, 221, 0.03); }
+    .auth-input {
+        width: 100%;
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: rgba(255,255,255,0.04);
+        color: #fff;
+        padding: 0 12px 0 38px;
+        outline: none;
+        font-size: .92rem;
+        transition: .2s ease;
+        box-sizing: border-box;
+    }
+    .auth-input:focus {
+        border-color: rgba(133, 201, 255, 0.55);
+        box-shadow: 0 0 0 4px rgba(106, 190, 255, 0.12);
+    }
+    .role-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .role-card {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.03);
+        padding: 12px;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+    .role-card i { color: #cde7ff; margin-bottom: 8px; }
+    .role-title { color: #fff; margin: 0 0 2px; font-size: .86rem; font-weight: 800; }
+    .role-sub { color: rgba(220,232,255,0.58); margin: 0; font-size: .74rem; }
+    .role-card.selected {
+        border-color: rgba(117, 229, 255, 0.55);
+        background: rgba(117, 229, 255, 0.12);
+        box-shadow: 0 0 0 1px rgba(117, 229, 255, 0.18) inset;
+    }
+    .btn-evorra { margin-top: 16px; }
+    .auth-foot {
+        text-align: center;
+        margin-top: 16px;
+        color: rgba(226,236,255,0.72);
+        font-size: .9rem;
+    }
+    .auth-foot a { color: #98d7ff; text-decoration: none; font-weight: 700; }
 
     .error-banner {
-        background: #FFF0EE;
-        border: 0.5px solid rgba(216, 90, 48, 0.3);
+        background: rgba(255, 115, 128, 0.12);
+        border: 1px solid rgba(255, 115, 128, 0.35);
         border-radius: 10px;
         padding: 12px;
-        color: #D85A30;
+        color: #ffd2da;
         font-size: 0.85rem;
         display: flex;
         align-items: center;
@@ -38,105 +164,109 @@
 
     .form-view { display: none; }
     .form-view.active { display: block; }
+    @media (min-width: 980px) {
+        .auth-stage { width: min(620px, 100%); }
+    }
+    @media (max-width: 640px) {
+        .auth-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .auth-panel { border-radius: 18px; padding: 14px; }
+        .role-group { grid-template-columns: 1fr; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-wrapper">
-    <div class="glow-bg"></div>
-    <div class="rings-container">
-        <div class="ring ring-1"></div>
-        <div class="ring ring-2"></div>
-        <div class="ring ring-3"></div>
-    </div>
-
-    <!-- Sign Up View -->
-    <div id="signup-view" class="form-view active animate-evorra" style="z-index: 10;">
-        <div style="margin-bottom: 30px; text-align: left; width: 100%; max-width: 480px;">
-            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px;">Create account</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Join thousands of event lovers on Evorra</p>
+<div class="auth-shell">
+    <div class="auth-stage">
+        <div class="auth-topbar">
+            <div class="auth-switch">
+                <button id="switch-signup" class="switch-btn active" onclick="toggleView('signup')">Create Account</button>
+                <button id="switch-login" class="switch-btn" onclick="toggleView('login')">Sign In</button>
+            </div>
         </div>
 
-        <div class="auth-card">
-            <div id="global-error" class="error-banner hide">
-                <i class="fa-solid fa-circle-info"></i>
-                <span id="error-msg"></span>
-            </div>
+        <!-- Sign Up View -->
+        <div id="signup-view" class="form-view active animate-evorra">
+            <div class="auth-panel">
+                <h1 class="auth-headline">Create account</h1>
+                <p class="auth-subline">Join thousands of event lovers on Evorra</p>
 
-            <label class="auth-label">Full name</label>
-            <div class="auth-input-group">
-                <i class="fa-regular fa-user auth-icon"></i>
-                <input type="text" id="s-name" class="auth-input" placeholder="Your full name">
-            </div>
-
-            <label class="auth-label">Email address</label>
-            <div class="auth-input-group">
-                <i class="fa-regular fa-envelope auth-icon"></i>
-                <input type="email" id="s-email" class="auth-input" placeholder="you@example.com">
-            </div>
-
-            <label class="auth-label">Password</label>
-            <div class="auth-input-group">
-                <i class="fa-solid fa-lock auth-icon"></i>
-                <input type="password" id="s-pass" class="auth-input" placeholder="Min. 6 characters">
-            </div>
-
-            <label class="auth-label">I want to</label>
-            <div class="role-group">
-                <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')">
-                    <i class="fa-solid fa-ticket"></i>
-                    <p class="role-title">Attend Events</p>
-                    <p class="role-sub">Discover & book</p>
+                <div id="global-error" class="error-banner hide">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span id="error-msg"></span>
                 </div>
-                <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
-                    <i class="fa-solid fa-bullhorn"></i>
-                    <p class="role-title">Host Events</p>
-                    <p class="role-sub">Create & manage</p>
+
+                <label class="auth-label">Full name</label>
+                <div class="auth-input-group">
+                    <i class="fa-regular fa-user auth-icon"></i>
+                    <input type="text" id="s-name" class="auth-input" placeholder="Your full name">
                 </div>
-            </div>
 
-            <div style="margin-top: 25px; display: flex; gap: 12px; align-items: flex-start;">
-                <input type="checkbox" id="s-terms" style="margin-top: 4px; accent-color: var(--primary);">
-                <p style="font-size: 0.8rem; color: #6B6882; line-height: 1.5;">
-                    I agree to the <span style="color: var(--primary); font-weight: 600;">Terms of Service</span> and 
-                    <span style="color: var(--primary); font-weight: 600;">Privacy Policy</span>
-                </p>
-            </div>
+                <label class="auth-label">Email address</label>
+                <div class="auth-input-group">
+                    <i class="fa-regular fa-envelope auth-icon"></i>
+                    <input type="email" id="s-email" class="auth-input" placeholder="you@example.com">
+                </div>
 
-            <button id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+                <label class="auth-label">Password</label>
+                <div class="auth-input-group">
+                    <i class="fa-solid fa-lock auth-icon"></i>
+                    <input type="password" id="s-pass" class="auth-input" placeholder="Min. 6 characters">
+                </div>
+
+                <label class="auth-label">I want to</label>
+                <div class="role-group">
+                    <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')">
+                        <i class="fa-solid fa-ticket"></i>
+                        <p class="role-title">Attend Events</p>
+                        <p class="role-sub">Discover & book</p>
+                    </div>
+                    <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
+                        <i class="fa-solid fa-bullhorn"></i>
+                        <p class="role-title">Host Events</p>
+                        <p class="role-sub">Create & manage</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; gap: 12px; align-items: flex-start;">
+                    <input type="checkbox" id="s-terms" style="margin-top: 4px; accent-color: var(--primary);">
+                    <p style="font-size: 0.8rem; color: rgba(225,236,255,0.7); line-height: 1.5;">
+                        I agree to the <span style="color: #98d7ff; font-weight: 600;">Terms of Service</span> and
+                        <span style="color: #98d7ff; font-weight: 600;">Privacy Policy</span>
+                    </p>
+                </div>
+
+                <button id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+            </div>
+            <p class="auth-foot">
+                Already have an account? <a href="#" onclick="toggleView('login')">Sign in</a>
+            </p>
         </div>
 
-        <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: var(--text-muted);">
-            Already have an account? <a href="#" onclick="toggleView('login')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Sign in</a>
-        </p>
-    </div>
+        <!-- Login View -->
+        <div id="login-view" class="form-view animate-evorra">
+            <div class="auth-panel">
+                <h1 class="auth-headline">Welcome back</h1>
+                <p class="auth-subline">Sign in to access your district experiences</p>
 
-    <!-- Login View (Simplified for now) -->
-    <div id="login-view" class="form-view animate-evorra" style="z-index: 10;">
-        <div style="margin-bottom: 30px; text-align: left; width: 100%; max-width: 480px;">
-            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px;">Welcome back</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to access your district experiences</p>
-        </div>
+                <label class="auth-label">Email address</label>
+                <div class="auth-input-group">
+                    <i class="fa-regular fa-envelope auth-icon"></i>
+                    <input type="email" id="l-email" class="auth-input" placeholder="you@example.com">
+                </div>
 
-        <div class="auth-card">
-            <label class="auth-label">Email address</label>
-            <div class="auth-input-group">
-                <i class="fa-regular fa-envelope auth-icon"></i>
-                <input type="email" id="l-email" class="auth-input" placeholder="you@example.com">
+                <label class="auth-label">Password</label>
+                <div class="auth-input-group">
+                    <i class="fa-solid fa-lock auth-icon"></i>
+                    <input type="password" id="l-pass" class="auth-input" placeholder="••••••••">
+                </div>
+
+                <button id="login-btn" onclick="handleLogin()" class="btn-evorra">Sign in</button>
             </div>
-
-            <label class="auth-label">Password</label>
-            <div class="auth-input-group">
-                <i class="fa-solid fa-lock auth-icon"></i>
-                <input type="password" id="l-pass" class="auth-input" placeholder="••••••••">
-            </div>
-
-            <button onclick="handleLogin()" class="btn-evorra">Sign in</button>
+            <p class="auth-foot">
+                New to Evorra? <a href="#" onclick="toggleView('signup')">Create account</a>
+            </p>
         </div>
-
-        <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: var(--text-muted);">
-            New to Evorra? <a href="#" onclick="toggleView('signup')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Create account</a>
-        </p>
     </div>
 </div>
 {% endblock %}
@@ -144,6 +274,7 @@
 {% block scripts %}
 <script>
     let currentRole = 'attendee';
+    const nextUrl = new URLSearchParams(window.location.search).get('next') || '/';
 
     function setRole(role) {
         currentRole = role;
@@ -154,6 +285,8 @@
     function toggleView(view) {
         document.getElementById('signup-view').classList.toggle('active', view === 'signup');
         document.getElementById('login-view').classList.toggle('active', view === 'login');
+        document.getElementById('switch-signup').classList.toggle('active', view === 'signup');
+        document.getElementById('switch-login').classList.toggle('active', view === 'login');
     }
 
     async function handleSignUp() {
@@ -197,7 +330,7 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
 
-            window.location.href = '/';
+            window.location.href = nextUrl;
         } catch (e) {
             showError(e.message);
             btn.disabled = false;
@@ -208,10 +341,17 @@
     async function handleLogin() {
         const email = document.getElementById('l-email').value;
         const pass = document.getElementById('l-pass').value;
+        const btn = document.getElementById('login-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing in...';
         try {
             await auth.signInWithEmailAndPassword(email, pass);
-            window.location.href = '/';
-        } catch (e) { alert(e.message); }
+            window.location.href = nextUrl;
+        } catch (e) {
+            alert(e.message);
+            btn.disabled = false;
+            btn.textContent = 'Sign in';
+        }
     }
 
     function showError(msg) {
