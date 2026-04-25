@@ -69,6 +69,10 @@ def payment_success():
 def my_tickets():
     return render_template('my_tickets.html')
 
+@app.route('/shared-tickets')
+def shared_tickets():
+    return render_template('shared_tickets.html')
+
 @app.route('/ticket/<ticket_id>')
 def ticket_details(ticket_id):
     return render_template('ticket_details.html', ticket_id=ticket_id)

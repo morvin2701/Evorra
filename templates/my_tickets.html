@@ -13,12 +13,26 @@
         margin: 0 auto;
         padding: 20px 0 110px;
     }
-    .tickets-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .tickets-topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+    .tickets-topbar-left { display: inline-flex; align-items: center; gap: 14px; }
     .tickets-back {
         width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
         color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
     }
     .tickets-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+    .shared-link {
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.06);
+        color: #e9f1ff;
+        text-decoration: none;
+        padding: 9px 11px;
+        font-size: 0.76rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
     .tickets-search { margin-bottom: 12px; position: relative; }
     .tickets-search i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.65); }
     .tickets-search input {
@@ -87,8 +101,13 @@
     <div class="tickets-shell">
     <!-- Page Header -->
     <div class="tickets-topbar">
-        <a href="javascript:history.back()" class="tickets-back"><i class="fa-solid fa-chevron-left"></i></a>
-        <h1 class="tickets-title">My Tickets</h1>
+        <div class="tickets-topbar-left">
+            <a href="javascript:history.back()" class="tickets-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <h1 class="tickets-title">My Tickets</h1>
+        </div>
+        <a href="/shared-tickets" class="shared-link">
+            <i class="fa-solid fa-share-nodes"></i> Shared
+        </a>
     </div>
 
     <!-- Search Section -->

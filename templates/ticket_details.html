@@ -187,6 +187,114 @@
         margin-top: 2px;
         flex-shrink: 0;
     }
+    .share-box {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 12px;
+    }
+    .share-input {
+        width: 100%;
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(8,14,26,0.74);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 10px 12px;
+        outline: none;
+    }
+    .share-input::placeholder { color: rgba(219,233,255,0.48); }
+    .share-input:focus { border-color: rgba(123, 241, 206, 0.5); }
+    .share-row {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    .share-note {
+        margin: 8px 0 0;
+        color: rgba(218,236,255,0.62);
+        font-size: 0.74rem;
+        line-height: 1.45;
+    }
+    .share-metrics {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .share-metric {
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 8px 10px;
+    }
+    .share-metric-label {
+        margin: 0 0 3px;
+        color: rgba(218,236,255,0.54);
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        font-weight: 800;
+    }
+    .share-metric-value {
+        margin: 0;
+        color: #fff;
+        font-size: .95rem;
+        font-weight: 900;
+    }
+    .share-btn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 11px;
+        border: 1px solid rgba(148, 255, 226, 0.45);
+        background: linear-gradient(135deg, rgba(123, 241, 206, 0.92), rgba(105, 210, 255, 0.9));
+        color: #072032;
+        font-size: 0.85rem;
+        font-weight: 900;
+        cursor: pointer;
+    }
+    .transfer-history {
+        margin-top: 10px;
+        border-top: 1px solid rgba(255,255,255,0.12);
+        padding-top: 10px;
+        max-height: 220px;
+        overflow: auto;
+    }
+    .transfer-history-title {
+        margin: 0 0 8px;
+        color: rgba(229,240,255,0.78);
+        font-size: .76rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        font-weight: 900;
+    }
+    .transfer-row {
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.11);
+        background: rgba(255,255,255,0.03);
+        padding: 8px 9px;
+        margin-bottom: 7px;
+    }
+    .transfer-row-main {
+        margin: 0;
+        color: #fff;
+        font-size: .8rem;
+        font-weight: 800;
+        word-break: break-word;
+    }
+    .transfer-row-sub {
+        margin: 2px 0 0;
+        color: rgba(214,232,255,0.63);
+        font-size: .72rem;
+    }
+    .transfer-empty {
+        margin: 0;
+        color: rgba(214,232,255,0.62);
+        font-size: .76rem;
+    }
     @media (min-width: 980px) {
         .ticket-layout { grid-template-columns: minmax(0, 1fr) 380px; }
     }
@@ -195,6 +303,8 @@
         .hero-cover { height: 180px; }
         .ticket-block { padding: 12px; }
         .pass-grid { grid-template-columns: 1fr; }
+        .share-row { grid-template-columns: 1fr; }
+        .share-metrics { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -291,6 +401,32 @@
                 </div>
 
                 <div class="ticket-card ticket-block">
+                    <h2 class="section-title">Share Tickets</h2>
+                    <div class="share-box">
+                        <input id="share-email" type="email" class="share-input" placeholder="Recipient account email">
+                        <div class="share-row">
+                            <input id="share-qty" type="number" min="1" step="1" class="share-input" placeholder="Qty">
+                            <button id="share-split-btn" class="share-btn" type="button">Share Split</button>
+                        </div>
+                        <div class="share-metrics">
+                            <div class="share-metric">
+                                <p class="share-metric-label">Shared</p>
+                                <p id="share-count" class="share-metric-value">0</p>
+                            </div>
+                            <div class="share-metric">
+                                <p class="share-metric-label">Remaining</p>
+                                <p id="remaining-count" class="share-metric-value">0</p>
+                            </div>
+                        </div>
+                        <p id="share-note" class="share-note">You can split this ticket quantity and transfer selected tickets to another registered account.</p>
+                        <div id="transfer-history" class="transfer-history">
+                            <p class="transfer-history-title">Transfer History</p>
+                            <p class="transfer-empty">No transfers yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-card ticket-block">
                     <h2 class="section-title">Entry Instructions</h2>
                     <div class="summary-box">
                         <div class="instruction-row">
@@ -321,6 +457,8 @@
 {% block scripts %}
 <script>
     const ticketId = "{{ ticket_id }}";
+    let activeTicket = null;
+    let rootTicketId = ticketId;
 
     function getPublicBase() {
         return (window.APP_PUBLIC_URL || window.location.origin || '').replace(/\/$/, '');
@@ -344,6 +482,8 @@
             const ticketSnap = await db.collection('tickets').doc(ticketId).get();
             if (!ticketSnap.exists) return alert("Ticket not found");
             const ticket = ticketSnap.data();
+            activeTicket = ticket;
+            rootTicketId = ticket.shared_from_ticket_id || ticket.id || ticketId;
 
             // Security check
             const user = auth.currentUser;
@@ -394,8 +534,231 @@
             document.getElementById('sum-amount').textContent = `₹${ticket.total_amount}`;
             document.getElementById('sum-payment').textContent = ticket.payment_id || 'N/A';
             document.getElementById('sum-date').textContent = formatDate(ticket.created_time);
+            const qty = Number(ticket.quantity || 1);
+            const shareQtyInput = document.getElementById('share-qty');
+            shareQtyInput.max = String(qty);
+            shareQtyInput.value = qty > 1 ? '1' : '1';
+            document.getElementById('remaining-count').textContent = String(qty);
+            document.getElementById('share-note').textContent =
+                qty > 1
+                    ? `Available to split: ${qty} tickets. Share any quantity up to ${qty}.`
+                    : `You have 1 ticket. You can transfer it fully to another registered account.`;
+
+            await loadTransferHistory();
 
         } catch (e) { console.error(e); }
+    }
+
+    function toIntQty(val) {
+        const n = Number(val);
+        if (!Number.isFinite(n)) return 0;
+        return Math.floor(n);
+    }
+
+    async function resolveRecipientUidByEmail(email) {
+        const clean = String(email || '').trim().toLowerCase();
+        if (!clean) return '';
+
+        let userDoc = null;
+        let q = await db.collection('users').where('email_lower', '==', clean).limit(1).get();
+        if (!q.empty) userDoc = q.docs[0];
+
+        if (!userDoc) {
+            q = await db.collection('users').where('email', '==', clean).limit(1).get();
+            if (!q.empty) userDoc = q.docs[0];
+        }
+
+        if (!userDoc) return '';
+        return userDoc.id;
+    }
+
+    async function splitAndShareTicket() {
+        if (!activeTicket) return alert("Ticket is still loading. Try again.");
+        const user = auth.currentUser;
+        if (!user) return alert("Please login again.");
+
+        const email = document.getElementById('share-email').value.trim();
+        const qty = toIntQty(document.getElementById('share-qty').value);
+        const srcQty = toIntQty(activeTicket.quantity || 1);
+        if (!email) return alert("Enter recipient email.");
+        if (qty < 1) return alert("Enter valid quantity.");
+        if (qty > srcQty) return alert(`You only have ${srcQty} ticket(s).`);
+
+        const btn = document.getElementById('share-split-btn');
+        btn.disabled = true;
+        btn.textContent = 'Sharing...';
+        try {
+            const targetUid = await resolveRecipientUidByEmail(email);
+            if (!targetUid) throw new Error("Recipient account not found. Ask them to sign up first.");
+            if (targetUid === user.uid) throw new Error("Recipient cannot be your own account.");
+
+            const ticketRef = db.collection('tickets').doc(ticketId);
+            const publicBase = getPublicBase();
+            let notificationPayload = null;
+            let transferTicketId = null;
+            let transferTargetUid = null;
+
+            await db.runTransaction(async (txn) => {
+                const snap = await txn.get(ticketRef);
+                if (!snap.exists) throw new Error("Ticket not found.");
+                const src = snap.data();
+                if (String(src.user_id || '') !== user.uid) throw new Error("Only ticket owner can share.");
+                if (String(src.status || '').toLowerCase() !== 'confirmed') throw new Error("Only confirmed tickets can be shared.");
+                if (src.checked_in === true) throw new Error("Checked-in ticket cannot be shared.");
+
+                const currentQty = toIntQty(src.quantity || 1);
+                if (qty > currentQty) throw new Error(`Only ${currentQty} ticket(s) left to share.`);
+
+                const currentAmount = Number(src.total_amount || 0);
+                const unit = currentQty > 0 ? (currentAmount / currentQty) : 0;
+                const transferAmount = Math.max(0, Math.round(unit * qty));
+                const remainingQty = currentQty - qty;
+                const rootId = src.shared_from_ticket_id || ticketId;
+                const msg = `${user.displayName || 'A user'} shared ${qty} ticket(s) for ${src.event_title || 'an event'} with you.`;
+
+                if (remainingQty <= 0) {
+                    txn.update(ticketRef, {
+                        user_id: targetUid,
+                        quantity: qty,
+                        total_amount: transferAmount || currentAmount,
+                        shared_by: user.uid,
+                        shared_from_ticket_id: rootId,
+                        shared_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    notificationPayload = {
+                        user_id: targetUid,
+                        title: "Ticket Received",
+                        message: msg,
+                        type: "ticket_share",
+                        ref_ticket_id: ticketId,
+                    };
+                    return;
+                }
+
+                txn.update(ticketRef, {
+                    quantity: remainingQty,
+                    total_amount: Math.max(0, Math.round(currentAmount - transferAmount)),
+                    updated_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const newRef = db.collection('tickets').doc();
+                const newId = newRef.id;
+                txn.set(newRef, {
+                    ...src,
+                    id: newId,
+                    // Create under current owner first (rules-safe), then transfer ownership after txn.
+                    user_id: user.uid,
+                    quantity: qty,
+                    total_amount: transferAmount,
+                    qr_code: `EV-${newId}-${Date.now()}`,
+                    qr_dynamic_url: `${publicBase}/scan-pass/${newId}`,
+                    shared_from_ticket_id: rootId,
+                    shared_by: user.uid,
+                    shared_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    scan_count: 0,
+                    checked_in: false,
+                    scanned_at: null,
+                    last_scanned_by: null,
+                    created_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                transferTicketId = newId;
+                transferTargetUid = targetUid;
+                notificationPayload = {
+                    user_id: targetUid,
+                    title: "Ticket Received",
+                    message: msg,
+                    type: "ticket_share",
+                    ref_ticket_id: newId,
+                };
+            });
+
+            // Complete recipient ownership transfer in a separate write.
+            // This avoids create-rule rejection for recipient-owned docs.
+            if (transferTicketId && transferTargetUid) {
+                await db.collection('tickets').doc(transferTicketId).update({
+                    user_id: transferTargetUid,
+                    updated_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            // Notification should not block share flow if rules are stricter.
+            if (notificationPayload) {
+                try {
+                    const notifRef = db.collection('notifications').doc();
+                    await notifRef.set({
+                        id: notifRef.id,
+                        ...notificationPayload,
+                        is_read: false,
+                        created_time: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (notifErr) {
+                    console.warn("Notification write skipped:", notifErr?.code || notifErr?.message || notifErr);
+                }
+            }
+
+            alert(`Successfully shared ${qty} ticket(s).`);
+            document.getElementById('share-email').value = '';
+            await loadTicketDetails();
+        } catch (e) {
+            alert(e.message || e.code || "Unable to share ticket right now.");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Share Split';
+        }
+    }
+
+    async function loadTransferHistory() {
+        const historyWrap = document.getElementById('transfer-history');
+        if (!historyWrap) return;
+        historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">Loading transfer history...</p>`;
+        try {
+            const rootRef = rootTicketId || ticketId;
+            const snap = await db.collection('tickets')
+                .where('shared_from_ticket_id', '==', rootRef)
+                .orderBy('shared_at', 'desc')
+                .limit(30)
+                .get();
+
+            if (snap.empty) {
+                document.getElementById('share-count').textContent = '0';
+                historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">No transfers yet.</p>`;
+                return;
+            }
+
+            const docs = snap.docs.map(d => d.data());
+            const sharedQty = docs.reduce((sum, item) => sum + toIntQty(item.quantity || 0), 0);
+            document.getElementById('share-count').textContent = String(sharedQty);
+
+            const userIds = [...new Set(docs.map(d => String(d.user_id || '')).filter(Boolean))];
+            const userMap = new Map();
+            await Promise.all(userIds.map(async (uid) => {
+                try {
+                    const userSnap = await db.collection('users').doc(uid).get();
+                    if (userSnap.exists) {
+                        const u = userSnap.data() || {};
+                        userMap.set(uid, u.email || u.email_lower || u.displayName || uid);
+                    }
+                } catch (e) {}
+            }));
+
+            const rows = docs.map(item => {
+                const sharedAt = item.shared_at?.toDate ? item.shared_at.toDate() : (item.shared_at ? new Date(item.shared_at) : null);
+                const when = sharedAt && !Number.isNaN(sharedAt.getTime())
+                    ? sharedAt.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                    : 'Time unavailable';
+                const recipient = userMap.get(String(item.user_id || '')) || item.user_id || 'Unknown recipient';
+                return `
+                    <div class="transfer-row">
+                        <p class="transfer-row-main">${recipient}</p>
+                        <p class="transfer-row-sub">Qty: ${toIntQty(item.quantity || 0)} • ${when}</p>
+                    </div>
+                `;
+            }).join('');
+
+            historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p>${rows}`;
+        } catch (e) {
+            historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">Unable to load transfer history.</p>`;
+        }
     }
 
     function formatDate(val) {
@@ -408,5 +771,6 @@
         if (user) loadTicketDetails();
         else location.href = '/auth';
     });
+    document.getElementById('share-split-btn').addEventListener('click', splitAndShareTicket);
 </script>
 {% endblock %}

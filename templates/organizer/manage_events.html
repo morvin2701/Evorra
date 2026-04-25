@@ -315,18 +315,32 @@
                     for (const doc of snapshot.docs) {
                         const event = doc.data();
                         event.id = doc.id;
-                        const eventId = doc.id;
 
-                        // Fetch payments for this event to calculate accurate revenue
-                        const paymentsSnap = await db.collection('payments').where('event_id', '==', eventId).get();
+                        // Revenue source priority:
+                        // 1) Sum confirmed ticket amounts for this event (live transactional truth)
+                        // 2) Fallback to event.total_revenue if ticket query fails.
                         let eventRevenue = 0;
-                        paymentsSnap.forEach(p => {
-                            eventRevenue += (p.data().total_amount || 0);
-                        });
+                        let eventConfirmedQty = 0;
+                        try {
+                            const ticketSnap = await db.collection('tickets')
+                                .where('event_id', '==', event.id)
+                                .where('status', '==', 'confirmed')
+                                .get();
+                            ticketSnap.forEach(t => {
+                                const td = t.data() || {};
+                                eventRevenue += Number(td.total_amount || 0);
+                                eventConfirmedQty += Number(td.quantity || 1);
+                            });
+                        } catch (ticketErr) {
+                            eventRevenue = Number(event.total_revenue || 0);
+                            eventConfirmedQty = Number(event.tickets_sold || 0);
+                        }
+                        if (!Number.isFinite(eventRevenue)) eventRevenue = 0;
+                        if (!Number.isFinite(eventConfirmedQty)) eventConfirmedQty = 0;
 
-                        const ticketsSold = event.tickets_sold || 0;
+                        const ticketsSold = eventConfirmedQty;
                         const inventory = event.ticket_inventory || 0;
-                        const attendees = ticketsSold; // Simplified tracking
+                        const attendees = eventConfirmedQty;
 
                         totalRevenue += eventRevenue;
                         totalTicketsSold += ticketsSold;
@@ -340,6 +354,18 @@
                     updateStats(snapshot.size, totalRevenue, totalTicketsSold, totalAttendees);
                     renderRevenueChart(chartEvents);
                     renderStatusDonut(chartEvents);
+                }, (error) => {
+                    console.error("Dashboard listener error:", error);
+                    const listContainer = document.getElementById('dashboard-events-list');
+                    if (listContainer) {
+                        listContainer.innerHTML = `
+                            <div class="summary-box" style="text-align: center; padding: 40px;">
+                                <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.4rem; color: rgba(255,255,255,0.2); margin-bottom: 12px;"></i>
+                                <h3 style="color: white; font-weight: 900;">Unable to load dashboard data</h3>
+                                <p style="color: rgba(255,255,255,0.56); font-size: 0.8rem; margin-top: 8px;">Please check your Firestore rules and refresh.</p>
+                            </div>
+                        `;
+                    }
                 });
         });
     }
