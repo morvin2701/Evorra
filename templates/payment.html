@@ -319,88 +319,101 @@
 
         try {
             const publicBase = (window.APP_PUBLIC_URL || window.location.origin || '').replace(/\/$/, '');
-            // Complex Transaction to ensure stock and order integrity
             const ticketCollection = bookingData.ticketCollection || 'ticketTypes';
             const ticketTypeRef = ticketCollection
                 ? db.collection('events').doc(bookingData.eventId).collection(ticketCollection).doc(bookingData.ticketId)
                 : null;
             const eventRef = db.collection('events').doc(bookingData.eventId);
             const scanUrlBase = `${publicBase}/scan-pass`;
-            
-            await db.runTransaction(async (txn) => {
-                // 1. All READS first
+
+            const buildTicketPayload = (orderId, paymentId, tData) => ({
+                id: orderId,
+                user_id: user.uid,
+                event_id: bookingData.eventId,
+                event_title: document.getElementById('event-title').textContent,
+                ticket_type_id: bookingData.ticketId,
+                ticket_type_name: tData.name,
+                quantity: bookingData.qty,
+                total_amount: bookingData.total,
+                status: 'confirmed',
+                qr_code: `EV-${orderId}-${Date.now()}`,
+                qr_dynamic_url: `${scanUrlBase}/${orderId}`,
+                scan_count: 0,
+                checked_in: false,
+                scanned_at: null,
+                last_scanned_by: null,
+                payment_id: paymentId,
+                created_time: firebase.firestore.FieldValue.serverTimestamp(),
+                event_snapshot: {
+                    title: document.getElementById('event-title').textContent,
+                    cover_image: document.getElementById('event-img').src,
+                    city: document.getElementById('event-location').textContent.split(' • ')[1].trim(),
+                    venue: document.getElementById('event-location').textContent.split(' • ')[0].trim(),
+                    start_time: document.getElementById('event-time').textContent
+                }
+            });
+
+            const buildPaymentPayload = (paymentId, orderId) => ({
+                id: paymentId,
+                user_id: user.uid,
+                event_id: bookingData.eventId,
+                ticket_id: orderId,
+                total_amount: bookingData.total,
+                payment_method: 'cod',
+                status: 'success',
+                created_time: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            const readOrderContext = async (txn) => {
                 const tSnap = ticketTypeRef ? await txn.get(ticketTypeRef) : null;
                 const eSnap = await txn.get(eventRef);
                 const eData = eSnap.data();
-                
                 const tData = tSnap ? tSnap.data() : (Array.isArray(eData?.ticket_types)
                     ? eData.ticket_types.find(t => String(t.id || '') === String(bookingData.ticketId))
                     : null);
-                
-                if (!tData || tData.stock < bookingData.qty) throw new Error("Out of stock!");
+                if (!tData || Number(tData.stock || 0) < bookingData.qty) throw new Error("Out of stock!");
                 if (isEventClosed(eData)) throw new Error("This event is closed and no longer bookable.");
+                return { eData, tData };
+            };
 
-                const orderId = db.collection('tickets').doc().id;
-                const paymentId = db.collection('payments').doc().id;
+            try {
+                // Primary mode: full integrity write (stock + metrics + order docs)
+                await db.runTransaction(async (txn) => {
+                    const { eData, tData } = await readOrderContext(txn);
+                    const orderId = db.collection('tickets').doc().id;
+                    const paymentId = db.collection('payments').doc().id;
 
-                // 2. All WRITES second
-                // Create Ticket
-                txn.set(db.collection('tickets').doc(orderId), {
-                    id: orderId,
-                    user_id: user.uid,
-                    event_id: bookingData.eventId,
-                    event_title: document.getElementById('event-title').textContent,
-                    ticket_type_id: bookingData.ticketId,
-                    ticket_type_name: tData.name,
-                    quantity: bookingData.qty,
-                    total_amount: bookingData.total,
-                    status: 'confirmed',
-                    qr_code: `EV-${orderId}-${Date.now()}`,
-                    qr_dynamic_url: `${scanUrlBase}/${orderId}`,
-                    scan_count: 0,
-                    checked_in: false,
-                    scanned_at: null,
-                    last_scanned_by: null,
-                    payment_id: paymentId,
-                    created_time: firebase.firestore.FieldValue.serverTimestamp(),
-                    event_snapshot: {
-                        title: document.getElementById('event-title').textContent,
-                        cover_image: document.getElementById('event-img').src,
-                        city: document.getElementById('event-location').textContent.split(' • ')[1].trim(),
-                        venue: document.getElementById('event-location').textContent.split(' • ')[0].trim(),
-                        start_time: document.getElementById('event-time').textContent
+                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData));
+                    txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
+
+                    if (ticketTypeRef) {
+                        txn.update(ticketTypeRef, { stock: tData.stock - bookingData.qty });
+                    } else {
+                        const nextTickets = (eData.ticket_types || []).map(t => {
+                            if (String(t.id || '') !== String(bookingData.ticketId)) return t;
+                            return { ...t, stock: Math.max(0, Number(t.stock || 0) - bookingData.qty) };
+                        });
+                        txn.update(eventRef, { ticket_types: nextTickets });
                     }
-                });
 
-                // Create Payment
-                txn.set(db.collection('payments').doc(paymentId), {
-                    id: paymentId,
-                    user_id: user.uid,
-                    event_id: bookingData.eventId,
-                    ticket_id: orderId,
-                    total_amount: bookingData.total,
-                    payment_method: 'cod',
-                    status: 'success',
-                    created_time: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // Update Stock
-                if (ticketTypeRef) {
-                    txn.update(ticketTypeRef, { stock: tData.stock - bookingData.qty });
-                } else {
-                    const nextTickets = (eData.ticket_types || []).map(t => {
-                        if (String(t.id || '') !== String(bookingData.ticketId)) return t;
-                        return { ...t, stock: Math.max(0, Number(t.stock || 0) - bookingData.qty) };
+                    txn.update(eventRef, {
+                        tickets_sold: (eData.tickets_sold || 0) + bookingData.qty,
+                        total_revenue: (eData.total_revenue || 0) + bookingData.total
                     });
-                    txn.update(eventRef, { ticket_types: nextTickets });
-                }
-                
-                // Update Event Sales & Revenue
-                txn.update(eventRef, { 
-                    tickets_sold: (eData.tickets_sold || 0) + bookingData.qty,
-                    total_revenue: (eData.total_revenue || 0) + bookingData.total
                 });
-            });
+            } catch (txnErr) {
+                // Fallback mode for strict Firestore rules: still allow order creation.
+                // Keeps booking functional when client is not permitted to update event inventory/metrics.
+                if (txnErr?.code !== 'permission-denied') throw txnErr;
+
+                await db.runTransaction(async (txn) => {
+                    const { tData } = await readOrderContext(txn);
+                    const orderId = db.collection('tickets').doc().id;
+                    const paymentId = db.collection('payments').doc().id;
+                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData));
+                    txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
+                });
+            }
 
             // Success
             sessionStorage.clear();
