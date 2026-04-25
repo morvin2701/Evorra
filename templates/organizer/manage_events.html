@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Event Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .dashboard-bg { background: transparent; min-height: 100vh; }
+    .dashboard-shell { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 120px; }
+    .dashboard-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+    .dashboard-back {
+        width: 40px; height: 40px; border-radius: 12px; color: #fff; text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .dashboard-title { font-size: 1.78rem; font-weight: 900; letter-spacing: -0.02em; }
+    .hero-overview {
+        margin-bottom: 18px; border-radius: 24px; padding: 20px;
+        display: grid; grid-template-columns: 70px 1fr; gap: 14px; align-items: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.3));
+    }
+    .hero-icon {
+        width: 70px; height: 70px; border-radius: 20px; background: rgba(255,255,255,0.2);
+        display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.22);
+        font-size: 1.8rem;
+    }
+    .hero-label { color: rgba(255,255,255,0.88); font-size: 0.82rem; font-weight: 700; }
+    #hero-event-count { font-size: 2.35rem; font-weight: 900; letter-spacing: -0.02em; margin: 4px 0; }
+    #hero-summary { font-size: 0.84rem; color: rgba(255,255,255,0.93); }
+    .dashboard-stats-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px;
+    }
+    .stat-card {
+        border-radius: 16px; padding: 16px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+    }
+    .stat-card i {
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 10px;
+    }
+    .charts-grid {
+        display: grid; grid-template-columns: 1.8fr 1fr; gap: 12px; margin-bottom: 18px;
+    }
+    .chart-card {
+        border-radius: 18px; padding: 16px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    }
+    .chart-title { color: #fff; font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+    .chart-sub { color: rgba(255,255,255,0.58); font-size: 0.76rem; margin-bottom: 12px; }
+    .bar-chart {
+        height: 210px; display: grid; grid-template-columns: repeat(6, 1fr); align-items: end; gap: 10px;
+        padding: 0 4px;
+    }
+    .bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .bar {
+        width: 100%; max-width: 42px; border-radius: 10px 10px 6px 6px;
+        background: linear-gradient(180deg, rgba(112,228,255,0.96), rgba(110,97,255,0.7));
+        min-height: 8px;
+    }
+    .bar-value { color: rgba(255,255,255,0.8); font-size: 0.66rem; font-weight: 700; }
+    .bar-label { color: rgba(255,255,255,0.55); font-size: 0.68rem; }
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .donut {
+        width: 158px; height: 158px; border-radius: 50%;
+        background: conic-gradient(var(--c1) 0 var(--s1), var(--c2) var(--s1) var(--s2), var(--c3) var(--s2) 100%);
+        position: relative;
+    }
+    .donut::after {
+        content: "";
+        position: absolute;
+        inset: 26px;
+        border-radius: 50%;
+        background: rgba(9,18,36,0.95);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .donut-center {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        flex-direction: column; z-index: 2;
+    }
+    .donut-total { font-size: 1.3rem; font-weight: 900; color: #fff; line-height: 1; }
+    .donut-total-sub { color: rgba(255,255,255,0.55); font-size: 0.68rem; margin-top: 4px; }
+    .legend { width: 100%; display: grid; gap: 8px; }
+    .legend-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; color: rgba(255,255,255,0.78); }
+    .legend-left { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .events-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .events-title { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; }
+    .events-add { padding: 10px 20px; font-size: 0.85rem; width: auto; border-radius: 14px; }
+    #dashboard-events-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 12px; }
+    .dashboard-event-card {
+        border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    }
+    .status-pill { border-radius: 999px; padding: 6px 10px; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+    .status-pill.live { color: #8CF0C6; background: rgba(140,240,198,0.12); border: 1px solid rgba(140,240,198,0.32); }
+    .status-pill.upcoming { color: #77D7FF; background: rgba(119,215,255,0.12); border: 1px solid rgba(119,215,255,0.32); }
+    .status-pill.completed { color: #ffc77a; background: rgba(255,199,122,0.12); border: 1px solid rgba(255,199,122,0.32); }
+    .status-pill.cancelled { color: #ff9fb2; background: rgba(255,159,178,0.12); border: 1px solid rgba(255,159,178,0.32); }
+    .status-pill.inactive { color: #ffb8c6; background: rgba(255,97,130,0.12); border: 1px solid rgba(255,97,130,0.32); }
+    .mini-metric { border-radius: 10px; padding: 8px; }
+    .mini-metric .label { font-size: 0.62rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.06em; }
+    .mini-metric .value { margin-top: 2px; font-size: 0.8rem; font-weight: 800; }
+    @media (max-width: 900px) {
+        .charts-grid { grid-template-columns: 1fr; }
+        #dashboard-events-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+        .dashboard-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .dashboard-title { font-size: 1.45rem; }
+        #hero-event-count { font-size: 1.95rem; }
+        .events-title { font-size: 1.2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-bg">
+    <div class="dashboard-shell">
+        <div class="dashboard-topbar">
+            <a href="/profile" class="dashboard-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <h1 class="dashboard-title">Event Dashboard</h1>
+        </div>
+
+        <!-- Hero Overview -->
+        <div class="hero-overview animate-evorra">
+            <div class="hero-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <p class="hero-label">Organizer Overview</p>
+                <h2 id="hero-event-count">0 Events</h2>
+                <p id="hero-summary">Revenue Rs. 0 • 0 attendees</p>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="dashboard-stats-grid">
+            <div class="stat-card">
+                <i class="fa-solid fa-calendar-check" style="background: rgba(142, 125, 255, 0.18); color: #8E7DFF;"></i>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Total Events</p>
+                <h3 id="stat-events" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Published events</p>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-ticket" style="background: rgba(140, 240, 198, 0.18); color: #8CF0C6;"></i>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Tickets Sold</p>
+                <h3 id="stat-sold" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Across all events</p>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-users" style="background: rgba(119, 215, 255, 0.18); color: #77D7FF;"></i>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Attendees</p>
+                <h3 id="stat-attendees" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Confirmed bookings</p>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-indian-rupee-sign" style="background: rgba(255, 200, 87, 0.18); color: #FFC857;"></i>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Revenue</p>
+                <h3 id="stat-revenue" style="font-size: 1.8rem; font-weight: 900; margin: 12px 0;">Rs. 0</h3>
+                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Total earnings</p>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">Revenue Trend</h3>
+                <p class="chart-sub">Last 6 months revenue (real-time)</p>
+                <div id="revenue-chart" class="bar-chart"></div>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">Event Status Mix</h3>
+                <p class="chart-sub">Published vs inactive events</p>
+                <div class="donut-wrap">
+                    <div id="status-donut" class="donut" style="--c1:#77D7FF;--c2:#8CF0C6;--c3:#FFC857;--s1:0%;--s2:0%;">
+                        <div class="donut-center">
+                            <p id="donut-total" class="donut-total">0</p>
+                            <p class="donut-total-sub">Total events</p>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#77D7FF;"></span>Upcoming</div><span id="legend-published">0</span></div>
+                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#8CF0C6;"></span>Live</div><span id="legend-inactive">0</span></div>
+                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#FFC857;"></span>Completed</div><span id="legend-draft">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="events-head">
+            <h2 class="events-title">Your Events</h2>
+            <a href="/add-event" class="btn-evorra events-add">Add Event</a>
+        </div>
+
+        <div id="dashboard-events-list">
+            <!-- Loading state -->
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function monthKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+    function monthLabel(date) {
+        return date.toLocaleDateString('en-IN', { month: 'short' });
+    }
+    function safeDate(val) {
+        if (!val) return null;
+        if (val.toDate) return val.toDate();
+        const d = new Date(val);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+    function renderRevenueChart(events) {
+        const el = document.getElementById('revenue-chart');
+        if (!el) return;
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            months.push({ key: monthKey(d), label: monthLabel(d), value: 0 });
+        }
+        const map = Object.fromEntries(months.map(m => [m.key, m]));
+        events.forEach(e => {
+            const d = safeDate(e.start_time);
+            if (!d) return;
+            const key = monthKey(new Date(d.getFullYear(), d.getMonth(), 1));
+            if (map[key]) map[key].value += (e.display_revenue || 0);
+        });
+        const max = Math.max(...months.map(m => m.value), 1);
+        el.innerHTML = months.map(m => {
+            const h = Math.max(8, Math.round((m.value / max) * 145));
+            return `
+                <div class="bar-col">
+                    <div class="bar-value">Rs.${Math.round(m.value).toLocaleString()}</div>
+                    <div class="bar" style="height:${h}px"></div>
+                    <div class="bar-label">${m.label}</div>
+                </div>
+            `;
+        }).join('');
+    }
+    function getEventLifecycleStatus(event) {
+        const rawStatus = String(event.status || '').toLowerCase();
+        if (['cancelled', 'canceled'].includes(rawStatus)) return 'cancelled';
+
+        const now = new Date();
+        const startDate = safeDate(event.start_time);
+        const endDate = safeDate(event.end_time || event.endTime);
+
+        if (endDate && endDate < now) return 'completed';
+        if (startDate && startDate <= now && (!endDate || endDate >= now)) return 'live';
+        if (startDate && startDate > now) return 'upcoming';
+
+        if (event.is_active === true) return 'live';
+        if (event.is_published === false || rawStatus === 'draft') return 'inactive';
+        return 'upcoming';
+    }
+    function renderStatusDonut(events) {
+        const upcoming = events.filter(e => getEventLifecycleStatus(e) === 'upcoming').length;
+        const live = events.filter(e => getEventLifecycleStatus(e) === 'live').length;
+        const completed = events.filter(e => ['completed', 'cancelled', 'inactive'].includes(getEventLifecycleStatus(e))).length;
+        const total = Math.max(events.length, 1);
+        const p1 = (upcoming / total) * 100;
+        const p2 = p1 + (live / total) * 100;
+        const donut = document.getElementById('status-donut');
+        if (donut) {
+            donut.style.setProperty('--s1', `${p1}%`);
+            donut.style.setProperty('--s2', `${p2}%`);
+        }
+        document.getElementById('donut-total').textContent = events.length;
+        document.getElementById('legend-published').textContent = upcoming;
+        document.getElementById('legend-inactive').textContent = live;
+        document.getElementById('legend-draft').textContent = completed;
+    }
+    async function initDashboard() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            // Real-time listener for events owned by this user
+            db.collection('events')
+                .where('organizer_id', '==', user.uid)
+                .onSnapshot(async (snapshot) => {
+                    const events = [];
+                    let totalRevenue = 0;
+                    let totalAttendees = 0;
+                    let totalTicketsSold = 0;
+
+                    const listContainer = document.getElementById('dashboard-events-list');
+                    if (snapshot.empty) {
+                        listContainer.innerHTML = `
+                            <div class="summary-box" style="text-align: center; padding: 40px;">
+                                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
+                                <h3 style="color: white; font-weight: 900;">No events yet</h3>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 10px;">Create your first event to start tracking sales.</p>
+                            </div>
+                        `;
+                        updateStats(0, 0, 0, 0);
+                        renderRevenueChart([]);
+                        renderStatusDonut([]);
+                        return;
+                    }
+
+                    listContainer.innerHTML = '';
+                    const chartEvents = [];
+                    
+                    for (const doc of snapshot.docs) {
+                        const event = doc.data();
+                        event.id = doc.id;
+                        const eventId = doc.id;
+
+                        // Fetch payments for this event to calculate accurate revenue
+                        const paymentsSnap = await db.collection('payments').where('event_id', '==', eventId).get();
+                        let eventRevenue = 0;
+                        paymentsSnap.forEach(p => {
+                            eventRevenue += (p.data().total_amount || 0);
+                        });
+
+                        const ticketsSold = event.tickets_sold || 0;
+                        const inventory = event.ticket_inventory || 0;
+                        const attendees = ticketsSold; // Simplified tracking
+
+                        totalRevenue += eventRevenue;
+                        totalTicketsSold += ticketsSold;
+                        totalAttendees += attendees;
+
+                        event.display_revenue = eventRevenue;
+                        chartEvents.push(event);
+                        renderEventCard(event, listContainer);
+                    }
+
+                    updateStats(snapshot.size, totalRevenue, totalTicketsSold, totalAttendees);
+                    renderRevenueChart(chartEvents);
+                    renderStatusDonut(chartEvents);
+                });
+        });
+    }
+
+    function updateStats(count, revenue, sold, attendees) {
+        document.getElementById('hero-event-count').textContent = `${count} Events`;
+        document.getElementById('hero-summary').textContent = `Revenue Rs. ${revenue.toLocaleString()} • ${attendees} attendees`;
+        
+        document.getElementById('stat-events').textContent = count;
+        document.getElementById('stat-sold').textContent = sold;
+        document.getElementById('stat-attendees').textContent = attendees;
+        document.getElementById('stat-revenue').textContent = `Rs. ${revenue.toLocaleString()}`;
+    }
+
+    function renderEventCard(event, container) {
+        const ticketsSold = event.tickets_sold || 0;
+        const inventory = event.ticket_inventory || 0;
+        const left = Math.max(0, inventory - ticketsSold);
+        const revenue = event.display_revenue || 0;
+        const rating = event.rating_average || 0;
+        
+        const startDate = safeDate(event.start_time);
+        const lifecycle = getEventLifecycleStatus(event);
+        const lifecycleLabel = lifecycle.charAt(0).toUpperCase() + lifecycle.slice(1);
+        const dateText = startDate ? startDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'}) : 'TBA';
+        const cardHtml = `
+            <div class="dashboard-event-card animate-evorra" onclick="location.href='/event/${event.id}'" style="cursor: pointer;">
+                <div style="height: 180px; width: 100%; background: #182338; position: relative;">
+                    <img src="${event.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; top: 15px; right: 15px;">
+                        <span class="status-pill ${lifecycle}">
+                            ${lifecycleLabel}
+                        </span>
+                    </div>
+                </div>
+                <div style="padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <h3 style="color: white; font-weight: 900; font-size: 1.1rem; line-height: 1.2;">${event.title}</h3>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px; opacity: 0.7; font-size: 0.75rem; color: white;">
+                        <span><i class="fa-regular fa-calendar" style="margin-right: 5px;"></i> ${dateText}</span>
+                        <span><i class="fa-solid fa-location-dot" style="margin-right: 5px;"></i> ${event.venue || 'Venue'} • ${event.city || 'City'}</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                        <div class="mini-metric" style="background: rgba(140, 240, 198, 0.1); color: #8CF0C6;">
+                            <p class="label">Sold</p>
+                            <p class="value">${ticketsSold}</p>
+                        </div>
+                        <div class="mini-metric" style="background: rgba(119, 215, 255, 0.1); color: #77D7FF;">
+                            <p class="label">Left</p>
+                            <p class="value">${left}</p>
+                        </div>
+                        <div class="mini-metric" style="background: rgba(255, 200, 87, 0.1); color: #FFC857;">
+                            <p class="label">Revenue</p>
+                            <p class="value">Rs. ${revenue.toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; display: flex; justify-content: space-around; text-align: center;">
+                        <div>
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Inventory</p>
+                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${inventory}</p>
+                        </div>
+                        <div>
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Rating</p>
+                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${rating.toFixed(1)}</p>
+                        </div>
+                        <div>
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Conversion</p>
+                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${inventory > 0 ? ((ticketsSold/inventory)*100).toFixed(0) : 0}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    }
+
+    initDashboard();
+</script>
+{% endblock %}

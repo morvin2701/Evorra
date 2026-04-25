@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Notifications{% endblock %}
+
+{% block content %}
+<div class="home-bg" style="padding-top: 40px; padding-bottom: 120px;">
+    <div style="padding: 0 5%;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; background: rgba(22, 40, 67, 0.45); padding: 15px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(14px);">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="/profile" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.08); border-radius: 50%; color: white;"><i class="fa-solid fa-chevron-left"></i></a>
+                <div>
+                    <h1 style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px;">Notifications</h1>
+                    <p id="notif-count-label" style="font-size: 0.75rem; color: rgba(255,255,255,0.7); font-weight: 700;">Loading updates...</p>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <button onclick="toggleMenu()" style="width: 42px; height: 42px; border-radius: 50%; border: none; background: linear-gradient(135deg, #685BFF, #8A7EFF); color: white; cursor: pointer;"><i class="fa-solid fa-ellipsis"></i></button>
+                <div id="notif-menu" class="hide" style="position: absolute; right: 0; top: 50px; background: #1A2B46; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; width: 180px; z-index: 100; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div class="menu-item" onclick="markAllRead()">Mark all as read</div>
+                    <div class="menu-item" onclick="clearAllNotifications()" style="color: #FF4569;">Clear all</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div id="filter-scroll" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;">
+            <div class="quick-filter-chip active" onclick="setFilter('all', this)">All</div>
+            <div class="quick-filter-chip" onclick="setFilter('unread', this)">Unread</div>
+            <div class="quick-filter-chip" onclick="setFilter('booking', this)">Booking</div>
+            <div class="quick-filter-chip" onclick="setFilter('payment', this)">Payment</div>
+            <div class="quick-filter-chip" onclick="setFilter('promo', this)">Offers</div>
+        </div>
+
+        <!-- Notification List -->
+        <div id="notifications-list">
+            <!-- Loading Skeletons -->
+            <div class="skeleton-notif"></div>
+            <div class="skeleton-notif"></div>
+            <div class="skeleton-notif"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .menu-item {
+        padding: 14px 18px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .menu-item:hover { background: rgba(255,255,255,0.05); }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentFilter = 'all';
+    let allNotifications = [];
+
+    async function initNotifications() {
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            // Simplified query to avoid index errors, sorting handled client-side
+            db.collection('notifications')
+              .where('user_id', '==', user.uid)
+              .where('is_archived', '==', false)
+              .onSnapshot(snap => {
+                  allNotifications = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                  // Sort by created_at desc client-side
+                  allNotifications.sort((a, b) => {
+                      const t1 = a.created_at ? a.created_at.toDate() : 0;
+                      const t2 = b.created_at ? b.created_at.toDate() : 0;
+                      return t2 - t1;
+                  });
+                  renderNotifications();
+              }, err => {
+                  console.error("Firestore Error:", err);
+                  document.getElementById('notifications-list').innerHTML = `<p style="color: rgba(255,255,255,0.5); text-align: center; margin-top: 40px;">Error loading notifications. Please try again.</p>`;
+              });
+        });
+    }
+
+    function renderNotifications() {
+        const list = document.getElementById('notifications-list');
+        const countLabel = document.getElementById('notif-count-label');
+        
+        const filtered = allNotifications.filter(n => {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'unread') return !n.is_read;
+            return n.type === currentFilter;
+        });
+
+        const unreadCount = allNotifications.filter(n => !n.is_read).length;
+        countLabel.textContent = unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up';
+
+        if (filtered.length === 0) {
+            list.innerHTML = `
+                <div class="summary-box" style="text-align: center; padding: 60px 20px; margin-top: 20px;">
+                    <div style="width: 86px; height: 86px; background: rgba(110, 99, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <i class="fa-solid fa-bell-slash" style="font-size: 2rem; color: #8E7DFF;"></i>
+                    </div>
+                    <h3 style="color: white; font-weight: 900; font-size: 1.4rem;">No notifications yet</h3>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 10px;">You're all caught up. New updates will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Group by Date
+        const groups = { 'Today': [], 'Yesterday': [], 'Earlier': [] };
+        const now = new Date();
+        const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+
+        filtered.forEach(n => {
+            const dt = n.created_at ? n.created_at.toDate() : new Date();
+            if (dt.toDateString() === now.toDateString()) groups['Today'].push(n);
+            else if (dt.toDateString() === yesterday.toDateString()) groups['Yesterday'].push(n);
+            else groups['Earlier'].push(n);
+        });
+
+        list.innerHTML = '';
+        Object.entries(groups).forEach(([title, items]) => {
+            if (items.length > 0) {
+                list.insertAdjacentHTML('beforeend', `<h3 class="notification-section-title">${title}</h3>`);
+                items.forEach(n => {
+                    const icon = getIcon(n.type);
+                    const accent = getAccent(n.type);
+                    const timeText = formatTime(n.created_at);
+                    
+                    const itemHtml = `
+                        <div class="notification-tile ${!n.is_read ? 'unread' : ''} animate-evorra" onclick="handleNotifTap('${n.id}', '${n.action_target}')">
+                            <div class="notif-icon-box" style="background: ${accent}22; color: ${accent};">
+                                <i class="${icon}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                                    <h4 style="color: white; font-size: 0.95rem; font-weight: 800;">${n.title}</h4>
+                                    <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">${timeText}</span>
+                                </div>
+                                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; line-height: 1.4; margin-bottom: 10px;">${n.body}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="padding: 4px 10px; border-radius: 999px; background: ${accent}33; color: ${accent}; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;">${n.type}</span>
+                                    ${!n.is_read ? `<button onclick="event.stopPropagation(); markRead('${n.id}')" style="background: rgba(255,255,255,0.1); border: none; color: white; padding: 5px 12px; border-radius: 999px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">Mark read</button>` : ''}
+                                </div>
+                            </div>
+                            ${!n.is_read ? '<div class="unread-pulse"></div>' : ''}
+                        </div>
+                    `;
+                    list.insertAdjacentHTML('beforeend', itemHtml);
+                });
+            }
+        });
+    }
+
+    function getIcon(type) {
+        switch(type) {
+            case 'booking': return 'fa-solid fa-ticket';
+            case 'payment': return 'fa-solid fa-credit-card';
+            case 'promo': return 'fa-solid fa-tag';
+            case 'reminder': return 'fa-solid fa-clock';
+            case 'event': return 'fa-solid fa-calendar-star';
+            default: return 'fa-solid fa-bell';
+        }
+    }
+
+    function getAccent(type) {
+        switch(type) {
+            case 'booking': return '#4FD1C5';
+            case 'payment': return '#F6C453';
+            case 'promo': return '#8E7DFF';
+            case 'reminder': return '#FF8A65';
+            case 'event': return '#7AA2FF';
+            default: return '#8A93A8';
+        }
+    }
+
+    function formatTime(ts) {
+        if (!ts) return 'Just now';
+        const date = ts.toDate();
+        const diff = (new Date() - date) / 1000;
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h';
+        return date.toLocaleDateString();
+    }
+
+    function setFilter(f, el) {
+        currentFilter = f;
+        document.querySelectorAll('.quick-filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        renderNotifications();
+    }
+
+    function toggleMenu() {
+        document.getElementById('notif-menu').classList.toggle('hide');
+    }
+
+    async function handleNotifTap(id, target) {
+        await markRead(id);
+        if (target && target !== 'null') location.href = target;
+    }
+
+    async function markRead(id) {
+        await db.collection('notifications').doc(id).update({ is_read: true });
+    }
+
+    async function markAllRead() {
+        const batch = db.batch();
+        allNotifications.forEach(n => {
+            if (!n.is_read) batch.update(db.collection('notifications').doc(n.id), { is_read: true });
+        });
+        await batch.commit();
+        toggleMenu();
+    }
+
+    async function clearAllNotifications() {
+        if (!confirm("Clear all notifications?")) return;
+        const batch = db.batch();
+        allNotifications.forEach(n => {
+            batch.update(db.collection('notifications').doc(n.id), { is_archived: true });
+        });
+        await batch.commit();
+        toggleMenu();
+    }
+
+    // Close menu on outside click
+    window.onclick = e => {
+        if (!e.target.closest('button')) document.getElementById('notif-menu').classList.add('hide');
+    }
+
+    initNotifications();
+</script>
+{% endblock %}

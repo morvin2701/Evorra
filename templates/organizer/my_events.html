@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | My Events{% endblock %}
+
+{% block head %}
+<style>
+    .my-events-bg { background: transparent; min-height: 100vh; }
+    .my-events-shell { width: min(1260px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 120px; }
+    .events-topbar {
+        display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+        background: rgba(11, 20, 36, 0.78); padding: 14px; border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(14px);
+    }
+    .events-topbar-left { display: flex; align-items: center; gap: 12px; }
+    .events-back {
+        width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
+        background: rgba(255,255,255,0.08); color: #fff; text-decoration: none;
+    }
+    .events-heading { font-size: 1.42rem; font-weight: 900; letter-spacing: -0.02em; }
+    .events-create-btn {
+        width: auto; padding: 10px 18px; font-size: 0.82rem; border-radius: 14px;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+    .kpi-card {
+        border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); padding: 12px;
+        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+        text-align: center;
+    }
+    .kpi-val { color: #fff; font-size: 1.15rem; font-weight: 900; }
+    .kpi-label { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; margin-top: 4px; }
+    .kpi-events { color: #8E7DFF; }
+    .kpi-published { color: #22C55E; }
+    .kpi-tickets { color: #4CC2FF; }
+    .kpi-scans { color: #FFC857; }
+    #my-events-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+    .my-event-card {
+        border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        box-shadow: 0 14px 24px rgba(0,0,0,0.2);
+        cursor: pointer; transition: transform .22s ease, border-color .22s ease;
+    }
+    .my-event-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.35); }
+    .my-event-img-wrap { height: 164px; width: 100%; background: #182338; position: relative; }
+    .my-event-img { width: 100%; height: 100%; object-fit: cover; }
+    .my-event-body { padding: 14px; }
+    .my-event-title { color: white; font-weight: 900; font-size: 1.1rem; margin-bottom: 4px; line-height: 1.22; }
+    .my-event-sub { color: rgba(255,255,255,0.62); font-size: 0.76rem; margin-bottom: 6px; }
+    .my-event-time { color: #8CF0C6; font-size: 0.76rem; font-weight: 800; margin-bottom: 12px; }
+    .my-event-metrics { display: flex; gap: 8px; }
+    .my-event-metric {
+        flex: 1; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; text-align: center;
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+    .my-event-metric-val { color: white; font-weight: 900; font-size: 0.85rem; }
+    .my-event-metric-label { color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-top: 2px; }
+    .status-pill {
+        border-radius: 999px; padding: 6px 10px; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+        border: 1px solid transparent;
+    }
+    .status-pill.published { color: #8CF0C6; background: rgba(140,240,198,0.14); border-color: rgba(140,240,198,0.3); }
+    .status-pill.draft { color: #b8ccff; background: rgba(133,167,255,0.14); border-color: rgba(133,167,255,0.3); }
+    .status-pill.inactive { color: #ff9fb2; background: rgba(255,159,178,0.14); border-color: rgba(255,159,178,0.3); }
+    @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) {
+        .my-events-shell { width: calc(100% - 20px); padding-top: 14px; }
+        #my-events-list { grid-template-columns: 1fr; }
+        .events-heading { font-size: 1.2rem; }
+        .events-create-btn { padding: 8px 14px; font-size: 0.78rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="my-events-bg">
+    <div class="my-events-shell">
+        <!-- Header -->
+        <div class="events-topbar">
+            <div class="events-topbar-left">
+                <a href="/profile" class="events-back"><i class="fa-solid fa-chevron-left"></i></a>
+                <h1 class="events-heading">My Events</h1>
+            </div>
+            <a href="/add-event" class="btn-evorra events-create-btn">
+                <i class="fa-solid fa-plus"></i> Create
+            </a>
+        </div>
+
+        <!-- KPIs Row -->
+        <div id="kpi-row" class="kpi-row">
+            <div class="kpi-card">
+                <p id="kpi-events" class="kpi-val">0</p>
+                <p class="kpi-label kpi-events">Events</p>
+            </div>
+            <div class="kpi-card">
+                <p id="kpi-published" class="kpi-val">0</p>
+                <p class="kpi-label kpi-published">Published</p>
+            </div>
+            <div class="kpi-card">
+                <p id="kpi-tickets" class="kpi-val">0</p>
+                <p class="kpi-label kpi-tickets">Tickets</p>
+            </div>
+            <div class="kpi-card">
+                <p id="kpi-scans" class="kpi-val">0</p>
+                <p class="kpi-label kpi-scans">Scans</p>
+            </div>
+        </div>
+
+        <!-- Events List -->
+        <div id="my-events-list">
+            <!-- Loading state -->
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function safeDate(val) {
+        if (!val) return null;
+        if (val.toDate) return val.toDate();
+        const d = new Date(val);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+    function openEventDetails(eventId) {
+        if (!eventId) return;
+        location.href = `/event/${encodeURIComponent(eventId)}`;
+    }
+    async function initMyEvents() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            // Real-time listener for events owned by this user
+            db.collection('events')
+                .where('organizer_id', '==', user.uid)
+                .onSnapshot(async (snapshot) => {
+                    const listContainer = document.getElementById('my-events-list');
+                    
+                    if (snapshot.empty) {
+                        listContainer.innerHTML = `
+                            <div class="summary-box" style="text-align: center; padding: 60px 20px;">
+                                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
+                                <h3 style="color: white; font-weight: 900;">No events yet</h3>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 10px;">Create your first event to get started.</p>
+                                <button onclick="location.href='/add-event'" class="btn-evorra" style="margin-top: 25px; width: auto; padding: 12px 30px;">Create Event</button>
+                            </div>
+                        `;
+                        updateKPIs(0, 0, 0, 0);
+                        return;
+                    }
+
+                    listContainer.innerHTML = '';
+                    let publishedCount = 0;
+                    let totalTickets = 0;
+                    let totalScans = 0;
+
+                    const events = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                    events.sort((a, b) => {
+                        const aDate = safeDate(a.created_at);
+                        const bDate = safeDate(b.created_at);
+                        return (bDate ? bDate.getTime() : 0) - (aDate ? aDate.getTime() : 0);
+                    });
+
+                    events.forEach(e => {
+                        if (e.is_published || e.status === 'published') publishedCount++;
+                        
+                        const stats = e.stats || {};
+                        const tickets = (stats.tickets_total || 0) + (e.tickets_sold || 0);
+                        const scans = stats.scans_total || 0;
+                        
+                        totalTickets += tickets;
+                        totalScans += scans;
+
+                        renderMyEventCard(e, listContainer);
+                    });
+
+                    updateKPIs(events.length, publishedCount, totalTickets, totalScans);
+                });
+        });
+    }
+
+    function updateKPIs(events, published, tickets, scans) {
+        document.getElementById('kpi-events').textContent = events;
+        document.getElementById('kpi-published').textContent = published;
+        document.getElementById('kpi-tickets').textContent = tickets;
+        document.getElementById('kpi-scans').textContent = scans;
+    }
+
+    function renderMyEventCard(e, container) {
+        const status = e.status || (e.is_published ? 'published' : 'draft');
+        const ticketsSold = e.tickets_sold || 0;
+        const scansTotal = (e.stats || {}).scans_total || 0;
+        const startDate = safeDate(e.start_time);
+        const dateText = startDate ? startDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'}) : 'Date TBD';
+
+        const cardHtml = `
+            <div class="my-event-card animate-evorra" onclick="openEventDetails('${e.id}')">
+                <div class="my-event-img-wrap">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="my-event-img">
+                </div>
+                <div class="my-event-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span class="status-pill ${status.toLowerCase()}">${status.toUpperCase()}</span>
+                        <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                    </div>
+                    
+                    <h3 class="my-event-title">${e.title}</h3>
+                    <p class="my-event-sub">${e.venue || 'Venue'} • ${e.city || 'City'}</p>
+                    <p class="my-event-time">${dateText}</p>
+
+                    <div class="my-event-metrics">
+                        <div class="my-event-metric">
+                            <p class="my-event-metric-val">${ticketsSold}</p>
+                            <p class="my-event-metric-label">Tickets</p>
+                        </div>
+                        <div class="my-event-metric">
+                            <p class="my-event-metric-val">${scansTotal}</p>
+                            <p class="my-event-metric-label">Scans</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    }
+
+    initMyEvents();
+</script>
+{% endblock %}

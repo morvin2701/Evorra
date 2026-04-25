@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Secure Payment{% endblock %}
+
+{% block head %}
+<style>
+    .payment-bg { background: transparent; min-height: 100vh; }
+    .payment-shell { width: min(1200px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 120px; }
+    .payment-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .payment-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        background: rgba(8, 14, 26, 0.75);
+    }
+    .payment-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(145, 166, 255, 0.32);
+        background: rgba(105, 120, 255, 0.16);
+        font-size: .72rem;
+        letter-spacing: .5px;
+        color: #dce5ff;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .payment-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .payment-main { display: grid; gap: 16px; }
+    .payment-card {
+        border-radius: 22px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
+        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+        backdrop-filter: blur(10px);
+    }
+    .payment-hero {
+        padding: 0;
+        overflow: hidden;
+        min-height: 156px;
+        display: grid;
+        grid-template-columns: 170px 1fr;
+    }
+    .payment-hero-img { width: 100%; height: 100%; object-fit: cover; }
+    .payment-hero-body { padding: 18px; }
+    .payment-title { font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 900; margin-bottom: 6px; color: #fff; }
+    .payment-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 10px; }
+    .payment-time { color: var(--secondary); font-size: .82rem; font-weight: 800; }
+    .payment-block { padding: 16px; }
+    .section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
+    .payment-method-card {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .payment-method-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+    }
+    .summary-box {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 14px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+    .summary-highlight { color: var(--secondary); font-size: 1.2rem; font-weight: 900; }
+    .terms-box {
+        margin-top: 16px; display: flex; gap: 12px; align-items: flex-start;
+        background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .payment-side { display: grid; gap: 12px; align-self: start; }
+    .pay-btn {
+        width: 100%;
+        margin: 12px 0 0;
+        padding: 13px 18px;
+        border-radius: 12px;
+        font-size: .92rem;
+        font-weight: 800;
+    }
+    .quick-note {
+        font-size: .8rem;
+        color: rgba(220,232,255,0.7);
+        line-height: 1.45;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+        border-radius: 14px;
+        padding: 12px;
+    }
+    @media (min-width: 860px) {
+        .payment-layout { grid-template-columns: minmax(0, 1fr) 360px; }
+    }
+    @media (max-width: 640px) {
+        .payment-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .payment-hero { grid-template-columns: 108px 1fr; min-height: 120px; }
+        .payment-hero-body { padding: 12px; }
+        .payment-block { padding: 12px; }
+        .pay-btn { padding: 11px 12px; font-size: .82rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-bg">
+    <div class="payment-shell">
+        <div class="payment-top">
+            <a href="javascript:history.back()" class="payment-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <span class="payment-badge">Secure Payment</span>
+        </div>
+        <div class="payment-layout">
+            <div class="payment-main">
+                <div class="payment-card payment-hero">
+                    <img id="event-img" src="" class="payment-hero-img">
+                    <div class="payment-hero-body">
+                        <h2 id="event-title" class="payment-title">Loading...</h2>
+                        <p id="event-location" class="payment-sub">Venue • City</p>
+                        <p id="event-time" class="payment-time">Date TBA</p>
+                    </div>
+                </div>
+
+                <div class="payment-card payment-block">
+                    <h2 class="section-title">Payment Method</h2>
+                    <div class="payment-method-card animate-evorra">
+                        <div class="payment-method-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
+                        <div style="flex: 1;">
+                            <h4 style="color: white; font-weight: 800;">Cash On Delivery</h4>
+                            <p style="color: #CFCBFF; font-size: 0.75rem; line-height: 1.4; margin-top: 2px;">Pay when you arrive at the venue. 100% Secure.</p>
+                        </div>
+                        <i class="fa-solid fa-circle-check" style="color: var(--secondary); font-size: 1.2rem;"></i>
+                    </div>
+                </div>
+
+                <div class="payment-card payment-block">
+                    <h2 class="section-title">Ticket Details</h2>
+                    <div class="summary-box">
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Ticket</span>
+                            <span id="ticket-name" style="font-weight: 800;">Loading...</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Quantity</span>
+                            <span id="ticket-qty" style="font-weight: 800;">1</span>
+                        </div>
+                        <div class="summary-row" style="margin-bottom:0;">
+                            <span style="color: rgba(255,255,255,0.6);">Unit Price</span>
+                            <span id="ticket-unit" style="font-weight: 800;">₹0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside class="payment-side">
+                <div class="payment-card payment-block">
+                    <h2 class="section-title">Order Summary</h2>
+                    <div class="summary-box">
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Subtotal</span>
+                            <span id="sum-subtotal" style="font-weight: 800;">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Discount</span>
+                            <span id="sum-discount" style="color: var(--secondary); font-weight: 800;">- ₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Platform Fee</span>
+                            <span id="sum-fee" style="font-weight: 800;">₹0</span>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        <div class="summary-row" style="margin-bottom: 0;">
+                            <span style="font-weight: 700;">Total Amount</span>
+                            <span id="sum-total" class="summary-highlight">₹0</span>
+                        </div>
+                    </div>
+
+                    <p style="margin-top:10px; color: rgba(255,255,255,0.5); font-size: 0.74rem; font-weight: 700;">COD Total</p>
+                    <p id="dock-total" style="color: var(--secondary); font-size: 1.4rem; font-weight: 900; margin: 2px 0 0;">₹0</p>
+
+                    <div class="terms-box">
+                        <input type="checkbox" id="confirm-check" checked style="margin-top: 4px;">
+                        <label for="confirm-check" style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.4;">I confirm this order and agree to the District COD terms.</label>
+                    </div>
+                    <button id="place-order-btn" onclick="placeOrder()" class="btn-evorra pay-btn">Place Order</button>
+                </div>
+
+                <div class="quick-note">
+                    Your ticket is confirmed only after successful order placement and stock validation.
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const eventId = "{{ event_id }}";
+    let bookingData = {
+        eventId: sessionStorage.getItem('booking_event_id'),
+        ticketId: sessionStorage.getItem('booking_ticket_id'),
+        qty: parseInt(sessionStorage.getItem('booking_qty')),
+        total: parseInt(sessionStorage.getItem('booking_total'))
+    };
+    function isEventClosed(eventItem) {
+        if (!eventItem) return true;
+        if (eventItem.is_closed === true) return true;
+        const status = String(eventItem.status || '').toLowerCase();
+        if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+        if (eventItem.is_published === false) return true;
+        const endRaw = eventItem.end_time || eventItem.endTime;
+        if (endRaw) {
+            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
+            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
+        }
+        return false;
+    }
+
+    async function loadPaymentDetails() {
+        if (!bookingData.eventId) {
+            alert("Session expired. Please start over.");
+            location.href = '/';
+            return;
+        }
+
+        try {
+            const eventSnap = await db.collection('events').doc(bookingData.eventId).get();
+            if (!eventSnap.exists) {
+                alert("Event not found");
+                sessionStorage.clear();
+                location.href = '/explore';
+                return;
+            }
+            const event = eventSnap.data();
+            if (isEventClosed(event)) {
+                alert("This event is closed and payment cannot continue.");
+                sessionStorage.clear();
+                location.href = '/explore';
+                return;
+            }
+            
+            document.getElementById('event-img').src = event.cover_image;
+            document.getElementById('event-title').textContent = event.title;
+            document.getElementById('event-location').textContent = `${event.venue_name} • ${event.city}`;
+            document.getElementById('event-time').textContent = formatDate(event.start_time);
+
+            let ticketCollection = 'ticketTypes';
+            let ticketSnap = await db.collection('events').doc(bookingData.eventId).collection(ticketCollection).doc(bookingData.ticketId).get();
+            if (!ticketSnap.exists) {
+                ticketCollection = 'ticket_types';
+                ticketSnap = await db.collection('events').doc(bookingData.eventId).collection(ticketCollection).doc(bookingData.ticketId).get();
+            }
+
+            let ticket = ticketSnap.exists ? ticketSnap.data() : null;
+            if (!ticket && Array.isArray(event.ticket_types)) {
+                ticket = event.ticket_types.find(t => String(t.id || '') === String(bookingData.ticketId)) || null;
+                ticketCollection = null;
+            }
+            if (!ticket) {
+                alert("Selected ticket no longer exists. Please book again.");
+                sessionStorage.clear();
+                location.href = `/book/${bookingData.eventId}`;
+                return;
+            }
+
+            bookingData.ticketCollection = ticketCollection;
+
+            const subtotal = ticket.price * bookingData.qty;
+            const fee = subtotal * 0.18;
+            const discount = (subtotal + fee) - bookingData.total;
+
+            document.getElementById('ticket-name').textContent = ticket.name;
+            document.getElementById('ticket-qty').textContent = bookingData.qty;
+            document.getElementById('ticket-unit').textContent = `₹${ticket.price}`;
+            
+            document.getElementById('sum-subtotal').textContent = `₹${subtotal}`;
+            document.getElementById('sum-discount').textContent = `- ₹${Math.round(discount)}`;
+            document.getElementById('sum-fee').textContent = `₹${Math.round(fee)}`;
+            document.getElementById('sum-total').textContent = `₹${bookingData.total}`;
+            document.getElementById('dock-total').textContent = `₹${bookingData.total}`;
+
+        } catch (e) { console.error(e); }
+    }
+
+    async function placeOrder() {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login to complete booking");
+        if (!document.getElementById('confirm-check').checked) return alert("Please confirm order terms");
+
+        const btn = document.getElementById('place-order-btn');
+        btn.textContent = "Processing...";
+        btn.disabled = true;
+
+        try {
+            // Complex Transaction to ensure stock and order integrity
+            const ticketCollection = bookingData.ticketCollection || 'ticketTypes';
+            const ticketTypeRef = ticketCollection
+                ? db.collection('events').doc(bookingData.eventId).collection(ticketCollection).doc(bookingData.ticketId)
+                : null;
+            const eventRef = db.collection('events').doc(bookingData.eventId);
+            const scanUrlBase = `${window.location.origin}/scan-pass`;
+            
+            await db.runTransaction(async (txn) => {
+                // 1. All READS first
+                const tSnap = ticketTypeRef ? await txn.get(ticketTypeRef) : null;
+                const eSnap = await txn.get(eventRef);
+                const eData = eSnap.data();
+                
+                const tData = tSnap ? tSnap.data() : (Array.isArray(eData?.ticket_types)
+                    ? eData.ticket_types.find(t => String(t.id || '') === String(bookingData.ticketId))
+                    : null);
+                
+                if (!tData || tData.stock < bookingData.qty) throw new Error("Out of stock!");
+                if (isEventClosed(eData)) throw new Error("This event is closed and no longer bookable.");
+
+                const orderId = db.collection('tickets').doc().id;
+                const paymentId = db.collection('payments').doc().id;
+
+                // 2. All WRITES second
+                // Create Ticket
+                txn.set(db.collection('tickets').doc(orderId), {
+                    id: orderId,
+                    user_id: user.uid,
+                    event_id: bookingData.eventId,
+                    event_title: document.getElementById('event-title').textContent,
+                    ticket_type_id: bookingData.ticketId,
+                    ticket_type_name: tData.name,
+                    quantity: bookingData.qty,
+                    total_amount: bookingData.total,
+                    status: 'confirmed',
+                    qr_code: `EV-${orderId}-${Date.now()}`,
+                    qr_dynamic_url: `${scanUrlBase}/${orderId}`,
+                    scan_count: 0,
+                    checked_in: false,
+                    scanned_at: null,
+                    last_scanned_by: null,
+                    payment_id: paymentId,
+                    created_time: firebase.firestore.FieldValue.serverTimestamp(),
+                    event_snapshot: {
+                        title: document.getElementById('event-title').textContent,
+                        cover_image: document.getElementById('event-img').src,
+                        city: document.getElementById('event-location').textContent.split(' • ')[1].trim(),
+                        venue: document.getElementById('event-location').textContent.split(' • ')[0].trim(),
+                        start_time: document.getElementById('event-time').textContent
+                    }
+                });
+
+                // Create Payment
+                txn.set(db.collection('payments').doc(paymentId), {
+                    id: paymentId,
+                    user_id: user.uid,
+                    event_id: bookingData.eventId,
+                    ticket_id: orderId,
+                    total_amount: bookingData.total,
+                    payment_method: 'cod',
+                    status: 'success',
+                    created_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update Stock
+                if (ticketTypeRef) {
+                    txn.update(ticketTypeRef, { stock: tData.stock - bookingData.qty });
+                } else {
+                    const nextTickets = (eData.ticket_types || []).map(t => {
+                        if (String(t.id || '') !== String(bookingData.ticketId)) return t;
+                        return { ...t, stock: Math.max(0, Number(t.stock || 0) - bookingData.qty) };
+                    });
+                    txn.update(eventRef, { ticket_types: nextTickets });
+                }
+                
+                // Update Event Sales & Revenue
+                txn.update(eventRef, { 
+                    tickets_sold: (eData.tickets_sold || 0) + bookingData.qty,
+                    total_revenue: (eData.total_revenue || 0) + bookingData.total
+                });
+            });
+
+            // Success
+            sessionStorage.clear();
+            location.href = `/payment_success`;
+
+        } catch (e) {
+            alert(e.message || "Order failed. Try again.");
+            btn.textContent = "Place Order";
+            btn.disabled = false;
+        }
+    }
+
+    function formatDate(val) {
+        if (!val) return 'TBA';
+        const date = val.toDate ? val.toDate() : new Date(val);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    loadPaymentDetails();
+</script>
+{% endblock %}

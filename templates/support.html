@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Help & Support{% endblock %}
+
+{% block head %}
+<style>
+    .support-bg { background: transparent; min-height: 100vh; }
+    .support-shell { width: min(1220px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 120px; }
+    .support-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .support-back {
+        width: 40px; height: 40px; border-radius: 12px; color: #fff; text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .support-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; }
+    .support-hero {
+        margin-bottom: 18px; border-radius: 22px; padding: 18px;
+        display: grid; grid-template-columns: 74px 1fr; gap: 14px; align-items: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(135deg, rgba(96,83,255,0.42), rgba(13,178,235,0.3));
+    }
+    .support-hero-icon {
+        width: 74px; height: 74px; border-radius: 22px; background: rgba(255,255,255,0.18);
+        display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    }
+    .support-hero-title { font-size: 1.35rem; font-weight: 900; }
+    .support-hero-sub { font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-top: 6px; line-height: 1.45; }
+    .support-section-title { margin: 26px 0 12px; font-size: 1.08rem; font-weight: 900; }
+    .help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mini-help-card {
+        border-radius: 16px; border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        padding: 14px;
+    }
+    .summary-card {
+        border-radius: 16px; border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        padding: 12px;
+    }
+    .action-tile { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; }
+    .action-icon {
+        width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; flex-shrink: 0;
+    }
+    .faq-item { padding: 10px; }
+    .faq-question { color: #fff; font-size: 0.9rem; font-weight: 800; }
+    .faq-answer { color: rgba(255,255,255,0.62); font-size: 0.78rem; margin-top: 6px; line-height: 1.45; }
+    .instruction-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+    .instruction-dot {
+        width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+        background: rgba(140,240,198,0.15); color: #8CF0C6; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;
+    }
+    @media (max-width: 640px) {
+        .support-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .support-title { font-size: 1.45rem; }
+        .help-grid { grid-template-columns: 1fr; }
+        .support-hero { grid-template-columns: 60px 1fr; }
+        .support-hero-icon { width: 60px; height: 60px; font-size: 1.5rem; border-radius: 16px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="support-bg">
+    <div class="support-shell">
+        <div class="support-topbar">
+            <a href="javascript:history.back()" class="support-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <h1 class="support-title">Help & Support</h1>
+        </div>
+
+        <!-- Support Hero -->
+        <div class="support-hero animate-evorra">
+            <div class="support-hero-icon">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <div>
+                <h2 class="support-hero-title">We Are Here To Help</h2>
+                <p class="support-hero-sub">Find answers, explore support options, and get guidance for bookings, tickets, and your account.</p>
+            </div>
+        </div>
+
+        <h2 class="support-section-title">Quick Help</h2>
+        <div class="help-grid">
+            <div class="mini-help-card flex-1">
+                <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-ticket-simple"></i></div>
+                <h4 style="color: white; font-weight: 800; font-size: 1rem; margin: 14px 0 6px;">Tickets</h4>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; line-height: 1.35;">Booking, QR and access help</p>
+            </div>
+            <div class="mini-help-card flex-1">
+                <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-regular fa-circle-user"></i></div>
+                <h4 style="color: white; font-weight: 800; font-size: 1rem; margin: 14px 0 6px;">Account</h4>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; line-height: 1.35;">Profile and login guidance</p>
+            </div>
+        </div>
+
+        <h2 class="support-section-title">Support Channels</h2>
+        <div class="summary-card">
+            <div class="action-tile">
+                <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-regular fa-envelope"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Email Support</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">support@evorra.app</p>
+                </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="action-tile">
+                <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-phone-flip"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Phone Support</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">+91 98765 43210</p>
+                </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="action-tile">
+                <div class="action-icon" style="background: rgba(255, 200, 87, 0.14); color: #FFC857;"><i class="fa-regular fa-comment-dots"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Live Chat</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Available 9:00 AM to 8:00 PM</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="support-section-title">Frequently Asked Questions</h2>
+        <div class="summary-card">
+            <div class="faq-item">
+                <p class="faq-question">How do I access my booked tickets?</p>
+                <p class="faq-answer">Open "My Tickets" from your profile to view your passes and QR entry details.</p>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="faq-item">
+                <p class="faq-question">What if my QR code does not scan?</p>
+                <p class="faq-answer">Increase screen brightness, make sure the ticket is active, and present the QR clearly at the entry gate.</p>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="faq-item">
+                <p class="faq-question">Can I update my profile information?</p>
+                <p class="faq-answer">Yes, you can edit your name, email, phone number, city, and role from the Edit Profile screen.</p>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="faq-item">
+                <p class="faq-question">How do I switch between attendee and organizer?</p>
+                <p class="faq-answer">Go to Edit Profile and change your role using the role selector section at the bottom.</p>
+            </div>
+        </div>
+
+        <h2 class="support-section-title">Important Notes</h2>
+        <div class="summary-card">
+            <div class="instruction-row">
+                <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5;">Always keep your app updated for the best event experience.</p>
+            </div>
+            <div class="instruction-row">
+                <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5;">Carry a valid ID proof when attending major venue events.</p>
+            </div>
+            <div class="instruction-row">
+                <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5;">Reach the venue early to avoid delays during entry validation.</p>
+            </div>
+            <div class="instruction-row" style="margin-bottom: 0;">
+                <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5;">Use only official support channels for booking or payment assistance.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

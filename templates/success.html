@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Payment Success{% endblock %}
+
+{% block head %}
+<style>
+    .success-wrap {
+        min-height: calc(100vh - 88px);
+        padding: 28px 14px 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .success-panel {
+        width: min(920px, 100%);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 28px;
+        padding: 26px;
+        background:
+            radial-gradient(circle at 15% 18%, rgba(85, 104, 255, 0.22), transparent 42%),
+            radial-gradient(circle at 80% 20%, rgba(92, 245, 200, 0.15), transparent 36%),
+            linear-gradient(160deg, rgba(8, 16, 30, 0.93), rgba(10, 18, 35, 0.88));
+        box-shadow: 0 28px 70px rgba(0,0,0,0.42);
+        backdrop-filter: blur(12px);
+    }
+    .success-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+    .success-dot {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #0c1a14;
+        font-size: 1.25rem;
+        background: radial-gradient(circle at 35% 30%, #d8ffef, #89f5d0 62%, #63ddae);
+        box-shadow: 0 0 12px rgba(118, 255, 205, 0.22);
+    }
+    .success-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: #bdfce8;
+        font-size: .76rem;
+        letter-spacing: .45px;
+        text-transform: uppercase;
+        font-weight: 800;
+        opacity: .92;
+    }
+    .success-headline {
+        margin: 18px 0 8px;
+        text-align: center;
+        font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+        line-height: 1.08;
+        letter-spacing: -.8px;
+        color: #fff;
+        font-weight: 900;
+    }
+    .success-text {
+        margin: 0 auto;
+        width: min(620px, 100%);
+        text-align: center;
+        color: rgba(225, 235, 255, 0.74);
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+    .success-grid {
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: 1.2fr .8fr;
+        gap: 14px;
+    }
+    .success-card {
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+        border-radius: 18px;
+        padding: 14px 15px;
+    }
+    .success-card h4 {
+        margin: 0 0 6px;
+        color: #fff;
+        font-size: .95rem;
+        font-weight: 800;
+    }
+    .success-card p {
+        margin: 0;
+        color: rgba(223, 233, 255, 0.72);
+        line-height: 1.55;
+        font-size: .86rem;
+    }
+    .success-actions {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .success-btn {
+        text-decoration: none;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.18);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 13px 14px;
+        font-size: .9rem;
+        font-weight: 800;
+        transition: .2s ease;
+    }
+    .success-btn:hover { transform: translateY(-1px); }
+    .success-btn.primary {
+        color: #08142b;
+        background: linear-gradient(135deg, #87f4cf, #5ad2ff);
+        box-shadow: 0 10px 24px rgba(90, 210, 255, 0.25);
+    }
+    .success-btn.ghost {
+        color: #e4ecff;
+        background: rgba(255,255,255,0.03);
+    }
+    @media (max-width: 760px) {
+        .success-panel { border-radius: 22px; padding: 20px 16px; }
+        .success-grid { grid-template-columns: 1fr; }
+        .success-actions { grid-template-columns: 1fr; }
+        .success-dot { width: 44px; height: 44px; font-size: 1.1rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-wrap">
+    <div class="success-panel animate-fade">
+        <div class="success-top">
+            <div class="success-dot"><i class="fa-solid fa-check"></i></div>
+            <span class="success-chip"><i class="fa-solid fa-shield-check"></i> Transaction Verified</span>
+        </div>
+        <h1 class="success-headline">Payment Successful!</h1>
+        <p class="success-text">Your ticket has been confirmed. You can find your QR pass in the "My Tickets" section.</p>
+
+        <div class="success-grid">
+            <div class="success-card">
+                <h4>Entry Reminder</h4>
+                <p>Please keep your ticket QR ready at venue entry. If the ticket is not visible immediately, refresh once in the "My Tickets" screen.</p>
+            </div>
+            <div class="success-card">
+                <h4>Need Help?</h4>
+                <p>If your booking details seem delayed, revisit after a few seconds from the tickets screen.</p>
+            </div>
+        </div>
+
+        <div class="success-actions">
+            <a href="/my-tickets" class="success-btn primary"><i class="fa-solid fa-ticket"></i> View My Tickets</a>
+            <a href="/" class="success-btn ghost"><i class="fa-solid fa-house"></i> Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,965 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra Studio | Craft Experience{% endblock %}
+
+{% block head %}
+<style>
+    /* Focus Mode Overrides */
+    .top-navbar, .bottom-nav { display: none !important; }
+    main { padding: 0; margin: 0; max-width: 100% !important; }
+    
+    :root {
+        --studio-dark: #070F1D;
+        --studio-glass: rgba(22, 31, 54, 0.7);
+        --studio-accent: #8E7DFF;
+        --studio-text: #FFFFFF;
+        --studio-muted: rgba(255, 255, 255, 0.5);
+        --sidebar-width: 280px;
+        --preview-width: 380px;
+    }
+
+    body { overflow: hidden; background: #070F1D; margin: 0; }
+
+    .studio-layout {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        background: radial-gradient(circle at 30% 20%, rgba(95, 82, 255, 0.1), transparent 40%), #070F1D;
+        color: var(--studio-text);
+        overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .studio-sidebar {
+        width: var(--sidebar-width);
+        background: rgba(11, 20, 36, 0.98);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        padding: 40px 30px;
+        flex-shrink: 0;
+        z-index: 100;
+    }
+
+    .sidebar-logo { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 50px; color: var(--studio-accent); text-align: center; }
+    
+    .studio-nav { flex: 1; }
+    .nav-step {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 1px solid transparent;
+        background: transparent;
+    }
+    .nav-step.active { background: rgba(142, 125, 255, 0.12); border-color: rgba(142, 125, 255, 0.2); }
+    .nav-step:hover:not(.active) { background: rgba(255, 255, 255, 0.04); }
+
+    .nav-number { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: var(--studio-muted); transition: 0.3s; }
+    .nav-step.active .nav-number { background: var(--studio-accent); color: white; box-shadow: 0 0 20px var(--studio-accent); }
+
+    .nav-info p { font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; color: var(--studio-muted); margin: 0; }
+    .nav-step.active .nav-info p { color: var(--studio-accent); }
+    .nav-info span { font-size: 0.95rem; font-weight: 700; display: block; margin-top: 2px; }
+
+    .sidebar-footer { padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .sidebar-footer a { color: var(--studio-accent); font-size: 0.8rem; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+    /* Content Area */
+    .studio-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 100px 60px 150px; /* Increased top padding */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        scrollbar-width: none;
+        z-index: 10;
+        background: linear-gradient(180deg, rgba(9, 16, 31, 0.96), rgba(7, 15, 29, 0.94));
+        border-left: 1px solid rgba(255,255,255,0.06);
+        border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .studio-content::-webkit-scrollbar { display: none; }
+
+    .form-scroll-area { width: 100%; max-width: 650px; }
+    
+    .step-intro { margin-bottom: 45px; }
+    .step-intro h2 { font-size: 2.8rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 12px; line-height: 1.1; color: white; }
+    .step-intro p { color: var(--studio-muted); font-size: 1.1rem; }
+
+    /* Form Step Visibility */
+    .form-step { display: none; width: 100%; }
+    .form-step.active-step { display: block; animation: studioFadeIn 0.5s ease-out; }
+
+    @keyframes studioFadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Preview Sidebar */
+    .studio-preview-sidebar {
+        width: var(--preview-width);
+        background: linear-gradient(180deg, rgba(11, 20, 36, 0.9), rgba(10, 22, 40, 0.86));
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 100px 35px 50px;
+        flex-shrink: 0;
+        backdrop-filter: blur(15px);
+        z-index: 50;
+    }
+
+    .preview-header { font-size: 0.75rem; font-weight: 900; letter-spacing: 2px; color: var(--studio-muted); margin-bottom: 30px; text-transform: uppercase; }
+    
+    .event-preview-card {
+        background: #121C30;
+        border-radius: 28px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+    .preview-cover-placeholder { height: 200px; background: #1A2640; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.08); font-size: 3.5rem; overflow: hidden; position: relative; }
+    .preview-cover-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .preview-body { padding: 25px; }
+    .preview-tag { background: var(--studio-accent); color: white; padding: 5px 12px; border-radius: 8px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+    .preview-body h3 { font-size: 1.4rem; font-weight: 900; margin: 15px 0 8px; line-height: 1.2; color: white; }
+    .preview-body p { font-size: 0.85rem; color: var(--studio-muted); display: flex; align-items: center; gap: 8px; }
+    
+    .preview-footer { display: flex; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .preview-date p, .preview-price p { font-size: 0.65rem; font-weight: 900; color: var(--studio-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .preview-date span, .preview-price span { font-size: 0.95rem; font-weight: 900; color: white; }
+
+    .premium-card { background: rgba(22, 31, 54, 0.82); border: 1px solid rgba(255,255,255,0.12); border-radius: 28px; padding: 34px; box-shadow: 0 20px 40px rgba(0,0,0,0.28); }
+    .input-group-premium { margin-bottom: 30px; }
+    .input-group-premium label { display: block; font-size: 0.75rem; font-weight: 900; color: var(--studio-muted); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.8px; }
+    
+    .premium-input { 
+        background: rgba(255,255,255,0.05); 
+        border: 1px solid rgba(255,255,255,0.1); 
+        border-radius: 18px; 
+        padding: 18px 22px; 
+        color: white; 
+        width: 100%; 
+        outline: none; 
+        font-size: 1.05rem; 
+        transition: 0.4s;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .premium-input:focus { border-color: var(--studio-accent); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 6px rgba(142, 125, 255, 0.12); }
+
+    .btn-next-studio { 
+        background: linear-gradient(135deg, #685BFF, #8A7EFF); 
+        color: white; 
+        border: none; 
+        padding: 20px 45px; 
+        border-radius: 22px; 
+        font-weight: 900; 
+        font-size: 1.05rem;
+        cursor: pointer; 
+        transition: 0.4s;
+        box-shadow: 0 10px 30px rgba(104, 91, 255, 0.3);
+    }
+    .btn-next-studio:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(104, 91, 255, 0.4); }
+
+    .media-drop-zone { width: 100%; height: 280px; border: 2px dashed rgba(255,255,255,0.12); border-radius: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.4s; overflow: hidden; }
+    .media-drop-zone:hover { border-color: var(--studio-accent); background: rgba(142, 125, 255, 0.05); }
+    .mini-media-preview { margin-top: 14px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); }
+    .mini-media-preview video, .mini-media-preview img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
+    .gallery-preview-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .gallery-preview-item { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); height: 70px; }
+    .gallery-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-remove-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(0,0,0,0.62);
+        color: #fff;
+        font-size: 0.68rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .media-inline-remove {
+        margin-top: 8px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .studio-ticket-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
+    .btn-back-studio { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.14); padding: 18px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; }
+    .btn-publish-studio:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    .studio-date-tile {
+        padding: 14px 16px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .studio-date-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        color: var(--studio-muted);
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+    }
+    .studio-date-input {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        outline: none;
+    }
+    .studio-date-input::-webkit-calendar-picker-indicator {
+        filter: invert(1) brightness(1.2);
+        cursor: pointer;
+    }
+    .studio-date-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    @media (max-width: 768px) {
+        .studio-sidebar, .studio-preview-sidebar { display: none; }
+        .studio-content { padding: 40px 20px; height: 100vh; }
+        .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    #publish-overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--studio-dark);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="studio-layout">
+    <!-- Navigation Sidebar -->
+    <aside class="studio-sidebar">
+        <div class="sidebar-logo">EVORRA STUDIO</div>
+        <nav class="studio-nav">
+            <div class="nav-step active" id="nav-1" onclick="jumpToStep(1)">
+                <div class="nav-number">01</div>
+                <div class="nav-info"><p>IDENTITY</p><span>Essentials</span></div>
+            </div>
+            <div class="nav-step" id="nav-2" onclick="jumpToStep(2)">
+                <div class="nav-number">02</div>
+                <div class="nav-info"><p>VISUALS</p><span>Media assets</span></div>
+            </div>
+            <div class="nav-step" id="nav-3" onclick="jumpToStep(3)">
+                <div class="nav-number">03</div>
+                <div class="nav-info"><p>LOGISTICS</p><span>Where & When</span></div>
+            </div>
+            <div class="nav-step" id="nav-4" onclick="jumpToStep(4)">
+                <div class="nav-number">04</div>
+                <div class="nav-info"><p>LAUNCH</p><span>Ticketing</span></div>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="javascript:history.back()"><i class="fa-solid fa-arrow-left"></i> Exit Studio</a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="studio-content">
+        <div class="form-scroll-area">
+            <!-- Step 1: Essentials -->
+            <div class="form-step active-step" id="step-1">
+                <div class="step-intro">
+                    <h2>The Identity</h2>
+                    <p>Tell the world what your experience is all about.</p>
+                </div>
+                <div class="premium-card">
+                    <div class="input-group-premium">
+                        <label>Event Title</label>
+                        <input type="text" id="ev-title" placeholder="What's the name of the experience?" class="premium-input" oninput="syncStudioPreview()">
+                    </div>
+                    <div class="input-group-premium">
+                        <label>Short Tagline</label>
+                        <input type="text" id="ev-subtitle" placeholder="A one-liner to grab attention" class="premium-input" oninput="syncStudioPreview()">
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group-premium">
+                            <label>Category</label>
+                            <input type="text" id="ev-category" list="category-list" placeholder="Pick or type a category" class="premium-input" oninput="syncStudioPreview()">
+                            <datalist id="category-list">
+                                <!-- Dynamically populated -->
+                                <option value="Music Festival">
+                                <option value="Nightlife">
+                                <option value="Art & Culture">
+                                <option value="Tech Summit">
+                                <option value="Sports">
+                                <option value="Networking">
+                            </datalist>
+                        </div>
+                        <div class="input-group-premium">
+                            <label>Format</label>
+                            <select id="ev-format" class="premium-input">
+                                <option value="In-Person">In-Person</option>
+                                <option value="Online">Online / Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-group-premium" style="margin-bottom:0;">
+                        <label>Story / Description</label>
+                        <textarea id="ev-description" placeholder="Explain the vibe, the line-up, and the details..." class="premium-input" style="height:150px;"></textarea>
+                    </div>
+                </div>
+                <div style="margin-top:40px; text-align:right;">
+                    <button class="btn-next-studio" onclick="nextStep(2)">Media Assets <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 2: Visuals -->
+            <div class="form-step" id="step-2">
+                <div class="step-intro">
+                    <h2>Visual Narrative</h2>
+                    <p>High-quality media makes your event stand out.</p>
+                </div>
+                <div class="premium-card">
+                    <div class="media-drop-zone" onclick="document.getElementById('cover-input').click()">
+                        <div id="cover-wrap" style="text-align:center;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:3rem; color:var(--studio-accent); margin-bottom:15px;"></i>
+                            <h4 style="margin-bottom:5px;">Main Cover Image</h4>
+                            <p style="font-size:0.75rem; color:var(--studio-muted);">Click to upload (Recommended 16:9)</p>
+                        </div>
+                        <input type="file" id="cover-input" class="hide" accept="image/*" onchange="previewStudioMedia(this)">
+                    </div>
+                    
+                    <div class="grid-2" style="margin-top:25px;">
+                        <div class="studio-date-tile" onclick="document.getElementById('gallery-input').click()" style="padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; display:flex; align-items:center; gap:15px; cursor:pointer;">
+                            <i class="fa-solid fa-images" style="color:var(--studio-accent); font-size:1.2rem;"></i>
+                            <div><p style="font-size:0.6rem; color:var(--studio-muted); margin:0;">GALLERY</p><span id="gallery-info" style="font-size:0.8rem; font-weight:700;">Add Photos</span></div>
+                            <input type="file" id="gallery-input" class="hide" multiple accept="image/*" onchange="updateGalleryStatus()">
+                        </div>
+                        <div class="studio-date-tile" onclick="document.getElementById('video-input').click()" style="padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; display:flex; align-items:center; gap:15px; cursor:pointer;">
+                            <i class="fa-solid fa-clapperboard" style="color:var(--studio-accent); font-size:1.2rem;"></i>
+                            <div><p style="font-size:0.6rem; color:var(--studio-muted); margin:0;">PROMO</p><span id="video-info" style="font-size:0.8rem; font-weight:700;">Add Video</span></div>
+                            <input type="file" id="video-input" class="hide" accept="video/*" onchange="updateVideoStatus()">
+                        </div>
+                    </div>
+                    <div id="gallery-preview" class="gallery-preview-grid"></div>
+                    <div id="video-preview" class="mini-media-preview hide"></div>
+                </div>
+                <div style="margin-top:40px; display:flex; justify-content:space-between;">
+                    <button class="btn-back-studio" onclick="prevStep(1)">Back</button>
+                    <button class="btn-next-studio" onclick="nextStep(3)">Logistics <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 3: Logistics -->
+            <div class="form-step" id="step-3">
+                <div class="step-intro">
+                    <h2>Logistics</h2>
+                    <p>Where and when will the magic happen?</p>
+                </div>
+                <div class="premium-card">
+                    <div class="input-group-premium">
+                        <label>Venue Name</label>
+                        <input type="text" id="ev-venue" placeholder="Grand District Arena" class="premium-input" oninput="syncStudioPreview()">
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group-premium">
+                            <label>City</label>
+                            <input type="text" id="ev-city" placeholder="Mumbai" class="premium-input" oninput="syncStudioPreview()">
+                        </div>
+                        <div class="input-group-premium">
+                            <label>State</label>
+                            <input type="text" id="ev-state" placeholder="Maharashtra" class="premium-input">
+                        </div>
+                    </div>
+                    <div class="input-group-premium">
+                        <label>Full Address</label>
+                        <textarea id="ev-address" placeholder="Exact coordinates..." class="premium-input" style="height:80px;"></textarea>
+                    </div>
+                    <div class="grid-2" style="margin-top:10px;">
+                        <div class="studio-date-tile">
+                            <div class="studio-date-label"><i class="fa-solid fa-calendar-plus" style="color:var(--studio-accent); font-size:1rem;"></i> START TIME</div>
+                            <input type="datetime-local" id="ev-start" class="studio-date-input" onchange="syncStudioDateText(this, 'ev-start-text')">
+                            <span id="ev-start-text" class="studio-date-value">Select</span>
+                        </div>
+                        <div class="studio-date-tile">
+                            <div class="studio-date-label"><i class="fa-solid fa-calendar-check" style="color:var(--studio-accent); font-size:1rem;"></i> END TIME</div>
+                            <input type="datetime-local" id="ev-end" class="studio-date-input" onchange="syncStudioDateText(this, 'ev-end-text')">
+                            <span id="ev-end-text" class="studio-date-value">Select</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:40px; display:flex; justify-content:space-between;">
+                    <button class="btn-back-studio" onclick="prevStep(2)">Back</button>
+                    <button class="btn-next-studio" onclick="nextStep(4)">Ticketing <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Step 4: Launch -->
+            <div class="form-step" id="step-4">
+                <div class="step-intro">
+                    <h2>Ticketing</h2>
+                    <p>Configure pricing and stock for your experience.</p>
+                </div>
+                <div id="studio-ticket-list"></div>
+                <button class="btn-add-studio" onclick="addStudioTicket()" style="width:100%; padding:20px; border-radius:20px; background:rgba(142, 125, 255, 0.1); border:1px dashed var(--studio-accent); color:var(--studio-accent); font-weight:800; cursor:pointer; margin-bottom:20px;">
+                    <i class="fa-solid fa-plus-circle"></i> Add Ticket Tier
+                </button>
+
+                <div style="margin-top:35px; background:rgba(255,255,255,0.03); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.06);">
+                    <label style="display:flex; gap:15px; cursor:pointer; align-items:center;">
+                        <input type="checkbox" id="publish-consent" checked>
+                        <span style="font-size:0.85rem; color:var(--studio-muted); line-height:1.4;">I confirm all details are accurate and I have rights to host this event.</span>
+                    </label>
+                </div>
+
+                <div style="margin-top:40px; display:flex; justify-content:space-between;">
+                    <button class="btn-back-studio" onclick="prevStep(3)">Back</button>
+                    <button id="launch-btn" class="btn-publish-studio" onclick="launchExperience()" style="flex:1; margin-left:20px; background:linear-gradient(135deg, #00D2FF, #3A7BD5); color:white; border:none; padding:20px; border-radius:22px; font-weight:900;">Launch Experience</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Preview Sidebar -->
+    <aside class="studio-preview-sidebar">
+        <div class="preview-header">LIVE PREVIEW</div>
+        <div class="event-preview-card">
+            <div id="preview-cover-box" class="preview-cover-placeholder">
+                <i class="fa-solid fa-image"></i>
+            </div>
+            <div class="preview-body">
+                <span id="preview-tag-box" class="preview-tag">MUSIC</span>
+                <h3 id="preview-title-box">Your Event Title</h3>
+                <p id="preview-venue-box"><i class="fa-solid fa-location-dot"></i> Venue, City</p>
+                <div class="preview-footer">
+                    <div class="preview-date">
+                        <p>Date</p>
+                        <span id="preview-date-box">TBD</span>
+                    </div>
+                    <div class="preview-price">
+                        <p>Starts</p>
+                        <span id="preview-price-box">₹ 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<div id="publish-overlay" class="hide">
+    <div class="studio-loader-ring" style="width:60px; height:60px; border:4px solid rgba(142, 125, 255, 0.1); border-top:4px solid var(--studio-accent); border-radius:50%; animation:spin 1s linear infinite;"></div>
+    <h3 style="margin-top:20px; font-weight:900;">Curating Experience...</h3>
+    <p id="publish-status-text" style="margin-top:8px; font-size:0.85rem; color:rgba(255,255,255,0.65);">Preparing files...</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentStep = 1;
+    let ticketCount = 0;
+
+    // Configure these on window (or inject from backend) for Cloudinary unsigned uploads.
+    const CLOUDINARY_CLOUD_NAME = window.CLOUDINARY_CLOUD_NAME || '';
+    const CLOUDINARY_UPLOAD_PRESET = window.CLOUDINARY_UPLOAD_PRESET || '';
+    const CLOUDINARY_UPLOAD_FOLDER = window.CLOUDINARY_UPLOAD_FOLDER || 'events';
+    const CLOUDINARY_UPLOAD_URL = window.CLOUDINARY_UPLOAD_URL || (CLOUDINARY_CLOUD_NAME
+        ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`
+        : '');
+
+    // Fix: Make functions global to ensure accessibility from HTML
+    window.syncStudioPreview = function() {
+        const title = document.getElementById('ev-title').value;
+        const category = document.getElementById('ev-category').value;
+        const venue = document.getElementById('ev-venue').value;
+        const city = document.getElementById('ev-city').value;
+
+        document.getElementById('preview-title-box').textContent = title || "Your Event Title";
+        document.getElementById('preview-tag-box').textContent = (category || 'EVENT').toUpperCase();
+        document.getElementById('preview-venue-box').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${venue || "Venue"}, ${city || "City"}`;
+    };
+
+    window.syncStudioDateText = function(input, displayId) {
+        if (!input.value) return;
+        const dt = new Date(input.value);
+        const txt = dt.toLocaleDateString('en-IN', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+        document.getElementById(displayId).textContent = txt;
+        if (displayId === 'ev-start-text') {
+            document.getElementById('preview-date-box').textContent = dt.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+        }
+    };
+
+    window.jumpToStep = function(step) {
+        if (step > currentStep && !validateStep(currentStep)) return;
+        
+        document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active-step'));
+        document.querySelectorAll('.nav-step').forEach(n => n.classList.remove('active'));
+        
+        document.getElementById(`step-${step}`).classList.add('active-step');
+        document.getElementById(`nav-${step}`).classList.add('active');
+        currentStep = step;
+        document.querySelector('.studio-content').scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    window.nextStep = function(step) { jumpToStep(step); };
+    window.prevStep = function(step) { jumpToStep(step); };
+
+    function validateStep(step) {
+        if (step === 1) {
+            if (!document.getElementById('ev-title').value.trim()) { alert("Please enter event title"); return false; }
+            if (!document.getElementById('ev-category').value.trim()) { alert("Please select a category"); return false; }
+        }
+        if (step === 3) {
+            if (!document.getElementById('ev-venue').value.trim()) { alert("Please enter venue name"); return false; }
+            if (!document.getElementById('ev-city').value.trim()) { alert("Please enter city"); return false; }
+            if (!document.getElementById('ev-start').value) { alert("Please select start time"); return false; }
+            if (!document.getElementById('ev-end').value) { alert("Please select end time"); return false; }
+        }
+        return true;
+    }
+
+    window.previewStudioMedia = function(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('preview-cover-box').innerHTML = `<img src="${e.target.result}">`;
+                document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-check-circle" style="font-size:2.5rem; color:#4CC2FF;"></i><p style="margin-top:5px; color:white;">Change Cover</p><button type="button" class="media-inline-remove" onclick="removeCoverMedia()">Remove Cover</button>`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+    window.removeCoverMedia = function() {
+        const coverInput = document.getElementById('cover-input');
+        coverInput.value = '';
+        document.getElementById('preview-cover-box').innerHTML = '<i class="fa-solid fa-image"></i>';
+        document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-cloud-arrow-up" style="font-size:3rem; color:var(--studio-accent); margin-bottom:15px;"></i><h4 style="margin-bottom:5px;">Main Cover Image</h4><p style="font-size:0.75rem; color:var(--studio-muted);">Click to upload (Recommended 16:9)</p>`;
+    };
+
+    window.removeGalleryImage = function(index) {
+        const input = document.getElementById('gallery-input');
+        const dt = new DataTransfer();
+        Array.from(input.files).forEach((file, i) => {
+            if (i !== index) dt.items.add(file);
+        });
+        input.files = dt.files;
+        updateGalleryStatus();
+    };
+
+    window.updateGalleryStatus = function() {
+        const input = document.getElementById('gallery-input');
+        const preview = document.getElementById('gallery-preview');
+        preview.innerHTML = '';
+        if (input.files.length > 0) {
+            document.getElementById('gallery-info').textContent = `${input.files.length} Added`;
+            Array.from(input.files).slice(0, 8).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                const item = document.createElement('div');
+                item.className = 'gallery-preview-item';
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                item.appendChild(img);
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'media-remove-btn';
+                removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    removeGalleryImage(i);
+                };
+                item.appendChild(removeBtn);
+                preview.appendChild(item);
+            });
+        } else {
+            document.getElementById('gallery-info').textContent = 'Add Photos';
+        }
+    };
+
+    window.removeVideoMedia = function() {
+        const input = document.getElementById('video-input');
+        input.value = '';
+        const preview = document.getElementById('video-preview');
+        preview.innerHTML = '';
+        preview.classList.add('hide');
+        document.getElementById('video-info').textContent = 'Add Video';
+    };
+
+    window.updateVideoStatus = function() {
+        const input = document.getElementById('video-input');
+        const preview = document.getElementById('video-preview');
+        preview.innerHTML = '';
+        if (input.files.length > 0) {
+            document.getElementById('video-info').textContent = "Video Added";
+            const file = input.files[0];
+            const video = document.createElement('video');
+            video.controls = true;
+            video.preload = 'metadata';
+            video.src = URL.createObjectURL(file);
+            preview.appendChild(video);
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'media-inline-remove';
+            removeBtn.textContent = 'Remove Video';
+            removeBtn.onclick = removeVideoMedia;
+            preview.appendChild(removeBtn);
+            preview.classList.remove('hide');
+        } else {
+            document.getElementById('video-info').textContent = 'Add Video';
+            preview.classList.add('hide');
+        }
+    };
+
+    window.addStudioTicket = function() {
+        ticketCount++;
+        const id = `tk-${ticketCount}`;
+        const html = `
+            <div class="studio-ticket-card" id="${id}">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                    <span style="font-size:0.7rem; font-weight:900; color:var(--studio-accent);">TIER 0${ticketCount}</span>
+                    <i class="fa-solid fa-times" style="color:rgba(255,255,255,0.2); cursor:pointer;" onclick="document.getElementById('${id}').remove(); updateMinPrice();"></i>
+                </div>
+                <input type="text" class="premium-input tk-name" placeholder="Tier Name" style="margin-bottom:15px; padding:12px 18px;">
+                <div class="grid-2">
+                    <input type="number" class="premium-input tk-price" placeholder="Price (₹)" oninput="updateMinPrice()">
+                    <input type="number" class="premium-input tk-qty" placeholder="Stock">
+                </div>
+            </div>
+        `;
+        document.getElementById('studio-ticket-list').insertAdjacentHTML('beforeend', html);
+    };
+
+    window.updateMinPrice = function() {
+        let min = Infinity;
+        document.querySelectorAll('.tk-price').forEach(input => {
+            const val = parseFloat(input.value);
+            if (!isNaN(val) && val < min) min = val;
+        });
+        document.getElementById('preview-price-box').textContent = min === Infinity ? "₹ 0" : `₹ ${min}`;
+    };
+
+    async function uploadFileToCloudinary(path, file) {
+        if (!file) return '';
+        if (!CLOUDINARY_UPLOAD_URL || !CLOUDINARY_UPLOAD_PRESET) {
+            throw new Error('Cloudinary config missing. Set CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET.');
+        }
+        const isVideo = (file.type || '').startsWith('video/');
+        const uploadUrl = isVideo
+            ? (CLOUDINARY_CLOUD_NAME
+                ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`
+                : CLOUDINARY_UPLOAD_URL.replace('/image/upload', '/video/upload'))
+            : CLOUDINARY_UPLOAD_URL;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', CLOUDINARY_UPLOAD_FOLDER);
+        formData.append('public_id', path.replace(/\.[^/.]+$/, ''));
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Cloudinary upload failed (${response.status}): ${errText || 'Unknown error'}`);
+        }
+        const data = await response.json();
+        return data.secure_url || data.url || '';
+    }
+    function withTimeout(promise, ms, label) {
+        let timer;
+        const timeout = new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error(`${label} timed out. Please try a smaller file or better network.`)), ms);
+        });
+        return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+    }
+    function getCurrentUserOnce(timeoutMs = 10000) {
+        if (auth?.currentUser) return Promise.resolve(auth.currentUser);
+        return new Promise((resolve) => {
+            let settled = false;
+            const done = (user) => {
+                if (settled) return;
+                settled = true;
+                resolve(user || null);
+            };
+            const unsub = auth.onAuthStateChanged((user) => {
+                if (unsub) unsub();
+                done(user);
+            }, () => done(null));
+            setTimeout(() => {
+                if (unsub) unsub();
+                done(auth?.currentUser || null);
+            }, timeoutMs);
+        });
+    }
+
+    function collectTicketPayload() {
+        const ticketRows = Array.from(document.querySelectorAll('.studio-ticket-card'));
+        const payload = [];
+        ticketRows.forEach(row => {
+            const name = row.querySelector('.tk-name')?.value?.trim();
+            const price = Number(row.querySelector('.tk-price')?.value || 0);
+            const qty = Number(row.querySelector('.tk-qty')?.value || 0);
+            if (!name) return;
+            if (price <= 0 || qty <= 0) return;
+            payload.push({ name, price, stock: qty, max_per_user: 10 });
+        });
+        return payload;
+    }
+
+    window.launchExperience = async function() {
+        if (!validateStep(1) || !validateStep(3)) return;
+        if (!document.getElementById('publish-consent').checked) {
+            alert("Please confirm details before launch.");
+            return;
+        }
+
+        const tickets = collectTicketPayload();
+        if (!tickets.length) {
+            alert("Please add at least one valid ticket tier.");
+            return;
+        }
+
+        const user = await getCurrentUserOnce();
+        if (!user) {
+            alert("Please login again to publish event.");
+            location.href = '/auth';
+            return;
+        }
+
+        const overlay = document.getElementById('publish-overlay');
+        const launchBtn = document.getElementById('launch-btn');
+        const statusText = document.getElementById('publish-status-text');
+        overlay.classList.remove('hide');
+        launchBtn.disabled = true;
+        launchBtn.textContent = "Publishing...";
+        statusText.textContent = "Validating details...";
+
+        try {
+            const title = document.getElementById('ev-title').value.trim();
+            const subtitle = document.getElementById('ev-subtitle').value.trim();
+            const category = document.getElementById('ev-category').value.trim();
+            const format = document.getElementById('ev-format').value;
+            const description = document.getElementById('ev-description').value.trim();
+            const venue = document.getElementById('ev-venue').value.trim();
+            const city = document.getElementById('ev-city').value.trim();
+            const state = document.getElementById('ev-state').value.trim();
+            const address = document.getElementById('ev-address').value.trim();
+            const startInput = document.getElementById('ev-start').value;
+            const endInput = document.getElementById('ev-end').value;
+
+            const startDate = new Date(startInput);
+            const endDate = new Date(endInput);
+            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) throw new Error("Please provide valid event dates.");
+            if (endDate <= startDate) throw new Error("End time must be after start time.");
+
+            const coverFile = document.getElementById('cover-input').files[0];
+            if (!coverFile) throw new Error("Please upload a cover image.");
+
+            const eventRef = db.collection('events').doc();
+            const eventId = eventRef.id;
+            const mediaBasePath = `events/${eventId}`;
+            const fallbackCover = 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2';
+
+            statusText.textContent = "Creating event record...";
+
+            let teaserVideoUrl = '';
+
+            const minPrice = Math.min(...tickets.map(t => t.price));
+            const totalInventory = tickets.reduce((sum, t) => sum + t.stock, 0);
+
+            // Save event first to prevent "stuck loader with no record"
+            const coreEventPayload = {
+                id: eventId,
+                organizer_id: user.uid,
+                organizer_name: user.displayName || 'Organizer',
+                title,
+                category_name: category,
+                category_id: category.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                format,
+                is_online: format !== 'In-Person',
+                venue_name: venue,
+                venue: venue,
+                city,
+                start_time: startDate,
+                end_time: endDate,
+                cover_image: fallbackCover,
+                price_start: minPrice,
+                ticket_inventory: totalInventory,
+                tickets_sold: 0,
+                total_revenue: 0,
+                is_published: true,
+                is_active: startDate <= new Date() && endDate >= new Date(),
+                status: 'published',
+                created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await eventRef.set(coreEventPayload);
+
+            // Merge optional fields separately, so stricter rules on core create don't block creation.
+            try {
+                await eventRef.set({
+                    subtitle,
+                    description,
+                    state,
+                    address,
+                    gallery_images: [],
+                    teaser_video_url: '',
+                    rating_average: 0,
+                    review_count: 0,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (metaErr) {
+                console.warn('Optional metadata merge failed:', metaErr);
+            }
+
+            statusText.textContent = "Saving ticket tiers...";
+            const ticketBatchErrors = [];
+            try {
+                const batch = db.batch();
+                tickets.forEach(ticket => {
+                    const ticketRef = eventRef.collection('ticketTypes').doc();
+                    batch.set(ticketRef, {
+                        ...ticket,
+                        id: ticketRef.id,
+                        created_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+            } catch (ticketErrPrimary) {
+                ticketBatchErrors.push(ticketErrPrimary?.message || String(ticketErrPrimary));
+                // Fallback for schema/rules variants using "ticket_types"
+                try {
+                    const legacyBatch = db.batch();
+                    tickets.forEach(ticket => {
+                        const ticketRef = eventRef.collection('ticket_types').doc();
+                        legacyBatch.set(ticketRef, {
+                            ...ticket,
+                            id: ticketRef.id,
+                            created_at: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                    await legacyBatch.commit();
+                } catch (ticketErrLegacy) {
+                    ticketBatchErrors.push(ticketErrLegacy?.message || String(ticketErrLegacy));
+                    // Last-resort fallback: keep tickets inside event doc so data is not lost.
+                    await eventRef.set({
+                        ticket_types: tickets,
+                        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+            }
+
+            // Upload media after core event exists; if media fails, event is still added.
+            statusText.textContent = "Uploading media files...";
+            let coverUrl = fallbackCover;
+            let galleryUrls = [];
+            const mediaErrors = [];
+            try {
+                coverUrl = await withTimeout(
+                    uploadFileToCloudinary(`${mediaBasePath}/cover-${Date.now()}-${coverFile.name}`, coverFile),
+                    60000,
+                    'Cover upload'
+                );
+            } catch (err) {
+                mediaErrors.push(err.message);
+            }
+            try {
+                const galleryFiles = Array.from(document.getElementById('gallery-input').files || []);
+                galleryUrls = await withTimeout(
+                    Promise.all(galleryFiles.map((file, i) =>
+                        uploadFileToCloudinary(`${mediaBasePath}/gallery-${Date.now()}-${i}-${file.name}`, file)
+                    )),
+                    120000,
+                    'Gallery upload'
+                );
+            } catch (err) {
+                mediaErrors.push(err.message);
+            }
+            try {
+                const videoFile = document.getElementById('video-input').files[0];
+                if (videoFile) {
+                    teaserVideoUrl = await withTimeout(
+                        uploadFileToCloudinary(`${mediaBasePath}/teaser-${Date.now()}-${videoFile.name}`, videoFile),
+                        180000,
+                        'Video upload'
+                    );
+                }
+            } catch (err) {
+                mediaErrors.push(err.message);
+            }
+
+            await eventRef.set({
+                cover_image: coverUrl,
+                gallery_images: galleryUrls,
+                teaser_video_url: teaserVideoUrl,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            alert("Experience launched successfully!");
+            if (mediaErrors.length) {
+                alert(`Event published, but some media failed to upload: ${mediaErrors.join(' | ')}`);
+            }
+            if (ticketBatchErrors.length) {
+                alert(`Event published, ticket subcollection fallback used: ${ticketBatchErrors.join(' | ')}`);
+            }
+            location.href = '/my-events';
+        } catch (e) {
+            console.error("Publish error:", e);
+            alert(e.message || "Failed to publish event. Please try again.");
+        } finally {
+            overlay.classList.add('hide');
+            launchBtn.disabled = false;
+            launchBtn.textContent = "Launch Experience";
+        }
+    };
+
+    async function loadDynamicCategories() {
+        try {
+            const snapshot = await db.collection('events').get();
+            const categories = new Set();
+            snapshot.forEach(doc => {
+                const cat = doc.data().category_name;
+                if (cat) categories.add(cat);
+            });
+            
+            const list = document.getElementById('category-list');
+            categories.forEach(cat => {
+                if (!Array.from(list.options).some(opt => opt.value === cat)) {
+                    const opt = document.createElement('option');
+                    opt.value = cat;
+                    list.appendChild(opt);
+                }
+            });
+        } catch (e) {
+            console.error("Error loading categories:", e);
+        }
+    }
+
+    // Default Init
+    addStudioTicket();
+    loadDynamicCategories();
+</script>
+{% endblock %}

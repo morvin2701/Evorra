@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | My Profile{% endblock %}
+
+{% block head %}
+<style>
+    .profile-bg { background: transparent; min-height: 100vh; }
+    .profile-shell { width: min(1260px, calc(100% - 36px)); margin: 0 auto; padding: 24px 0 120px; }
+    .profile-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; }
+    .profile-heading { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; }
+    .profile-edit-btn { width: auto; padding: 10px 20px; font-size: 0.85rem; margin: 0; border-radius: 14px; }
+    .profile-hero {
+        display: grid; grid-template-columns: 96px 1fr; gap: 16px;
+        padding: 20px; border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        box-shadow: 0 18px 34px rgba(0,0,0,0.24);
+    }
+    .profile-avatar {
+        width: 96px; height: 96px; border-radius: 50%; border: 2px solid rgba(142, 125, 255, 0.55);
+        overflow: hidden; background: #1B2640; flex-shrink: 0;
+    }
+    .profile-role-badge { display: inline-flex; border-radius: 999px; padding: 6px 11px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(140, 240, 198, 0.13); color: #8CF0C6; border: 1px solid rgba(140,240,198,0.24); }
+    .profile-name { color: white; font-size: 1.45rem; font-weight: 900; margin-top: 10px; line-height: 1.1; }
+    .profile-email { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px; }
+    .profile-city { color: var(--secondary); font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
+    .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; }
+    .spotlight-link { text-decoration: none; margin-top: 16px; display: block; }
+    .spotlight-card {
+        border-radius: 20px; padding: 16px;
+        display: grid; grid-template-columns: 68px 1fr auto; gap: 14px; align-items: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
+        color: #fff;
+    }
+    .spot-icon { width: 68px; height: 68px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .spot-sub { font-size: 0.85rem; font-weight: 700; }
+    .spot-count { font-size: 2.1rem; font-weight: 900; margin: 3px 0; line-height: 1; }
+    .spot-msg { font-size: 0.8rem; color: rgba(255,255,255,0.9); }
+    .spot-arrow { padding: 10px; background: rgba(0,0,0,0.15); border-radius: 12px; }
+    .details-card, .actions-card {
+        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    }
+    .details-card { padding: 14px 16px; }
+    .interests-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
+    .action-tile {
+        display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer;
+        transition: background .2s ease;
+    }
+    .action-tile:hover { background: rgba(255,255,255,0.04); }
+    .action-icon {
+        width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; flex-shrink: 0;
+    }
+    .logout-card {
+        border-radius: 16px; border: 1px solid rgba(255,165,186,0.32);
+        background: linear-gradient(145deg, rgba(255,165,186,0.1), rgba(255,165,186,0.03));
+        display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer;
+    }
+    @media (max-width: 640px) {
+        .profile-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .profile-hero { grid-template-columns: 78px 1fr; padding: 16px; }
+        .profile-avatar { width: 78px; height: 78px; }
+        .profile-name { font-size: 1.2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-bg">
+    <div class="profile-shell">
+        <!-- Header Sticky Logic already in base, but page-specific header here -->
+        <div class="profile-topbar">
+            <h1 class="profile-heading">Profile</h1>
+            <a href="/profile/edit" class="btn-evorra profile-edit-btn">Edit</a>
+        </div>
+
+        <!-- Profile Header Card -->
+        <div class="profile-hero">
+            <div id="p-avatar" class="profile-avatar">
+                <img id="p-img" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                <div id="p-initial" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; color: white;">?</div>
+            </div>
+            <div style="flex: 1;">
+                <span id="p-role" class="profile-role-badge">ATTENDEE</span>
+                <h2 id="p-name" class="profile-name">Loading...</h2>
+                <p id="p-email" class="profile-email">-</p>
+                <p id="p-city" class="profile-city">-</p>
+            </div>
+        </div>
+
+        <!-- Ticket Spotlight -->
+        <a href="/my-tickets" class="spotlight-link">
+            <div class="spotlight-card animate-evorra">
+                <div class="spot-icon">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+                <div style="flex: 1;">
+                    <p class="spot-sub">Your Tickets</p>
+                    <h2 id="p-ticket-count" class="spot-count">0</h2>
+                    <p id="p-ticket-msg" class="spot-msg">View your active bookings</p>
+                </div>
+                <div class="spot-arrow">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+        </a>
+
+        <h2 class="profile-section-title">Profile Details</h2>
+        <div class="details-card">
+            <div class="summary-row"><span>Display Name</span><span id="d-name" style="font-weight: 800;">-</span></div>
+            <div class="summary-row"><span>Email</span><span id="d-email" style="font-weight: 800;">-</span></div>
+            <div class="summary-row"><span>Phone</span><span id="d-phone" style="font-weight: 800;">-</span></div>
+            <div class="summary-row"><span>City</span><span id="d-city" style="font-weight: 800;">-</span></div>
+            <div class="summary-row" style="margin-bottom: 0;"><span>Role</span><span id="d-role" style="font-weight: 800; color: var(--secondary);">Attendee</span></div>
+        </div>
+
+        <div id="interests-section" class="hide">
+            <h2 class="profile-section-title">Interests</h2>
+            <div id="interests-wrap" class="interests-wrap">
+                <!-- Dynamic Chips -->
+            </div>
+        </div>
+
+        <h2 class="profile-section-title">Quick Actions</h2>
+        <div class="actions-card" style="padding: 10px;">
+            <div class="action-tile" onclick="location.href='/profile/edit'">
+                <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-solid fa-user-pen"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Edit Profile</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Update your personal details</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="action-tile" onclick="location.href='/my-tickets'">
+                <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-ticket-simple"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">My Tickets</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Manage your active passes</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+            </div>
+            <div id="organizer-actions" class="hide animate-evorra">
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+                <div class="action-tile" onclick="location.href='/organizer/manage'">
+                    <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-solid fa-chart-line"></i></div>
+                    <div style="flex: 1;">
+                        <p style="color: white; font-weight: 800; font-size: 0.95rem;">Event Dashboard</p>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Sales, attendees and revenue</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                </div>
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+                <div class="action-tile" onclick="location.href='/my-events'">
+                    <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div style="flex: 1;">
+                        <p style="color: white; font-weight: 800; font-size: 0.95rem;">My Events</p>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Manage your published events</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                </div>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <div class="action-tile" onclick="location.href='/support'">
+                <div class="action-icon" style="background: rgba(119, 215, 255, 0.14); color: #77D7FF;"><i class="fa-solid fa-headset"></i></div>
+                <div style="flex: 1;">
+                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Help & Support</p>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Get in touch with us</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="logout-card animate-evorra" style="margin-top: 24px;" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket" style="color: #FFA5BA; font-size: 1.2rem;"></i>
+            <div style="flex: 1;">
+                <p style="color: #FFD4DE; font-weight: 800; font-size: 0.95rem;">Logout</p>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: #FFA5BA; font-size: 0.8rem;"></i>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function handleLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            try {
+                await auth.signOut();
+                location.href = '/auth';
+            } catch (e) {
+                console.error("Logout Error:", e);
+                alert("Failed to logout. Please try again.");
+            }
+        }
+    }
+
+    async function loadProfile() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            try {
+                // Listen for User Data
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    const data = doc.data() || {};
+                    
+                    // Avatar
+                    const img = document.getElementById('p-img');
+                    const initial = document.getElementById('p-initial');
+                    if (data.photo_url || user.photoURL) {
+                        img.src = data.photo_url || user.photoURL;
+                        img.style.display = 'block';
+                        initial.style.display = 'none';
+                    } else {
+                        initial.textContent = (data.display_name || user.displayName || user.email || '?').charAt(0).toUpperCase();
+                    }
+
+                    // Header Info
+                    const role = data.role || 'Attendee';
+                    document.getElementById('p-role').textContent = role.toUpperCase();
+                    document.getElementById('p-name').textContent = data.display_name || user.displayName || 'Guest';
+                    document.getElementById('p-email').textContent = data.email || user.email;
+                    document.getElementById('p-city').textContent = data.city || 'Location not set';
+
+                    // Details
+                    document.getElementById('d-name').textContent = data.display_name || user.displayName || 'Guest';
+                    document.getElementById('d-email').textContent = data.email || user.email;
+                    document.getElementById('d-phone').textContent = data.phone_number || 'N/A';
+                    document.getElementById('d-city').textContent = data.city || 'N/A';
+                    document.getElementById('d-role').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+
+                    // Interests
+                    if (data.interests && data.interests.length > 0) {
+                        document.getElementById('interests-section').classList.remove('hide');
+                        const wrap = document.getElementById('interests-wrap');
+                        wrap.innerHTML = '';
+                        data.interests.forEach(interest => {
+                            const chip = document.createElement('div');
+                            chip.className = 'tab-chip active'; // Reusing tab-chip style
+                            chip.style.fontSize = '0.75rem';
+                            chip.textContent = interest;
+                            wrap.appendChild(chip);
+                        });
+                    }
+
+                    // Organizer Actions
+                    if (role.toLowerCase().includes('organizer')) {
+                        document.getElementById('organizer-actions').classList.remove('hide');
+                    }
+                });
+
+                // Listen for Tickets Count
+                db.collection('tickets').where('user_id', '==', user.uid).onSnapshot(snap => {
+                    const count = snap.size;
+                    document.getElementById('p-ticket-count').textContent = count;
+                    document.getElementById('p-ticket-msg').textContent = count === 1 ? '1 active ticket in your account' : `${count} active tickets in your account`;
+                });
+
+            } catch (e) { console.error(e); }
+        });
+    }
+
+
+    loadProfile();
+</script>
+{% endblock %}

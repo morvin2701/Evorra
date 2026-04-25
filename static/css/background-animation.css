@@ -1,0 +1,180 @@
+:root {
+    --bg-anim-opacity: 0.7;
+}
+
+body {
+    position: relative;
+    overflow-x: hidden;
+}
+
+.global-bg-anim {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: var(--bg-anim-opacity);
+    mix-blend-mode: screen;
+}
+
+.bg-gradient-layer {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 12% 10%, rgba(114, 84, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 20%, rgba(19, 185, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 70% 88%, rgba(14, 213, 186, 0.09), transparent 34%);
+    animation: bgShift 10s ease-in-out infinite alternate;
+}
+
+.bg-glow {
+    position: absolute;
+    width: 38vw;
+    height: 38vw;
+    min-width: 280px;
+    min-height: 280px;
+    max-width: 520px;
+    max-height: 520px;
+    border-radius: 999px;
+    filter: blur(90px);
+    opacity: 0.3;
+    mix-blend-mode: screen;
+}
+
+.bg-glow-1 {
+    left: -10%;
+    top: -6%;
+    background: #6e61ff;
+    animation: floatGlowA 9s ease-in-out infinite;
+}
+
+.bg-glow-2 {
+    right: -12%;
+    top: 12%;
+    background: #00beff;
+    animation: floatGlowB 12s ease-in-out infinite;
+}
+
+.bg-glow-3 {
+    right: 10%;
+    bottom: -16%;
+    background: #3be3b8;
+    animation: floatGlowC 15s ease-in-out infinite;
+}
+
+.bg-grid-layer {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(circle at center, black 15%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at center, black 15%, transparent 85%);
+    opacity: 0.42;
+    animation: gridDrift 14s linear infinite;
+}
+
+.bg-particles {
+    position: absolute;
+    inset: 0;
+}
+
+.bg-particle {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(161, 227, 255, 0.14));
+    opacity: 0.5;
+    transform: translate3d(0, 0, 0);
+    animation: particleDrift var(--duration) linear infinite;
+    animation-delay: var(--delay);
+}
+
+.top-navbar,
+main,
+.bottom-nav {
+    position: relative;
+    z-index: 3;
+}
+
+@keyframes bgShift {
+    0% { transform: scale(1) translate3d(0, 0, 0); }
+    100% { transform: scale(1.14) translate3d(3%, -3%, 0); }
+}
+
+@keyframes floatGlowA {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(14%, 12%, 0); }
+}
+
+@keyframes floatGlowB {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(-14%, 14%, 0); }
+}
+
+@keyframes floatGlowC {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(-12%, -12%, 0); }
+}
+
+@keyframes gridDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(56px, 56px, 0) scale(1.02); }
+}
+
+@keyframes particleDrift {
+    0% {
+        transform: translate3d(0, 110vh, 0) scale(0.85);
+        opacity: 0;
+    }
+    15% { opacity: 0.28; }
+    85% { opacity: 0.4; }
+    100% {
+        transform: translate3d(0, -15vh, 0) scale(1.1);
+        opacity: 0;
+    }
+}
+
+/* Additional aurora ribbons for clearly live motion */
+.global-bg-anim::before,
+.global-bg-anim::after {
+    content: "";
+    position: absolute;
+    width: 160%;
+    height: 46%;
+    left: -30%;
+    border-radius: 999px;
+    filter: blur(44px);
+    opacity: 0.22;
+}
+.global-bg-anim::before {
+    top: 8%;
+    background: linear-gradient(90deg, rgba(104, 97, 255, 0.42), rgba(0, 191, 255, 0.36), rgba(72, 229, 187, 0.3));
+    animation: auroraWaveA 12s ease-in-out infinite alternate;
+}
+.global-bg-anim::after {
+    bottom: -8%;
+    background: linear-gradient(90deg, rgba(0, 191, 255, 0.32), rgba(104, 97, 255, 0.3), rgba(72, 229, 187, 0.26));
+    animation: auroraWaveB 15s ease-in-out infinite alternate;
+}
+
+@keyframes auroraWaveA {
+    0% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+    100% { transform: translate3d(8%, -4%, 0) rotate(-3deg); }
+}
+
+@keyframes auroraWaveB {
+    0% { transform: translate3d(0, 0, 0) rotate(6deg); }
+    100% { transform: translate3d(-10%, 5%, 0) rotate(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bg-gradient-layer,
+    .bg-glow,
+    .bg-grid-layer,
+    .bg-particle {
+        animation: none !important;
+    }
+}

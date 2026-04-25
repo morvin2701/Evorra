@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Ticket Pass{% endblock %}
+
+{% block head %}
+<style>
+    .ticket-bg { background: transparent; min-height: 100vh; }
+    .ticket-shell { width: min(1180px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 110px; }
+    .ticket-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .ticket-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        background: rgba(8, 14, 26, 0.75);
+    }
+    .ticket-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(145, 166, 255, 0.32);
+        background: rgba(105, 120, 255, 0.16);
+        font-size: .72rem;
+        letter-spacing: .5px;
+        color: #dce5ff;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .ticket-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .ticket-main { display: grid; gap: 16px; }
+    .ticket-side { display: grid; gap: 16px; align-self: start; }
+    .ticket-card {
+        border-radius: 22px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
+        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+    .ticket-block { padding: 16px; }
+    .hero-cover { width: 100%; height: 220px; object-fit: cover; display: block; }
+    .hero-title { font-size: clamp(1.45rem, 2.8vw, 2rem); font-weight: 900; margin: 10px 0 8px; line-height: 1.1; color: #fff; }
+    .hero-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 8px; }
+    .hero-time { color: var(--secondary); font-size: .86rem; font-weight: 800; margin: 0; }
+    .section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
+    .pass-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px dashed rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.03);
+    }
+    .pass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .pass-info-block {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+    }
+    .mini-info-label { margin: 0 0 4px; color: rgba(225,236,255,0.5); font-size: .7rem; font-weight: 700; }
+    .mini-info-value { margin: 0; color: #fff; font-weight: 800; line-height: 1.3; word-break: break-word; }
+    .qr-container {
+        margin-top: 8px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background:
+            radial-gradient(circle at 80% 18%, rgba(94, 232, 186, 0.16), transparent 40%),
+            linear-gradient(150deg, rgba(8, 16, 30, 0.9), rgba(10, 19, 36, 0.86));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+    }
+    .qr-stage {
+        width: 100%;
+        max-width: 270px;
+        border-radius: 14px;
+        background: #fff;
+        border: 1px solid rgba(5, 16, 34, 0.12);
+        box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+    }
+    .qr-caption {
+        margin-top: 10px;
+        color: rgba(216, 230, 255, 0.66);
+        font-size: .72rem;
+        letter-spacing: .35px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    #qr-img {
+        width: 100%;
+        max-width: 240px;
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+        border-radius: 8px;
+        object-fit: contain;
+        display: none;
+    }
+    #qr-loader {
+        width: 100%;
+        max-width: 240px;
+        height: 240px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #qr-code-text {
+        color: #e8f0ff !important;
+        font-size: .78rem !important;
+        font-weight: 800 !important;
+        margin-top: 8px !important;
+        text-align: center;
+        letter-spacing: .25px;
+        word-break: break-all;
+    }
+    .summary-box {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 14px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        margin-bottom: 10px;
+    }
+    .detail-item:last-child { margin-bottom: 0; }
+    .payment-method-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .instruction-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: flex-start;
+    }
+    .instruction-row:last-child { margin-bottom: 0; }
+    .instruction-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(123, 241, 206, 0.18);
+        border: 1px solid rgba(123, 241, 206, 0.45);
+        color: #a2ffe1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .65rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    @media (min-width: 980px) {
+        .ticket-layout { grid-template-columns: minmax(0, 1fr) 380px; }
+    }
+    @media (max-width: 640px) {
+        .ticket-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .hero-cover { height: 180px; }
+        .ticket-block { padding: 12px; }
+        .pass-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ticket-bg">
+    <div class="ticket-shell">
+        <div class="ticket-top">
+            <a href="javascript:history.back()" class="ticket-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <span class="ticket-badge">Digital Entry Pass</span>
+        </div>
+
+        <div class="ticket-layout">
+            <div class="ticket-main">
+                <div class="ticket-card">
+                    <img id="hero-img" src="" class="hero-cover">
+                    <div class="ticket-block">
+                <span id="hero-status" class="status-chip status-confirmed">Confirmed</span>
+                        <h1 id="hero-title" class="hero-title">Loading...</h1>
+                        <p id="hero-location" class="hero-sub">Venue • City</p>
+                        <p id="hero-time" class="hero-time">Date TBA</p>
+                    </div>
+                </div>
+
+                <div class="ticket-card animate-evorra">
+                    <div class="pass-header">
+                        <span style="color: white; font-size: 0.8rem; font-weight: 900; letter-spacing: 1px;">EVORRA EVENT PASS</span>
+                        <span id="pass-status-text" style="color: white; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.9px;">CONFIRMED</span>
+                    </div>
+                    <div class="ticket-block">
+                        <div class="pass-grid">
+                            <div class="pass-info-block">
+                                <p class="mini-info-label">Event</p>
+                                <p id="pass-event" class="mini-info-value" style="font-size: 0.85rem;">-</p>
+                            </div>
+                            <div class="pass-info-block">
+                                <p class="mini-info-label">Ticket</p>
+                                <p id="pass-type" class="mini-info-value" style="font-size: 0.85rem;">-</p>
+                            </div>
+                            <div class="pass-info-block">
+                                <p class="mini-info-label">Quantity</p>
+                                <p id="pass-qty" class="mini-info-value" style="font-size: 0.85rem;">0</p>
+                            </div>
+                            <div class="pass-info-block">
+                                <p class="mini-info-label">Amount</p>
+                                <p id="pass-amount" class="mini-info-value" style="font-size: 0.85rem;">₹0</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-container">
+                            <div class="qr-caption">Scan at Venue Gate</div>
+                            <div class="qr-stage">
+                                <img id="qr-img" src="">
+                                <div id="qr-loader">
+                                    <div class="spinner" style="border-color: #11192B; border-top-color: transparent;"></div>
+                                </div>
+                            </div>
+                            <p id="qr-code-text">GENERATING...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="ticket-side">
+                <div class="ticket-card ticket-block">
+                    <h2 class="section-title">Event Details</h2>
+                    <div class="detail-item">
+                        <div class="payment-method-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                        <div style="flex: 1;">
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 700; margin:0;">Date & Time</p>
+                            <p id="detail-time" style="color: white; font-size: 0.9rem; font-weight: 800; margin-top: 4px;">-</p>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="payment-method-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div style="flex: 1;">
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 700; margin:0;">Venue</p>
+                            <p id="detail-venue" style="color: white; font-size: 0.9rem; font-weight: 800; margin-top: 4px;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ticket-card ticket-block">
+                    <h2 class="section-title">Booking Summary</h2>
+                    <div class="summary-box">
+                        <div class="summary-row"><span>Ticket ID</span><span id="sum-id">-</span></div>
+                        <div class="summary-row"><span>Ticket Type</span><span id="sum-type">-</span></div>
+                        <div class="summary-row"><span>Quantity</span><span id="sum-qty">-</span></div>
+                        <div class="summary-row"><span>Status</span><span id="sum-status" style="color: var(--secondary);">-</span></div>
+                        <div class="summary-row"><span>Amount</span><span id="sum-amount">-</span></div>
+                        <div class="summary-row"><span>Payment ID</span><span id="sum-payment">-</span></div>
+                        <div class="summary-row" style="margin-bottom: 0;"><span>Purchased At</span><span id="sum-date">-</span></div>
+                    </div>
+                </div>
+
+                <div class="ticket-card ticket-block">
+                    <h2 class="section-title">Entry Instructions</h2>
+                    <div class="summary-box">
+                        <div class="instruction-row">
+                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Show this QR code at the venue entry point.</p>
+                        </div>
+                        <div class="instruction-row">
+                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Keep phone brightness high for fast scanning.</p>
+                        </div>
+                        <div class="instruction-row">
+                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Each ticket QR can only be scanned once.</p>
+                        </div>
+                        <div class="instruction-row">
+                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
+                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Reach the venue at least 15 minutes early.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ticketId = "{{ ticket_id }}";
+
+    async function loadTicketDetails() {
+        try {
+            const ticketSnap = await db.collection('tickets').doc(ticketId).get();
+            if (!ticketSnap.exists) return alert("Ticket not found");
+            const ticket = ticketSnap.data();
+
+            // Security check
+            const user = auth.currentUser;
+            if (ticket.user_id !== user.uid) {
+                alert("Unauthorized access");
+                location.href = '/my-tickets';
+                return;
+            }
+
+            const eventData = ticket.event_snapshot || {};
+            
+            // Hero
+            document.getElementById('hero-img').src = eventData.cover_image;
+            document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
+            document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
+            document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
+            document.getElementById('hero-status').textContent = ticket.status.toUpperCase();
+            document.getElementById('hero-status').className = `status-chip status-${ticket.status}`;
+
+            // Pass Card
+            document.getElementById('pass-status-text').textContent = ticket.status.toUpperCase();
+            document.getElementById('pass-event').textContent = ticket.event_title || eventData.title;
+            document.getElementById('pass-type').textContent = ticket.ticket_type_name;
+            document.getElementById('pass-qty').textContent = ticket.quantity;
+            document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
+
+            // QR Pass Logic
+            const qrData = ticket.qr_dynamic_url || ticket.qr_code || `EV-${ticket.id}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=0&data=${encodeURIComponent(qrData)}`;
+            
+            const qrImg = document.getElementById('qr-img');
+            qrImg.src = qrUrl;
+            qrImg.onload = () => {
+                document.getElementById('qr-loader').style.display = 'none';
+                qrImg.style.display = 'block';
+                document.getElementById('qr-code-text').textContent = qrData;
+            };
+
+            // Details
+            document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
+            document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
+
+            // Summary
+            document.getElementById('sum-id').textContent = ticket.id;
+            document.getElementById('sum-type').textContent = ticket.ticket_type_name;
+            document.getElementById('sum-qty').textContent = ticket.quantity;
+            document.getElementById('sum-status').textContent = ticket.status.toUpperCase();
+            document.getElementById('sum-amount').textContent = `₹${ticket.total_amount}`;
+            document.getElementById('sum-payment').textContent = ticket.payment_id || 'N/A';
+            document.getElementById('sum-date').textContent = formatDate(ticket.created_time);
+
+        } catch (e) { console.error(e); }
+    }
+
+    function formatDate(val) {
+        if (!val) return 'TBA';
+        const date = val.toDate ? val.toDate() : new Date(val);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    auth.onAuthStateChanged(user => {
+        if (user) loadTicketDetails();
+        else location.href = '/auth';
+    });
+</script>
+{% endblock %}

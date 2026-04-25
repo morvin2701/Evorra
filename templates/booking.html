@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Book Tickets{% endblock %}
+
+{% block head %}
+<style>
+    .booking-bg { background: transparent; min-height: 100vh; }
+    .booking-shell { width: min(1200px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 130px; }
+    .booking-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .booking-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        text-decoration: none;
+        background: rgba(8, 14, 26, 0.75);
+    }
+    .booking-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(145, 166, 255, 0.32);
+        background: rgba(105, 120, 255, 0.16);
+        font-size: .72rem;
+        letter-spacing: .5px;
+        color: #dce5ff;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .booking-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .booking-main { display: grid; gap: 16px; }
+    .booking-card {
+        border-radius: 22px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
+        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+        backdrop-filter: blur(10px);
+    }
+    .booking-hero {
+        padding: 0;
+        overflow: hidden;
+        min-height: 156px;
+        display: grid;
+        grid-template-columns: 170px 1fr;
+    }
+    .booking-hero-img { width: 100%; height: 100%; object-fit: cover; }
+    .booking-hero-body { padding: 18px; }
+    .booking-title { font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 900; margin-bottom: 6px; color: #fff; }
+    .booking-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 10px; }
+    .booking-time { color: var(--secondary); font-size: .82rem; font-weight: 800; }
+    .booking-block { padding: 16px; }
+    .booking-section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
+    #ticket-list { display: grid; gap: 10px; }
+    .ticket-select-card {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+        padding: 12px;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+    .ticket-select-card.active { border-color: rgba(88,228,255,0.52); box-shadow: 0 0 0 2px rgba(88,228,255,0.12) inset; }
+    .qty-selector {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        padding: 10px 14px;
+    }
+    .qty-btn {
+        width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.08); color: #fff; cursor: pointer;
+    }
+    .promo-input-group { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .promo-input-group input {
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.05); color: #fff; padding: 0 12px; outline: none;
+    }
+    .promo-input-group input::placeholder { color: rgba(255,255,255,0.48); }
+    .summary-box {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 14px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+    .terms-box {
+        margin-top: 16px; display: flex; gap: 12px; align-items: flex-start;
+        background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+    .booking-side {
+        display: grid;
+        gap: 12px;
+        align-self: start;
+    }
+    .pay-btn {
+        width: 100%;
+        margin: 0;
+        padding: 13px 18px;
+        border-radius: 12px;
+        font-size: .92rem;
+        font-weight: 800;
+        margin-top: 12px;
+    }
+    .quick-note {
+        font-size: .8rem;
+        color: rgba(220,232,255,0.7);
+        line-height: 1.45;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.03);
+        border-radius: 14px;
+        padding: 12px;
+    }
+    @media (min-width: 860px) {
+        .booking-layout { grid-template-columns: minmax(0, 1fr) 360px; }
+        .booking-side {
+            position: static;
+            width: 100%;
+        }
+    }
+    @media (max-width: 640px) {
+        .booking-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .booking-hero { grid-template-columns: 108px 1fr; min-height: 120px; }
+        .booking-hero-body { padding: 12px; }
+        .booking-block { padding: 12px; }
+        .booking-side { position: static; top: auto; }
+        .pay-btn { padding: 11px 12px; font-size: .82rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="booking-bg">
+    <div class="booking-shell">
+        <div class="booking-top">
+            <a href="javascript:history.back()" class="booking-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <span class="booking-badge">Secure Checkout</span>
+        </div>
+        <div class="booking-layout">
+            <div class="booking-main">
+                <div class="booking-card booking-hero">
+                    <img id="event-img" src="" class="booking-hero-img">
+                    <div class="booking-hero-body">
+                        <h2 id="event-title" class="booking-title">Loading...</h2>
+                        <p id="event-location" class="booking-sub">Venue • City</p>
+                        <p id="event-time" class="booking-time">Date TBA</p>
+                    </div>
+                </div>
+
+                <div class="booking-card booking-block">
+                    <h2 class="booking-section-title">Select Ticket</h2>
+                    <div id="ticket-list">
+                        <!-- Dynamic Ticket Selectors -->
+                    </div>
+                </div>
+
+                <div class="booking-card booking-block">
+                    <h2 class="booking-section-title">Quantity</h2>
+                    <div class="qty-selector">
+                        <button class="qty-btn" onclick="updateQty(-1)"><i class="fa-solid fa-minus"></i></button>
+                        <div style="text-align: center;">
+                            <span id="qty-display" style="font-size: 1.4rem; font-weight: 800;">1</span>
+                            <p id="qty-limit" style="color: rgba(255,255,255,0.5); font-size: 0.7rem; font-weight: 600; margin-top: 4px;">Max 10 per user</p>
+                        </div>
+                        <button class="qty-btn" onclick="updateQty(1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="booking-card booking-block">
+                    <h2 class="booking-section-title">Promo Code</h2>
+                    <div class="promo-input-group">
+                        <input type="text" id="promo-code" placeholder="Enter promo code" style="text-transform: uppercase;">
+                        <button class="btn-evorra" onclick="applyPromo()" style="width: auto; padding: 10px 24px; margin: 0; font-size: 0.85rem;">Apply</button>
+                    </div>
+                    <p id="promo-msg" style="font-size: 0.75rem; margin-top: 8px; margin-left: 10px; font-weight: 600;" class="hide"></p>
+                </div>
+            </div>
+            <aside class="booking-side">
+                <div class="booking-card booking-block">
+                    <h2 class="booking-section-title">Order Summary</h2>
+                    <div class="summary-box">
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Ticket Price</span>
+                            <span id="sum-price" style="font-weight: 800;">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Quantity</span>
+                            <span id="sum-qty" style="font-weight: 800;">1</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Subtotal</span>
+                            <span id="sum-subtotal" style="font-weight: 800;">₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Discount</span>
+                            <span id="sum-discount" style="color: var(--secondary); font-weight: 800;">- ₹0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span style="color: rgba(255,255,255,0.6);">Platform Fee (18%)</span>
+                            <span id="sum-fee" style="font-weight: 800;">₹0</span>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+                        <div class="summary-row" style="margin-bottom: 0;">
+                            <span style="font-weight: 700;">Total</span>
+                            <span id="sum-total" style="color: var(--secondary); font-size: 1.2rem; font-weight: 900;">₹0</span>
+                        </div>
+                    </div>
+
+                    <div class="terms-box">
+                        <input type="checkbox" id="terms-check" style="margin-top: 4px;">
+                        <label for="terms-check" style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.4;">I agree to the terms, ticket policy and refund conditions.</label>
+                    </div>
+                    <button id="pay-btn" onclick="continueToPayment()" class="btn-evorra pay-btn">Continue to Payment</button>
+                </div>
+
+                <div class="quick-note">
+                    Your seats remain available only until payment confirmation. Complete checkout quickly to avoid stock changes.
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const eventId = "{{ event_id }}";
+    let tickets = [];
+    let selectedTicket = null;
+    let quantity = 1;
+    let appliedDiscount = 0;
+    let promoData = null;
+    function isEventClosed(eventItem) {
+        if (!eventItem) return true;
+        if (eventItem.is_closed === true) return true;
+        const status = String(eventItem.status || '').toLowerCase();
+        if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+        if (eventItem.is_published === false) return true;
+        const endRaw = eventItem.end_time || eventItem.endTime;
+        if (endRaw) {
+            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
+            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
+        }
+        return false;
+    }
+
+    async function loadBookingData() {
+        try {
+            const eventSnap = await db.collection('events').doc(eventId).get();
+            if (!eventSnap.exists) {
+                alert("Event not found");
+                location.href = '/explore';
+                return;
+            }
+            const event = eventSnap.data();
+            if (isEventClosed(event)) {
+                alert("This event is closed and booking is unavailable.");
+                location.href = '/explore';
+                return;
+            }
+            
+            document.getElementById('event-img').src = event.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
+            document.getElementById('event-title').textContent = event.title || 'Untitled Event';
+            document.getElementById('event-location').textContent = `${event.venue_name || event.venue || 'Venue'} • ${event.city || 'District'}`;
+            document.getElementById('event-time').textContent = formatDate(event.start_time);
+
+            let ticketSnap = await db.collection('events').doc(eventId).collection('ticketTypes').get();
+            if (ticketSnap.empty) {
+                ticketSnap = await db.collection('events').doc(eventId).collection('ticket_types').get();
+            }
+            const list = document.getElementById('ticket-list');
+            
+            ticketSnap.forEach(doc => {
+                const t = doc.data();
+                t.id = doc.id;
+                tickets.push(t);
+
+                const card = document.createElement('div');
+                card.className = 'ticket-select-card animate-evorra';
+                card.id = `t-${t.id}`;
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 style="color: white; font-weight: 800;">${t.name}</h4>
+                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-top: 4px;">${t.stock > 0 ? t.stock + ' left' : 'Sold out'}</p>
+                        </div>
+                        <span style="color: var(--secondary); font-weight: 900; font-size: 1.1rem;">₹${t.price}</span>
+                    </div>
+                `;
+                card.onclick = () => selectTicket(t);
+                list.appendChild(card);
+            });
+
+            if (tickets.length === 0 && Array.isArray(event.ticket_types) && event.ticket_types.length) {
+                event.ticket_types.forEach((t, idx) => {
+                    const fallback = {
+                        id: t.id || `inline-${idx}`,
+                        name: t.name || `Ticket ${idx + 1}`,
+                        price: Number(t.price || 0),
+                        stock: Number(t.stock || 0),
+                        max_per_user: Number(t.max_per_user || 10)
+                    };
+                    tickets.push(fallback);
+                    const card = document.createElement('div');
+                    card.className = 'ticket-select-card animate-evorra';
+                    card.id = `t-${fallback.id}`;
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: white; font-weight: 800;">${fallback.name}</h4>
+                                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-top: 4px;">${fallback.stock > 0 ? fallback.stock + ' left' : 'Sold out'}</p>
+                            </div>
+                            <span style="color: var(--secondary); font-weight: 900; font-size: 1.1rem;">₹${fallback.price}</span>
+                        </div>
+                    `;
+                    card.onclick = () => selectTicket(fallback);
+                    list.appendChild(card);
+                });
+            }
+
+            if (tickets.length > 0) selectTicket(tickets[0]);
+
+        } catch (e) { console.error(e); }
+    }
+
+    function selectTicket(t) {
+        if (t.stock <= 0) return;
+        selectedTicket = t;
+        document.querySelectorAll('.ticket-select-card').forEach(c => c.classList.remove('active'));
+        document.getElementById(`t-${t.id}`).classList.add('active');
+        
+        // Reset promo when ticket changes
+        promoData = null;
+        appliedDiscount = 0;
+        document.getElementById('promo-msg').classList.add('hide');
+        document.getElementById('promo-code').value = '';
+
+        updateSummary();
+    }
+
+    function updateQty(delta) {
+        const newVal = quantity + delta;
+        if (newVal < 1) return;
+        if (selectedTicket && newVal > (selectedTicket.max_per_user || 10)) return;
+        if (selectedTicket && newVal > selectedTicket.stock) return;
+        
+        quantity = newVal;
+        document.getElementById('qty-display').textContent = quantity;
+        document.getElementById('sum-qty').textContent = quantity;
+        updateSummary();
+    }
+
+    async function applyPromo() {
+        const code = document.getElementById('promo-code').value.toUpperCase().trim();
+        const msg = document.getElementById('promo-msg');
+        if (!code) return;
+
+        try {
+            const snap = await db.collection('promo_codes').doc(code).get();
+            if (!snap.exists) {
+                msg.textContent = "Invalid promo code";
+                msg.style.color = "var(--error)";
+                msg.classList.remove('hide');
+                return;
+            }
+            const data = snap.data();
+            const subtotal = selectedTicket.price * quantity;
+            
+            if (subtotal < (data.min_order_amount || 0)) {
+                msg.textContent = `Min order ₹${data.min_order_amount} required`;
+                msg.style.color = "var(--error)";
+                msg.classList.remove('hide');
+                return;
+            }
+
+            promoData = data;
+            msg.textContent = "Promo applied!";
+            msg.style.color = "var(--secondary)";
+            msg.classList.remove('hide');
+            updateSummary();
+
+        } catch (e) { console.error(e); }
+    }
+
+    function updateSummary() {
+        if (!selectedTicket) return;
+        const subtotal = selectedTicket.price * quantity;
+        
+        appliedDiscount = 0;
+        if (promoData) {
+            if (promoData.discount_type === 'percentage') {
+                appliedDiscount = (subtotal * promoData.discount_value) / 100;
+            } else {
+                appliedDiscount = promoData.discount_value;
+            }
+        }
+
+        const fee = (subtotal - appliedDiscount) * 0.18;
+        const total = subtotal - appliedDiscount + fee;
+
+        document.getElementById('sum-price').textContent = `₹${selectedTicket.price}`;
+        document.getElementById('sum-subtotal').textContent = `₹${subtotal}`;
+        document.getElementById('sum-discount').textContent = `- ₹${Math.round(appliedDiscount)}`;
+        document.getElementById('sum-fee').textContent = `₹${Math.round(fee)}`;
+        document.getElementById('sum-total').textContent = `₹${Math.round(total)}`;
+    }
+
+    function continueToPayment() {
+        if (!selectedTicket) return alert("Select a ticket type");
+        if (!document.getElementById('terms-check').checked) return alert("Accept terms to continue");
+
+        const btn = document.getElementById('pay-btn');
+        btn.textContent = "Processing...";
+        btn.disabled = true;
+
+        // Store selection in sessionStorage for checkout
+        sessionStorage.setItem('booking_event_id', eventId);
+        sessionStorage.setItem('booking_ticket_id', selectedTicket.id);
+        sessionStorage.setItem('booking_qty', quantity);
+        const totalDigits = document.getElementById('sum-total').textContent.replace(/[^\d]/g, '');
+        sessionStorage.setItem('booking_total', Math.round(Number(totalDigits || 0)));
+
+        location.href = `/payment/${eventId}`;
+    }
+
+    function formatDate(val) {
+        if (!val) return 'TBA';
+        const date = val.toDate ? val.toDate() : new Date(val);
+        return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    loadBookingData();
+</script>
+{% endblock %}

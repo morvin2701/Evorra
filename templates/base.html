@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Evorra | Experience Everything{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/background-animation.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase (Compat Mode for easier integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Global Animated Background -->
+    <div class="global-bg-anim" aria-hidden="true">
+        <div class="bg-gradient-layer"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+        <div class="bg-grid-layer"></div>
+        <div id="bg-particles" class="bg-particles"></div>
+    </div>
+
+    <!-- Proper Website Top Navbar -->
+    <nav class="top-navbar">
+        <a href="/" class="nav-logo">EVORRA</a>
+        
+        <div class="nav-links">
+            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/explore" class="nav-link {% if request.path == '/explore' %}active{% endif %}"><i class="fa-solid fa-compass"></i> Explore</a>
+            <a href="/add-event" id="nav-add-event" class="nav-link hide"><i class="fa-solid fa-plus"></i> Add Event</a>
+            <a href="/my-tickets" class="nav-link {% if request.path == '/my-tickets' %}active{% endif %}"><i class="fa-solid fa-ticket"></i> Tickets</a>
+            <a href="/profile" id="nav-profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="/auth" id="nav-login" class="nav-link hide">Login</a>
+        </div>
+
+        <div id="user-header">
+            <!-- Dynamic Auth Button -->
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Mobile-only Bottom Navigation -->
+    <div class="bottom-nav hide-on-desktop">
+        <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="/explore" class="nav-item {% if request.path == '/explore' %}active{% endif %}">
+            <i class="fa-solid fa-compass"></i>
+            <span>Explore</span>
+        </a>
+        <a href="/my-tickets" class="nav-item {% if request.path == '/my-tickets' %}active{% endif %}">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Tickets</span>
+        </a>
+        <a href="/profile" class="nav-item {% if request.path == '/profile' %}active{% endif %}">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <script>
+        window.CLOUDINARY_CLOUD_NAME = "dpp3e46eh";
+        window.CLOUDINARY_UPLOAD_PRESET = "flutterflow_upload";
+        window.CLOUDINARY_UPLOAD_URL = "https://api.cloudinary.com/v1_1/dpp3e46eh/image/upload";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCweE0Uuv94g4HULOF7SXsO77h38sQdVXU",
+            authDomain: "evorra-event-managment-ydnjw4.firebaseapp.com",
+            projectId: "evorra-event-managment-ydnjw4",
+            storageBucket: "evorra-event-managment-ydnjw4.appspot.com",
+            messagingSenderId: "489575101931",
+            appId: "1:489575101931:web:8aa3a02a3198911a6a55ae"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(user => {
+            const userHeader = document.getElementById('user-header');
+            if (user) {
+                document.getElementById('nav-profile').classList.remove('hide');
+                document.getElementById('nav-login').classList.add('hide');
+                
+                // Check for organizer role to show Add Event
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().role && doc.data().role.toLowerCase().includes('organizer')) {
+                        document.getElementById('nav-add-event').classList.remove('hide');
+                    }
+                });
+
+                userHeader.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <a href="/notifications" style="color: white; font-size: 1.2rem; position: relative; text-decoration: none;">
+                            <i class="fa-regular fa-bell"></i>
+                            <span id="global-notif-badge" class="hide" style="position: absolute; top: -5px; right: -5px; background: var(--error); width: 14px; height: 14px; border-radius: 50%; font-size: 0.6rem; display: flex; align-items: center; justify-content: center;"></span>
+                        </a>
+                        <a href="/profile" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                            <span class="hide-on-mobile" style="color: white; font-weight: 600; font-size: 0.9rem;">${user.displayName || 'Account'}</span>
+                            <img src="${user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid}" 
+                                 style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);">
+                        </a>
+                    </div>
+                `;
+
+                // Global notification listener for navbar badge
+                db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
+                    .onSnapshot(snap => {
+                        const badge = document.getElementById('global-notif-badge');
+                        if (badge) {
+                            if (!snap.empty) {
+                                badge.textContent = snap.size > 9 ? '9+' : snap.size;
+                                badge.classList.remove('hide');
+                            } else {
+                                badge.classList.add('hide');
+                            }
+                        }
+                    });
+            } else {
+                userHeader.innerHTML = `
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/auth" class="nav-link" style="padding-top: 10px;">Sign In</a>
+                        <a href="/auth" class="btn-evorra" style="padding: 10px 24px; margin: 0; font-size: 0.85rem; width: auto;">Sign Up</a>
+                    </div>
+                `;
+            }
+        });
+    </script>
+    
+    <!-- Global Evorra Smart Alert Modal -->
+    <div id="evorra-alert-root" class="hide" style="position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div id="evorra-alert-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); opacity: 0; transition: 0.4s;"></div>
+        <div id="evorra-alert-card" style="position: relative; background: rgba(22, 31, 54, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 36px; padding: 40px; width: 100%; max-width: 420px; text-align: center; transform: scale(0.85); opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 40px 100px rgba(0,0,0,0.8);">
+            <div id="evorra-alert-icon" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: rgba(142, 125, 255, 0.1); color: #8E7DFF;">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <h2 id="evorra-alert-title" style="font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.5px;">Notification</h2>
+            <p id="evorra-alert-message" style="color: rgba(255,255,255,0.6); line-height: 1.6; font-size: 1.05rem; margin-bottom: 35px;">This is a system message from Evorra.</p>
+            <button onclick="closeEvorraAlert()" style="width: 100%; padding: 18px; border-radius: 20px; border: none; background: linear-gradient(135deg, #685BFF, #8E7DFF); color: white; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(104, 91, 255, 0.3);">Dismiss</button>
+        </div>
+    </div>
+
+    <script>
+        const alertRoot = document.getElementById('evorra-alert-root');
+        const alertOverlay = document.getElementById('evorra-alert-overlay');
+        const alertCard = document.getElementById('evorra-alert-card');
+        const alertIcon = document.getElementById('evorra-alert-icon');
+        const alertTitle = document.getElementById('evorra-alert-title');
+        const alertMsg = document.getElementById('evorra-alert-message');
+
+        window.alert = function(msg, type = 'info') {
+            alertMsg.textContent = msg;
+            
+            // Customize based on type
+            if (msg.toLowerCase().includes('error') || msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('required')) {
+                alertIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
+                alertIcon.style.background = 'rgba(255, 76, 76, 0.1)';
+                alertIcon.style.color = '#FF4C4C';
+                alertTitle.textContent = "System Error";
+                alertCard.style.borderColor = 'rgba(255, 76, 76, 0.2)';
+            } else if (msg.toLowerCase().includes('success') || msg.toLowerCase().includes('published')) {
+                alertIcon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
+                alertIcon.style.background = 'rgba(76, 194, 255, 0.1)';
+                alertIcon.style.color = '#4CC2FF';
+                alertTitle.textContent = "Success";
+                alertCard.style.borderColor = 'rgba(76, 194, 255, 0.2)';
+            } else {
+                alertIcon.innerHTML = '<i class="fa-solid fa-bell"></i>';
+                alertIcon.style.background = 'rgba(142, 125, 255, 0.1)';
+                alertIcon.style.color = '#8E7DFF';
+                alertTitle.textContent = "Notification";
+                alertCard.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            }
+
+            alertRoot.classList.remove('hide');
+            setTimeout(() => {
+                alertOverlay.style.opacity = '1';
+                alertCard.style.opacity = '1';
+                alertCard.style.transform = 'scale(1)';
+            }, 10);
+        };
+
+        function closeEvorraAlert() {
+            alertOverlay.style.opacity = '0';
+            alertCard.style.opacity = '0';
+            alertCard.style.transform = 'scale(0.85)';
+            setTimeout(() => {
+                alertRoot.classList.add('hide');
+            }, 400);
+        }
+    </script>
+    
+    <style>
+        .hide-on-desktop { display: none; }
+        .hide-on-mobile { display: block; }
+        @media (max-width: 768px) {
+            .hide-on-desktop { display: flex; }
+            .hide-on-mobile { display: none; }
+            .top-navbar .nav-links { display: none; }
+        }
+        .hide { display: none !important; }
+    </style>
+
+    <script src="{{ url_for('static', filename='js/background-animation.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

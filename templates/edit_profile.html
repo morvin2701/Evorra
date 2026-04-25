@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Edit Profile{% endblock %}
+
+{% block head %}
+<style>
+    .edit-bg { background: transparent; min-height: 100vh; }
+    .edit-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 22px 0 120px; }
+    .edit-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .edit-back {
+        width: 40px; height: 40px; border-radius: 12px; color: #fff; text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .edit-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; }
+    .branding-card {
+        margin-bottom: 18px; border-radius: 20px; padding: 16px;
+        display: grid; grid-template-columns: 68px 1fr; gap: 14px; align-items: center;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
+    }
+    .branding-icon {
+        width: 68px; height: 68px; background: rgba(255,255,255,0.18); border-radius: 20px;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        font-size: 1.8rem;
+    }
+    .branding-title { font-size: 1.2rem; font-weight: 900; }
+    .branding-sub { font-size: 0.82rem; color: rgba(255,255,255,0.92); margin-top: 4px; }
+    .status-banner {
+        border-radius: 12px; padding: 10px 12px; font-size: 0.85rem; font-weight: 700; margin-bottom: 14px;
+        border: 1px solid transparent;
+    }
+    .status-banner.success { color: #9af7d2; background: rgba(54, 206, 156, 0.12); border-color: rgba(54,206,156,0.35); }
+    .status-banner.error { color: #ffbbc8; background: rgba(255, 88, 122, 0.12); border-color: rgba(255,88,122,0.35); }
+    .edit-section-title { margin: 26px 0 12px; font-size: 1.08rem; font-weight: 900; }
+    .edit-card {
+        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        padding: 18px;
+    }
+    .profile-input-group { margin-bottom: 16px; }
+    .field-label { color: rgba(255,255,255,0.82); font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; display: block; }
+    .profile-input-wrapper {
+        height: 50px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.05); display: grid; grid-template-columns: 40px 1fr; align-items: center;
+        overflow: hidden;
+    }
+    .profile-input-wrapper i { color: rgba(255,255,255,0.68); justify-self: center; }
+    .profile-input-wrapper input {
+        height: 100%; border: none; outline: none; background: transparent; color: #fff;
+        font-size: 0.9rem; padding-right: 12px;
+    }
+    .profile-input-wrapper input::placeholder { color: rgba(255,255,255,0.45); }
+    .field-error { color: #FFB4B4; font-size: 0.72rem; margin-top: 6px; font-weight: 600; }
+    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .role-card {
+        border-radius: 14px; border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.05); padding: 14px; cursor: pointer; transition: .2s ease;
+    }
+    .role-card.active {
+        border-color: rgba(88,228,255,0.5);
+        background: linear-gradient(145deg, rgba(35,198,243,0.22), rgba(127,95,255,0.22));
+    }
+    #save-btn { margin-top: 28px; height: 56px; font-size: 1rem; font-weight: 900; }
+    @media (max-width: 640px) {
+        .edit-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .edit-title { font-size: 1.45rem; }
+        .role-grid { grid-template-columns: 1fr; }
+        .branding-card { grid-template-columns: 56px 1fr; }
+        .branding-icon { width: 56px; height: 56px; font-size: 1.4rem; border-radius: 16px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-bg">
+    <div class="edit-shell">
+        <div class="edit-topbar">
+            <a href="javascript:history.back()" class="edit-back"><i class="fa-solid fa-chevron-left"></i></a>
+            <h1 class="edit-title">Edit Profile</h1>
+        </div>
+
+        <!-- Hero Branding -->
+        <div class="branding-card animate-evorra">
+            <div class="branding-icon">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+                <h3 class="branding-title">Refine Your Identity</h3>
+                <p class="branding-sub">Keep your profile polished and ready for every event experience.</p>
+            </div>
+        </div>
+
+        <div id="status-banner" class="status-banner hide"></div>
+
+        <h2 class="edit-section-title">Basic Info</h2>
+        <div class="edit-card">
+            <!-- Name -->
+            <div class="profile-input-group">
+                <p class="field-label">Full Name</p>
+                <div class="profile-input-wrapper">
+                    <i class="fa-regular fa-user"></i>
+                    <input type="text" id="edit-name" placeholder="Enter your full name">
+                </div>
+                <p id="err-name" class="field-error hide"></p>
+            </div>
+
+            <!-- Email -->
+            <div class="profile-input-group">
+                <p class="field-label">Email Address</p>
+                <div class="profile-input-wrapper">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="edit-email" placeholder="you@example.com">
+                </div>
+                <p id="err-email" class="field-error hide"></p>
+            </div>
+
+            <!-- Phone -->
+            <div class="profile-input-group">
+                <p class="field-label">Phone Number</p>
+                <div class="profile-input-wrapper">
+                    <i class="fa-solid fa-phone-flip"></i>
+                    <input type="text" id="edit-phone" placeholder="+91 98765 43210">
+                </div>
+            </div>
+
+            <!-- City -->
+            <div class="profile-input-group" style="margin-bottom: 0;">
+                <p class="field-label">City</p>
+                <div class="profile-input-wrapper">
+                    <i class="fa-solid fa-city"></i>
+                    <input type="text" id="edit-city" placeholder="Enter your city">
+                </div>
+                <p id="err-city" class="field-error hide"></p>
+            </div>
+        </div>
+
+        <h2 class="edit-section-title">Role</h2>
+        <div class="role-grid">
+            <div class="role-card active" id="role-attendee" onclick="setRole('attendee')">
+                <i class="fa-solid fa-masks-theater"></i>
+                <h4 style="color: white; font-weight: 800; font-size: 0.9rem;">Attendee</h4>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.7rem; margin-top: 5px;">Browse, save and book events</p>
+            </div>
+            <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
+                <i class="fa-solid fa-id-badge"></i>
+                <h4 style="color: white; font-weight: 800; font-size: 0.9rem;">Organiser</h4>
+                <p style="color: rgba(255,255,255,0.5); font-size: 0.7rem; margin-top: 5px;">Host and manage events</p>
+            </div>
+        </div>
+
+        <button id="save-btn" onclick="saveProfile()" class="btn-evorra">Save Changes</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedRole = 'attendee';
+
+    async function loadCurrentProfile() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                const data = doc.data() || {};
+                
+                document.getElementById('edit-name').value = data.display_name || user.displayName || '';
+                document.getElementById('edit-email').value = data.email || user.email || '';
+                document.getElementById('edit-phone').value = data.phone_number || '';
+                document.getElementById('edit-city').value = data.city || '';
+                
+                if (data.role) setRole(data.role.toLowerCase());
+
+            } catch (e) { console.error(e); }
+        });
+    }
+
+    function setRole(role) {
+        selectedRole = role;
+        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+        if (role.includes('organizer')) {
+            document.getElementById('role-organizer').classList.add('active');
+        } else {
+            document.getElementById('role-attendee').classList.add('active');
+        }
+    }
+
+    async function saveProfile() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const name = document.getElementById('edit-name').value.trim();
+        const email = document.getElementById('edit-email').value.trim();
+        const phone = document.getElementById('edit-phone').value.trim();
+        const city = document.getElementById('edit-city').value.trim();
+
+        // Simple validation
+        let ok = true;
+        if (!name) { document.getElementById('err-name').textContent = "Name is required"; document.getElementById('err-name').classList.remove('hide'); ok = false; }
+        else document.getElementById('err-name').classList.add('hide');
+
+        if (!email) { document.getElementById('err-email').textContent = "Email is required"; document.getElementById('err-email').classList.remove('hide'); ok = false; }
+        else document.getElementById('err-email').classList.add('hide');
+
+        if (!city) { document.getElementById('err-city').textContent = "City is required"; document.getElementById('err-city').classList.remove('hide'); ok = false; }
+        else document.getElementById('err-city').classList.add('hide');
+
+        if (!ok) return;
+
+        const btn = document.getElementById('save-btn');
+        btn.textContent = "Saving...";
+        btn.disabled = true;
+
+        try {
+            await db.collection('users').doc(user.uid).set({
+                display_name: name,
+                email: email,
+                phone_number: phone,
+                city: city,
+                role: selectedRole,
+                updated_time: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            // Update Auth Profile
+            if (user.displayName !== name) await user.updateProfile({ displayName: name });
+
+            const banner = document.getElementById('status-banner');
+            banner.textContent = "Profile updated successfully!";
+            banner.className = "status-banner success";
+            banner.classList.remove('hide');
+
+            setTimeout(() => { location.href = '/profile'; }, 1500);
+
+        } catch (e) {
+            const banner = document.getElementById('status-banner');
+            banner.textContent = e.message || "Failed to update profile";
+            banner.className = "status-banner error";
+            banner.classList.remove('hide');
+            btn.textContent = "Save Changes";
+            btn.disabled = false;
+        }
+    }
+
+    loadCurrentProfile();
+</script>
+{% endblock %}

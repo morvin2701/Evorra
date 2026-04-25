@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Explore Events{% endblock %}
+
+{% block head %}
+<style>
+    .home-bg {
+        background: transparent;
+        min-height: 100vh;
+    }
+    .explore-wrap { padding-top: 26px; padding-bottom: 120px; }
+    .explore-shell { width: min(1260px, calc(100% - 40px)); margin: 0 auto; }
+    .explore-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        gap: 12px;
+    }
+    .explore-title-row { display: flex; align-items: center; gap: 13px; }
+    .explore-back {
+        width: 40px; height: 40px; border-radius: 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        text-decoration: none; color: #fff;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.05);
+    }
+    .explore-heading { font-size: 1.72rem; font-weight: 900; letter-spacing: -0.02em; }
+    .filter-btn { width: auto; padding: 10px 20px; font-size: 0.85rem; border-radius: 16px; margin: 0; }
+    .search-field-container {
+        display: grid; grid-template-columns: 22px 1fr 20px; align-items: center;
+        gap: 10px; padding: 0 14px; height: 56px; border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        margin-bottom: 14px;
+    }
+    .search-field-container input {
+        background: transparent; border: none; color: #fff; font-size: 0.92rem;
+        width: 100%; outline: none;
+    }
+    .search-field-container input::placeholder { color: rgba(255,255,255,0.5); }
+    #category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 14px; margin-bottom: 10px; scrollbar-width: none; }
+    #category-scroll::-webkit-scrollbar { display: none; }
+    .quick-filter-chip {
+        flex-shrink: 0; padding: 9px 13px; border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+        color: rgba(234,243,255,0.84); font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    }
+    .quick-filter-chip.active {
+        color: #fff; border-color: rgba(87,228,255,0.56);
+        background: linear-gradient(145deg, rgba(35,198,243,0.32), rgba(127,95,255,0.3));
+    }
+    .results-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    #results-count { font-size: 1.25rem; font-weight: 900; color: #fff; }
+    #clear-all-filters { background: none; border: none; color: #8E7DFF; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #results-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+    .search-result-card {
+        border-radius: 18px; overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+        cursor: pointer; transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+    }
+    .search-result-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.45); box-shadow: 0 18px 28px rgba(0,0,0,0.26); }
+    .search-result-card.closed { opacity: 0.8; filter: grayscale(0.2); }
+    .result-image-wrap { height: 166px; position: relative; }
+    .result-image { width: 100%; height: 100%; object-fit: cover; }
+    .result-badge {
+        position: absolute; top: 12px; left: 12px; border-radius: 999px; padding: 6px 10px;
+        background: rgba(108, 92, 231, 0.9); color: #fff; font-size: 0.66rem; font-weight: 800; text-transform: uppercase;
+    }
+    .result-badge.right { left: auto; right: 12px; background: rgba(34, 197, 155, 0.92); }
+    .result-badge.closed { left: auto; right: 12px; background: rgba(255, 82, 112, 0.88); }
+    .result-body { padding: 14px; }
+    .result-title { color: #fff; font-size: 1.02rem; font-weight: 900; line-height: 1.25; margin-bottom: 8px; }
+    .result-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; opacity: 0.74; font-size: 0.75rem; color: #fff; }
+    .metric-row { display: flex; gap: 10px; }
+    .metric-pill { flex: 1; border-radius: 12px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.1); }
+    .metric-pill .label { font-size: 0.64rem; opacity: 0.78; text-transform: uppercase; letter-spacing: 0.06em; }
+    .metric-pill .value { margin-top: 2px; font-size: 0.8rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .metric-pill.price { background: rgba(140, 240, 198, 0.1); color: #8CF0C6; }
+    .metric-pill.type { background: rgba(142, 125, 255, 0.1); color: #8E7DFF; }
+    .explore-toast {
+        position: fixed; top: 14px; left: 50%; transform: translate(-50%, -10px);
+        z-index: 1205; background: rgba(14, 22, 39, 0.94); border: 1px solid rgba(255,255,255,0.14);
+        color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 0.82rem; font-weight: 600;
+        opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+    }
+    .explore-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .flex-1 { flex: 1; }
+    @media (max-width: 640px) {
+        .explore-shell { width: calc(100% - 20px); }
+        .explore-heading { font-size: 1.4rem; }
+        #results-list { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-bg explore-wrap">
+    <div class="explore-shell">
+        <!-- Header -->
+        <div class="explore-topbar">
+            <div class="explore-title-row">
+                <a href="/" class="explore-back"><i class="fa-solid fa-chevron-left"></i></a>
+                <h1 class="explore-heading">Search Events</h1>
+            </div>
+            <button onclick="toggleFilters()" class="btn-evorra filter-btn">Filter</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="search-field-container">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="search-input" placeholder="Search events, cities, organizers..." oninput="handleSearch()">
+            <i id="clear-search" class="fa-solid fa-circle-xmark hide" style="color: rgba(255,255,255,0.3); cursor: pointer;" onclick="clearSearch()"></i>
+        </div>
+
+        <!-- Dynamic Category Chips -->
+        <div id="category-scroll" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;">
+            <div class="quick-filter-chip active" onclick="setCategory('all', this)">All</div>
+            <!-- More dynamic chips -->
+        </div>
+
+        <!-- Results Header -->
+        <div class="results-head">
+            <h2 id="results-count">Results</h2>
+            <button id="clear-all-filters" class="hide" onclick="clearAllFilters()">Clear All</button>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="results-list">
+            <!-- Loading state -->
+            <div style="text-align: center; padding: 40px;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="explore-toast" class="explore-toast"></div>
+
+<!-- Simple Filter Modal Overlay -->
+<div id="filter-modal" class="hide" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; backdrop-filter: blur(10px); display: flex; align-items: flex-end;">
+    <div style="background: #0D1B31; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 5%; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); transform: translateY(100%); transition: transform 0.3s ease;" id="filter-sheet">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 style="color: white; font-size: 1.5rem; font-weight: 900;">Filters</h3>
+            <i class="fa-solid fa-xmark" style="color: white; font-size: 1.5rem; cursor: pointer;" onclick="toggleFilters()"></i>
+        </div>
+
+        <div style="max-height: 60vh; overflow-y: auto; padding-bottom: 30px;">
+            <p style="color: rgba(255,255,255,0.5); font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase;">Price Range</p>
+            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                <div class="profile-input-wrapper flex-1"><input type="number" id="f-min-price" placeholder="Min Price" style="width: 100%;"></div>
+                <div class="profile-input-wrapper flex-1"><input type="number" id="f-max-price" placeholder="Max Price" style="width: 100%;"></div>
+            </div>
+
+            <p style="color: rgba(255,255,255,0.5); font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase;">City</p>
+            <div class="profile-input-wrapper" style="margin-bottom: 25px;">
+                <input type="text" id="f-city" placeholder="Select City" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <span style="color: white; font-weight: 700;">Featured Events Only</span>
+                <input type="checkbox" id="f-featured" style="width: 20px; height: 20px;">
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+                <span style="color: white; font-weight: 700;">Online Events Only</span>
+                <input type="checkbox" id="f-online" style="width: 20px; height: 20px;">
+            </div>
+
+            <button onclick="applyFilters()" class="btn-evorra" style="height: 56px; font-weight: 900; font-size: 1rem;">Apply Filters</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let allEvents = [];
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let activeFilters = {
+        minPrice: 0,
+        maxPrice: 100000,
+        city: '',
+        featured: false,
+        online: false
+    };
+    function isEventClosed(eventItem) {
+        if (!eventItem) return true;
+        if (eventItem.is_closed === true) return true;
+        const status = String(eventItem.status || '').toLowerCase();
+        if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+        const endRaw = eventItem.end_time || eventItem.endTime;
+        if (endRaw) {
+            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
+            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
+        }
+        return false;
+    }
+    function safeLower(value) {
+        return String(value || '').toLowerCase();
+    }
+    function showExploreToast(message) {
+        const toast = document.getElementById('explore-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        if (toast._timer) clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    function openEventFromExplore(eventId, isClosed) {
+        if (isClosed) return showExploreToast('This event is closed and no longer accessible.');
+        location.href = `/event/${eventId}`;
+    }
+
+    async function initExplore() {
+        // Listen for all events
+        db.collection('events').onSnapshot(snap => {
+            allEvents = snap.docs
+                .map(doc => ({id: doc.id, ...doc.data()}))
+                .filter(ev => ev.is_published !== false);
+            renderCategories();
+            handleSearch();
+        });
+    }
+
+    function renderCategories() {
+        const catScroll = document.getElementById('category-scroll');
+        const categories = new Set();
+        allEvents.forEach(ev => {
+            if (ev.category_name) categories.add(ev.category_name);
+        });
+
+        catScroll.innerHTML = `<div class="quick-filter-chip ${currentCategory === 'all' ? 'active' : ''}" onclick="setCategory('all', this)">All</div>`;
+        categories.forEach(cat => {
+            const chip = document.createElement('div');
+            chip.className = `quick-filter-chip ${currentCategory === cat ? 'active' : ''}`;
+            chip.textContent = cat;
+            chip.onclick = () => setCategory(cat, chip);
+            catScroll.appendChild(chip);
+        });
+    }
+
+    function setCategory(cat, el) {
+        currentCategory = cat;
+        document.querySelectorAll('.quick-filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        handleSearch();
+    }
+
+    function handleSearch() {
+        searchQuery = document.getElementById('search-input').value.toLowerCase();
+        document.getElementById('clear-search').classList.toggle('hide', searchQuery === '');
+        
+        const filtered = allEvents.filter(ev => {
+            const matchesQuery = !searchQuery || 
+                safeLower(ev.title).includes(searchQuery) || 
+                safeLower(ev.venue_name || ev.venue).includes(searchQuery) ||
+                safeLower(ev.city).includes(searchQuery) ||
+                safeLower(ev.organizer_name).includes(searchQuery);
+            
+            const matchesCategory = currentCategory === 'all' || ev.category_name === currentCategory;
+            
+            const priceStart = Number(ev.price_start || 0);
+            const matchesPrice = priceStart >= activeFilters.minPrice && priceStart <= activeFilters.maxPrice;
+            const matchesCity = !activeFilters.city || safeLower(ev.city).includes(safeLower(activeFilters.city));
+            const matchesFeatured = !activeFilters.featured || ev.is_featured;
+            const matchesOnline = !activeFilters.online || ev.is_online;
+
+            return matchesQuery && matchesCategory && matchesPrice && matchesCity && matchesFeatured && matchesOnline;
+        });
+
+        renderResults(filtered);
+    }
+
+    function renderResults(events) {
+        const list = document.getElementById('results-list');
+        document.getElementById('results-count').textContent = `${events.length} Results`;
+        
+        if (events.length === 0) {
+            list.innerHTML = `
+                <div class="summary-box" style="text-align: center; padding: 40px;">
+                    <i class="fa-solid fa-search-minus" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
+                    <h3 style="color: white; font-weight: 900;">No matches found</h3>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 10px;">Try another keyword or adjust your filters.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = '';
+        events.forEach(ev => {
+            const closed = isEventClosed(ev);
+            const eventDate = ev.start_time
+                ? new Date(ev.start_time.toDate ? ev.start_time.toDate() : ev.start_time).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})
+                : 'TBA';
+            const card = `
+                <div class="search-result-card animate-evorra ${closed ? 'closed' : ''}" onclick="openEventFromExplore('${ev.id}', ${closed})">
+                    <div class="result-image-wrap">
+                        <img src="${ev.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="result-image">
+                        <div class="result-badge">
+                            ${ev.category_name || 'Event'}
+                        </div>
+                        ${closed ? '<div class="result-badge closed">Closed</div>' : (ev.is_featured ? '<div class="result-badge right">Featured</div>' : '')}
+                    </div>
+                    <div class="result-body">
+                        <h3 class="result-title">${ev.title || 'Untitled Event'}</h3>
+                        <div class="result-meta">
+                            <span><i class="fa-solid fa-user" style="width: 16px;"></i> ${ev.organizer_name || 'Evorra'}</span>
+                            <span><i class="fa-regular fa-calendar" style="width: 16px;"></i> ${eventDate}</span>
+                            <span><i class="fa-solid fa-location-dot" style="width: 16px;"></i> ${(ev.venue_name || ev.venue || 'Venue')} • ${ev.city || 'District'}</span>
+                        </div>
+                        <div class="metric-row">
+                            <div class="metric-pill price">
+                                <p class="label">Price</p>
+                                <p class="value">₹${ev.price_start || 0}</p>
+                            </div>
+                            <div class="metric-pill type">
+                                <p class="label">Type</p>
+                                <p class="value">${ev.category_name || 'Public'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('beforeend', card);
+        });
+    }
+
+    function toggleFilters() {
+        const modal = document.getElementById('filter-modal');
+        const sheet = document.getElementById('filter-sheet');
+        if (modal.classList.contains('hide')) {
+            modal.classList.remove('hide');
+            setTimeout(() => sheet.style.transform = 'translateY(0)', 10);
+        } else {
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => modal.classList.add('hide'), 300);
+        }
+    }
+
+    function applyFilters() {
+        activeFilters.minPrice = parseInt(document.getElementById('f-min-price').value) || 0;
+        activeFilters.maxPrice = parseInt(document.getElementById('f-max-price').value) || 100000;
+        activeFilters.city = document.getElementById('f-city').value;
+        activeFilters.featured = document.getElementById('f-featured').checked;
+        activeFilters.online = document.getElementById('f-online').checked;
+        
+        document.getElementById('clear-all-filters').classList.remove('hide');
+        toggleFilters();
+        handleSearch();
+    }
+
+    function clearAllFilters() {
+        activeFilters = { minPrice: 0, maxPrice: 100000, city: '', featured: false, online: false };
+        document.getElementById('f-min-price').value = '';
+        document.getElementById('f-max-price').value = '';
+        document.getElementById('f-city').value = '';
+        document.getElementById('f-featured').checked = false;
+        document.getElementById('f-online').checked = false;
+        document.getElementById('search-input').value = '';
+        currentCategory = 'all';
+        renderCategories();
+        document.getElementById('clear-all-filters').classList.add('hide');
+        handleSearch();
+    }
+
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        handleSearch();
+    }
+
+    initExplore();
+</script>
+{% endblock %}

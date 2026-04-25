@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Join the District{% endblock %}
+
+{% block head %}
+<style>
+    /* Decorative Rings (CSS Implementation of _SuRingsPainter) */
+    .rings-container {
+        position: absolute;
+        top: 18%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 1;
+    }
+    .ring {
+        position: absolute;
+        border: 1px solid rgba(127, 119, 221, 0.05);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .ring-1 { width: 300px; height: 300px; border-color: rgba(127, 119, 221, 0.1); }
+    .ring-2 { width: 500px; height: 500px; border-color: rgba(127, 119, 221, 0.06); }
+    .ring-3 { width: 700px; height: 700px; border-color: rgba(127, 119, 221, 0.03); }
+
+    .error-banner {
+        background: #FFF0EE;
+        border: 0.5px solid rgba(216, 90, 48, 0.3);
+        border-radius: 10px;
+        padding: 12px;
+        color: #D85A30;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .form-view { display: none; }
+    .form-view.active { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="glow-bg"></div>
+    <div class="rings-container">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+    </div>
+
+    <!-- Sign Up View -->
+    <div id="signup-view" class="form-view active animate-evorra" style="z-index: 10;">
+        <div style="margin-bottom: 30px; text-align: left; width: 100%; max-width: 480px;">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px;">Create account</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Join thousands of event lovers on Evorra</p>
+        </div>
+
+        <div class="auth-card">
+            <div id="global-error" class="error-banner hide">
+                <i class="fa-solid fa-circle-info"></i>
+                <span id="error-msg"></span>
+            </div>
+
+            <label class="auth-label">Full name</label>
+            <div class="auth-input-group">
+                <i class="fa-regular fa-user auth-icon"></i>
+                <input type="text" id="s-name" class="auth-input" placeholder="Your full name">
+            </div>
+
+            <label class="auth-label">Email address</label>
+            <div class="auth-input-group">
+                <i class="fa-regular fa-envelope auth-icon"></i>
+                <input type="email" id="s-email" class="auth-input" placeholder="you@example.com">
+            </div>
+
+            <label class="auth-label">Password</label>
+            <div class="auth-input-group">
+                <i class="fa-solid fa-lock auth-icon"></i>
+                <input type="password" id="s-pass" class="auth-input" placeholder="Min. 6 characters">
+            </div>
+
+            <label class="auth-label">I want to</label>
+            <div class="role-group">
+                <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')">
+                    <i class="fa-solid fa-ticket"></i>
+                    <p class="role-title">Attend Events</p>
+                    <p class="role-sub">Discover & book</p>
+                </div>
+                <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <p class="role-title">Host Events</p>
+                    <p class="role-sub">Create & manage</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 25px; display: flex; gap: 12px; align-items: flex-start;">
+                <input type="checkbox" id="s-terms" style="margin-top: 4px; accent-color: var(--primary);">
+                <p style="font-size: 0.8rem; color: #6B6882; line-height: 1.5;">
+                    I agree to the <span style="color: var(--primary); font-weight: 600;">Terms of Service</span> and 
+                    <span style="color: var(--primary); font-weight: 600;">Privacy Policy</span>
+                </p>
+            </div>
+
+            <button id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: var(--text-muted);">
+            Already have an account? <a href="#" onclick="toggleView('login')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Sign in</a>
+        </p>
+    </div>
+
+    <!-- Login View (Simplified for now) -->
+    <div id="login-view" class="form-view animate-evorra" style="z-index: 10;">
+        <div style="margin-bottom: 30px; text-align: left; width: 100%; max-width: 480px;">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 8px;">Welcome back</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to access your district experiences</p>
+        </div>
+
+        <div class="auth-card">
+            <label class="auth-label">Email address</label>
+            <div class="auth-input-group">
+                <i class="fa-regular fa-envelope auth-icon"></i>
+                <input type="email" id="l-email" class="auth-input" placeholder="you@example.com">
+            </div>
+
+            <label class="auth-label">Password</label>
+            <div class="auth-input-group">
+                <i class="fa-solid fa-lock auth-icon"></i>
+                <input type="password" id="l-pass" class="auth-input" placeholder="••••••••">
+            </div>
+
+            <button onclick="handleLogin()" class="btn-evorra">Sign in</button>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; font-size: 0.9rem; color: var(--text-muted);">
+            New to Evorra? <a href="#" onclick="toggleView('signup')" style="color: var(--primary-light); text-decoration: none; font-weight: 600;">Create account</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentRole = 'attendee';
+
+    function setRole(role) {
+        currentRole = role;
+        document.getElementById('role-attendee').classList.toggle('selected', role === 'attendee');
+        document.getElementById('role-organizer').classList.toggle('selected', role === 'organizer');
+    }
+
+    function toggleView(view) {
+        document.getElementById('signup-view').classList.toggle('active', view === 'signup');
+        document.getElementById('login-view').classList.toggle('active', view === 'login');
+    }
+
+    async function handleSignUp() {
+        const name = document.getElementById('s-name').value;
+        const email = document.getElementById('s-email').value;
+        const pass = document.getElementById('s-pass').value;
+        const terms = document.getElementById('s-terms').checked;
+        const btn = document.getElementById('signup-btn');
+        const errBanner = document.getElementById('global-error');
+
+        if (!name || !email || pass.length < 6) {
+            showError("Please fill all fields correctly. Password min 6 chars.");
+            return;
+        }
+        if (!terms) {
+            showError("Please accept the Terms to continue.");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
+
+        try {
+            const res = await auth.createUserWithEmailAndPassword(email, pass);
+            const uid = res.user.uid;
+
+            await res.user.updateProfile({ displayName: name });
+
+            // Firestore User Doc (Reference Flutter Code)
+            await db.collection('users').doc(uid).set({
+                uid: uid,
+                displayName: name,
+                email: email,
+                photoURL: '',
+                bio: '',
+                role: currentRole,
+                eventsHosted: 0,
+                eventsAttended: 0,
+                followersCount: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+
+            window.location.href = '/';
+        } catch (e) {
+            showError(e.message);
+            btn.disabled = false;
+            btn.textContent = 'Create account';
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('l-email').value;
+        const pass = document.getElementById('l-pass').value;
+        try {
+            await auth.signInWithEmailAndPassword(email, pass);
+            window.location.href = '/';
+        } catch (e) { alert(e.message); }
+    }
+
+    function showError(msg) {
+        const banner = document.getElementById('global-error');
+        document.getElementById('error-msg').textContent = msg;
+        banner.classList.remove('hide');
+        setTimeout(() => banner.classList.add('hide'), 5000);
+    }
+</script>
+{% endblock %}

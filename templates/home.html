@@ -1,0 +1,841 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Discover Districts{% endblock %}
+
+{% block head %}
+<style>
+    .home-bg {
+        position: relative;
+        min-height: 100vh;
+        background: transparent;
+    }
+    .home-shell {
+        position: relative;
+        z-index: 1;
+        width: min(1320px, calc(100% - 40px));
+        margin: 20px auto 110px;
+        display: grid;
+        gap: 16px;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 260px; gap: 14px; }
+    .home-header {
+        position: relative;
+        overflow: hidden;
+        padding: 30px;
+        border-radius: 30px;
+        background: linear-gradient(135deg, rgba(22, 28, 48, 0.95), rgba(12, 25, 47, 0.9));
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 24px 55px rgba(0,0,0,0.35);
+    }
+    .home-header::after {
+        content: "";
+        position: absolute;
+        width: 270px;
+        height: 270px;
+        top: -95px;
+        right: -60px;
+        background: radial-gradient(circle, rgba(71, 220, 255, 0.22), transparent 72%);
+        pointer-events: none;
+    }
+    .welcome-copy { color: rgba(255,255,255,0.66); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .header-title { font-size: clamp(1.65rem, 2.35vw, 2.35rem); font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1.14; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .notif-wrap {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.03));
+        cursor: pointer;
+        transition: transform .22s ease, border-color .22s ease, background .22s ease;
+    }
+    .notif-wrap:hover { transform: translateY(-2px); border-color: rgba(97, 225, 255, 0.45); background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05)); }
+    .notif-icon { color: #fff; font-size: 1.15rem; }
+    .notif-badge {
+        position: absolute;
+        right: -4px;
+        top: -4px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #ff5070;
+        border: 2px solid #11182b;
+        font-size: 0.62rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+    .header-subtitle { margin-top: 8px; color: rgba(220,236,255,0.76); font-size: 0.88rem; }
+    .hero-presence {
+        margin-top: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: rgba(233,244,255,0.9);
+        font-size: 0.73rem;
+        font-weight: 600;
+        padding: 7px 12px;
+    }
+    .hero-presence-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #68ffc8;
+        box-shadow: 0 0 0 5px rgba(104,255,200,0.16);
+        animation: pulseDot 1.7s ease-in-out infinite;
+    }
+    .hero-highlights {
+        margin-top: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .hero-highlight-chip {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        color: rgba(232,244,255,0.86);
+        padding: 8px 11px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+    .hero-kpis {
+        border-radius: 24px;
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+        background: linear-gradient(160deg, rgba(8,16,34,0.93), rgba(12,27,53,0.85));
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+    .kpi-item {
+        border-radius: 13px;
+        padding: 11px 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(150deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    }
+    .kpi-label { color: rgba(208,226,255,0.65); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em; }
+    .kpi-value { color: #fff; font-size: 1.26rem; margin-top: 4px; font-weight: 800; line-height: 1; }
+    .section-panel {
+        position: relative;
+        border-radius: 24px;
+        padding: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(145deg, rgba(14,21,39,0.86), rgba(10,24,43,0.8));
+        box-shadow: 0 16px 34px rgba(0,0,0,0.24);
+    }
+    .section-panel::before {
+        content: "";
+        position: absolute;
+        left: 22px;
+        right: 22px;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(96,226,255,0.5), transparent);
+    }
+    .horizontal-feed { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
+    .horizontal-feed::-webkit-scrollbar { display: none; }
+    .category-strip { padding-bottom: 2px; }
+    .category-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.13);
+        color: rgba(230,241,255,0.85);
+        background: rgba(255,255,255,0.06);
+        font-size: 0.8rem;
+        font-weight: 600;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .category-chip:hover { transform: translateY(-2px); border-color: rgba(112,234,255,0.35); }
+    .category-chip.active { border-color: rgba(84,229,255,0.6); background: linear-gradient(145deg, rgba(35,198,243,0.3), rgba(127,95,255,0.28)); color: #fff; }
+    .category-badge { min-width: 22px; height: 22px; border-radius: 999px; font-size: 0.69rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.16); padding: 0 6px; }
+    .section-head { margin-bottom: 15px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+    .section-title { margin: 0; color: #fff; font-size: 1.27rem; font-weight: 800; letter-spacing: -0.01em; }
+    .section-subtitle { color: rgba(215,232,253,0.6); font-size: 0.82rem; margin-top: 4px; }
+    .see-all { color: rgba(205,230,255,0.8); text-decoration: none; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.12em; }
+    .see-all:hover { color: #fff; }
+    .featured-scroll { padding-bottom: 4px; }
+    .featured-card {
+        position: relative;
+        width: 306px;
+        min-height: 316px;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: #0f1a31;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: transform .27s ease, box-shadow .27s ease, border-color .27s ease;
+    }
+    .featured-card:hover { transform: translateY(-6px); border-color: rgba(100,230,255,0.35); box-shadow: 0 24px 40px rgba(0,0,0,0.32); }
+    .featured-card-img { width: 100%; height: 194px; object-fit: cover; display: block; }
+    .featured-tag {
+        position: absolute;
+        top: 11px;
+        left: 11px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(8,12,24,0.72);
+        color: #fff;
+        font-size: 0.63rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+    .closed-tag {
+        position: absolute;
+        top: 11px;
+        right: 11px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.32);
+        background: rgba(255, 82, 112, 0.25);
+        color: #ffd8df;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+    .event-card-closed {
+        opacity: 0.78;
+        filter: grayscale(0.15);
+    }
+    .featured-card-body { padding: 14px 15px 16px; }
+    .featured-title { color: #fff; font-size: 1.03rem; margin: 0 0 6px; line-height: 1.3; }
+    .featured-meta { color: rgba(218,236,255,0.58); font-size: 0.78rem; margin: 0; }
+    .featured-bottom { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .featured-price { color: #7cf2c0; font-weight: 800; }
+    .featured-rating { color: #ffd47a; font-size: 0.8rem; }
+    .promo-wrap { margin-top: -1px; }
+    .promo-banner {
+        position: relative;
+        border-radius: 20px;
+        padding: 17px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: linear-gradient(128deg, rgba(95,80,255,0.62), rgba(0,171,230,0.48));
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        overflow: hidden;
+        box-shadow: 0 18px 34px rgba(0,0,0,0.2);
+    }
+    .promo-banner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+        transform: translateX(-100%);
+        animation: promoSweep 3.6s linear infinite;
+    }
+    .promo-icon-wrap { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.24); flex-shrink: 0; }
+    .promo-icon { color: #fff; font-size: 1.3rem; }
+    .promo-title { margin: 0; color: #fff; font-size: 1.02rem; font-weight: 800; }
+    .promo-text { margin: 3px 0 0; color: rgba(255,255,255,0.93); font-size: 0.82rem; }
+    .cards-stack { display: grid; gap: 10px; }
+    .marquee-card {
+        width: 305px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+        cursor: pointer;
+        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        flex-shrink: 0;
+    }
+    .marquee-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(96,228,255,0.5);
+        box-shadow: 0 18px 30px rgba(0,0,0,0.28);
+    }
+    .marquee-card-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+    .marquee-card-body { padding: 12px 13px 14px; }
+    .marquee-card-category { color: #87f1cb; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.64rem; font-weight: 800; }
+    .marquee-card-title { color: #fff; margin: 5px 0; font-size: 1rem; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .marquee-card-meta { color: rgba(219,236,255,0.6); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .marquee-card-bottom { margin-top: 9px; display: flex; justify-content: space-between; align-items: center; }
+    .marquee-card-price { color: #ffd46a; font-weight: 700; font-size: 0.92rem; }
+    .marquee-card-heart {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .marquee-closed-label,
+    .upcoming-closed-label {
+        color: #ff9fb1;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .marquee-shell {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 16px;
+        mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+    }
+    .marquee-track {
+        display: flex;
+        gap: 14px;
+        width: max-content;
+        will-change: transform;
+        animation: horizontalMarquee 24s linear infinite;
+    }
+    .marquee-shell:hover .marquee-track { animation-play-state: paused; }
+    .marquee-shell.marquee-disabled { overflow: visible; mask-image: none; -webkit-mask-image: none; }
+    .marquee-shell.marquee-disabled .marquee-track { animation: none; }
+    .list-card {
+        padding: 10px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.11);
+        background: linear-gradient(130deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        display: grid;
+        grid-template-columns: 84px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        cursor: pointer;
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .list-card:hover { transform: translateY(-2px); border-color: rgba(90,226,255,0.35); box-shadow: 0 14px 24px rgba(0,0,0,0.22); }
+    .list-card-img { width: 84px; height: 84px; object-fit: cover; border-radius: 12px; }
+    .list-content { min-width: 0; }
+    .list-category { color: #87f1cb; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.66rem; font-weight: 800; }
+    .list-title { color: #fff; margin: 3px 0; font-size: 1rem; line-height: 1.28; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .list-meta { color: rgba(219,236,255,0.6); font-size: 0.79rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .list-price { color: #ffd46a; font-weight: 700; margin-top: 7px; font-size: 0.9rem; }
+    .heart-wrap { display: flex; align-items: center; }
+    .list-heart-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.05);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .list-heart-btn i { opacity: 0.88; }
+    .upcoming-stack { padding-bottom: 8px; }
+    .upcoming-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+        gap: 12px;
+    }
+    .upcoming-card {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
+        cursor: pointer;
+        transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+    }
+    .upcoming-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(93,229,255,0.5);
+        box-shadow: 0 18px 30px rgba(0,0,0,0.28);
+    }
+    .upcoming-card-img {
+        width: 100%;
+        height: 170px;
+        object-fit: cover;
+        display: block;
+    }
+    .upcoming-card-body { padding: 12px 13px 14px; }
+    .upcoming-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(8,15,28,0.55);
+        color: #8ff4cb;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 800;
+        padding: 5px 8px;
+    }
+    .upcoming-title {
+        color: #fff;
+        margin: 9px 0 6px;
+        font-size: 1rem;
+        line-height: 1.28;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .upcoming-meta {
+        color: rgba(220,236,255,0.65);
+        font-size: 0.79rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .upcoming-bottom {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .upcoming-price { color: #ffd46a; font-size: 0.92rem; font-weight: 700; }
+    .upcoming-heart {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.16);
+        background: rgba(255,255,255,0.06);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .toast-msg {
+        position: fixed;
+        left: 50%;
+        top: 14px;
+        transform: translate(-50%, -10px);
+        z-index: 1205;
+        background: rgba(14, 22, 39, 0.94);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast-msg.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    .animate-evorra { animation: fadeUp .65s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) scale(0.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes promoSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    @keyframes horizontalMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes pulseDot {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(0.8); opacity: 0.72; }
+    }
+    @media (max-width: 980px) {
+        .hero-grid { grid-template-columns: 1fr; }
+        .hero-kpis { grid-template-columns: repeat(3, 1fr); display: grid; }
+    }
+    @media (max-width: 640px) {
+        .home-shell { width: calc(100% - 20px); margin-top: 14px; gap: 14px; }
+        .home-header { padding: 21px; border-radius: 22px; }
+        .hero-kpis { grid-template-columns: 1fr; }
+        .section-panel { padding: 15px; }
+        .marquee-card { width: 250px; }
+        .marquee-card-img { height: 144px; }
+        .featured-card { width: 266px; min-height: 300px; }
+        .featured-card-img { height: 176px; }
+        .list-card { grid-template-columns: 72px 1fr auto; gap: 10px; }
+        .list-card-img { width: 72px; height: 72px; }
+        .upcoming-card-img { height: 155px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-bg">
+    <div class="home-shell">
+        <div class="hero-grid">
+            <!-- Header Section (Dynamic) -->
+            <div class="home-header" id="dynamic-header">
+                <p class="welcome-copy">Welcome back</p>
+                <div class="header-row">
+                    <h1 id="user-display-name" class="header-title">Guest</h1>
+                    <div class="header-actions">
+                        <div class="notif-wrap" onclick="location.href='/notifications'">
+                            <i class="fa-regular fa-bell notif-icon"></i>
+                            <span id="notif-badge" class="hide notif-badge">0</span>
+                        </div>
+                    </div>
+                </div>
+                <p id="user-city" class="header-subtitle">Your district</p>
+                <div class="hero-presence">
+                    <span class="hero-presence-dot"></span>
+                    <span>Live discovery mode enabled</span>
+                </div>
+                <div class="hero-highlights">
+                    <span class="hero-highlight-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> Curated Picks</span>
+                    <span class="hero-highlight-chip"><i class="fa-solid fa-bolt"></i> Instant Booking</span>
+                    <span class="hero-highlight-chip"><i class="fa-solid fa-shield-heart"></i> Trusted Venues</span>
+                </div>
+            </div>
+
+            <div class="hero-kpis">
+                <div class="kpi-item">
+                    <p class="kpi-label">Active Categories</p>
+                    <p class="kpi-value" id="kpi-categories">0</p>
+                </div>
+                <div class="kpi-item">
+                    <p class="kpi-label">Live Events</p>
+                    <p class="kpi-value" id="kpi-events">0</p>
+                </div>
+                <div class="kpi-item">
+                    <p class="kpi-label">Featured</p>
+                    <p class="kpi-value" id="kpi-featured">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div class="section-panel">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">Discover Categories</h2>
+                    <p class="section-subtitle">Choose a vibe and explore curated experiences</p>
+                </div>
+            </div>
+            <div class="horizontal-feed category-strip" id="categories-scroll">
+                <div class="category-chip active" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>
+                <!-- Dynamic Categories -->
+            </div>
+        </div>
+
+        <!-- Featured Section -->
+        <div class="section-panel">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">Featured Events</h2>
+                    <p class="section-subtitle">Handpicked headline experiences near you</p>
+                </div>
+            </div>
+            <div class="horizontal-feed featured-scroll" id="featured-scroll">
+                <!-- Dynamic Featured Cards -->
+            </div>
+        </div>
+
+        <!-- Promo Section -->
+        <div id="promo-container" class="promo-wrap">
+            <!-- Dynamic Promo Banner -->
+        </div>
+
+        <!-- Popular Section -->
+        <div class="section-panel">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">Popular Right Now</h2>
+                    <p class="section-subtitle">What the city is booking the most this week</p>
+                </div>
+                <a href="/explore" class="see-all">See all</a>
+            </div>
+            <div class="cards-stack" id="popular-list">
+                <!-- Dynamic List Cards -->
+            </div>
+        </div>
+
+        <!-- Upcoming Section -->
+        <div class="section-panel">
+            <div class="section-head">
+                <div>
+                    <h2 class="section-title">Upcoming Events</h2>
+                    <p class="section-subtitle">Plan ahead with what is launching soon</p>
+                </div>
+                <a href="/explore" class="see-all">See all</a>
+            </div>
+            <div class="cards-stack upcoming-stack" id="upcoming-list">
+                <!-- Dynamic List Cards -->
+            </div>
+        </div>
+    </div>
+</div>
+<div id="home-toast" class="toast-msg"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedCatId = '';
+    function isEventClosed(eventItem) {
+        if (!eventItem) return true;
+        if (eventItem.is_closed === true) return true;
+
+        const status = String(eventItem.status || '').toLowerCase();
+        if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+
+        const endRaw = eventItem.end_time || eventItem.endTime;
+        if (endRaw) {
+            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
+            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
+        }
+        return false;
+    }
+    function matchesSelectedCategory(eventItem) {
+        if (!selectedCatId) return true;
+        return String(eventItem.category_id || '') === String(selectedCatId);
+    }
+    function showToast(message) {
+        const toast = document.getElementById('home-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        if (toast._timer) clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2200);
+    }
+    function handleEventCardTap(eventId, isClosed) {
+        if (isClosed) {
+            showToast('This event is closed and no longer accessible.');
+            return;
+        }
+        location.href = `/event/${eventId}`;
+    }
+
+    async function initializeHome() {
+        const user = auth.currentUser;
+        if (user) {
+            const userSnap = await db.collection('users').doc(user.uid).get();
+            const userData = userSnap.data() || {};
+            document.getElementById('user-display-name').textContent = userData.displayName || user.displayName || 'Guest';
+            document.getElementById('user-city').textContent = userData.city || 'Your district';
+            
+            // Notifications badge
+            db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
+                .onSnapshot(snap => {
+                    const badge = document.getElementById('notif-badge');
+                    if (!snap.empty) {
+                        badge.textContent = snap.size > 9 ? '9+' : snap.size;
+                        badge.classList.remove('hide');
+                    } else {
+                        badge.classList.add('hide');
+                    }
+                });
+        }
+
+        loadData();
+    }
+
+    async function loadData() {
+        try {
+            const eventSnap = await db.collection('events').get();
+            const events = [];
+            eventSnap.forEach(doc => {
+                const data = doc.data();
+                data.id = doc.id;
+                events.push(data);
+            });
+            const publishedEvents = events.filter(e => e.is_published !== false);
+            const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
+            document.getElementById('kpi-events').textContent = liveEvents.length;
+
+            renderCategories(events);
+            renderFeatured(events);
+            renderPopular(events);
+            renderUpcoming(events);
+            renderPromo();
+
+        } catch (e) { console.error(e); }
+    }
+
+    function renderCategories(events) {
+        const scroll = document.getElementById('categories-scroll');
+        const allChipClass = selectedCatId === '' ? 'category-chip active' : 'category-chip';
+        scroll.innerHTML = `<div class="${allChipClass}" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>`;
+        const bucket = {};
+        events.forEach(e => {
+            const id = e.category_id || 'other';
+            const name = e.category_name || 'Event';
+            if (!bucket[id]) bucket[id] = { name, count: 0 };
+            bucket[id].count++;
+        });
+
+        document.getElementById('count-all').textContent = events.length;
+        
+        Object.entries(bucket).forEach(([id, cat]) => {
+            if (id === 'other') return;
+            const chip = document.createElement('div');
+            chip.className = `category-chip ${selectedCatId === id ? 'active' : ''}`;
+            chip.innerHTML = `${cat.name} <span class="category-badge">${cat.count}</span>`;
+            chip.onclick = () => filterByCat(id, chip);
+            scroll.appendChild(chip);
+        });
+        document.getElementById('kpi-categories').textContent = Object.keys(bucket).filter(id => id !== 'other').length;
+    }
+
+    function renderFeatured(events) {
+        const scroll = document.getElementById('featured-scroll');
+        scroll.innerHTML = '';
+        const featured = events
+            .filter(e => e.is_featured && e.is_published !== false && matchesSelectedCategory(e))
+            .sort((a, b) => Number(isEventClosed(a)) - Number(isEventClosed(b)));
+        document.getElementById('kpi-featured').textContent = featured.length;
+        featured.forEach(e => {
+            const closed = isEventClosed(e);
+            const card = `
+                <div class="featured-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="featured-card-img">
+                    <span class="featured-tag">${e.category_name || 'Featured'}</span>
+                    ${closed ? '<span class="closed-tag">Closed</span>' : ''}
+                    <div class="featured-card-body">
+                        <h3 class="featured-title">${e.title || 'Untitled'}</h3>
+                        <p class="featured-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                        <div class="featured-bottom">
+                            <span class="featured-price">₹${e.price_start || 0}</span>
+                            <span class="featured-rating"><i class="fa-solid fa-star"></i> ${e.rating_average || '0.0'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            scroll.innerHTML += card;
+        });
+    }
+
+    function renderPopular(events) {
+        const list = document.getElementById('popular-list');
+        list.innerHTML = '';
+        const popular = events
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .sort((a, b) => (b.tickets_sold || 0) - (a.tickets_sold || 0))
+            .slice(0, 5);
+        if (!popular.length) return;
+
+        const marqueeShell = document.createElement('div');
+        marqueeShell.className = 'marquee-shell';
+        const marqueeTrack = document.createElement('div');
+        marqueeTrack.className = 'marquee-track';
+
+        popular.forEach(e => {
+            marqueeTrack.innerHTML += createMarqueeCard(e);
+        });
+
+        if (popular.length > 1) {
+            popular.forEach(e => {
+                marqueeTrack.innerHTML += createMarqueeCard(e);
+            });
+        } else {
+            marqueeShell.classList.add('marquee-disabled');
+        }
+
+        marqueeShell.appendChild(marqueeTrack);
+        list.appendChild(marqueeShell);
+    }
+
+    function createMarqueeCard(e) {
+        const closed = isEventClosed(e);
+        return `
+            <div class="marquee-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="marquee-card-img">
+                <div class="marquee-card-body">
+                    <span class="marquee-card-category">${e.category_name || 'Event'}</span>
+                    <h3 class="marquee-card-title">${e.title || 'Untitled Experience'}</h3>
+                    <p class="marquee-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                    <div class="marquee-card-bottom">
+                        <span class="marquee-card-price">₹${e.price_start || 0}</span>
+                        ${closed ? '<span class="marquee-closed-label">Closed</span>' : '<span class="marquee-card-heart"><i class="fa-regular fa-heart"></i></span>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderUpcoming(events) {
+        const list = document.getElementById('upcoming-list');
+        list.innerHTML = '<div class="upcoming-grid" id="upcoming-grid"></div>';
+        const grid = document.getElementById('upcoming-grid');
+        const upcoming = events
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+            .slice(0, 5);
+        upcoming.forEach(e => {
+            grid.innerHTML += createUpcomingCard(e);
+        });
+    }
+
+    function createUpcomingCard(e) {
+        const closed = isEventClosed(e);
+        return `
+            <div class="upcoming-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="upcoming-card-img">
+                <div class="upcoming-card-body">
+                    <span class="upcoming-chip">${e.category_name || 'Event'}</span>
+                    <h3 class="upcoming-title">${e.title || 'Untitled Experience'}</h3>
+                    <p class="upcoming-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                    <div class="upcoming-bottom">
+                        <span class="upcoming-price">₹${e.price_start || 0}</span>
+                        ${closed ? '<span class="upcoming-closed-label">Closed</span>' : '<span class="upcoming-heart"><i class="fa-regular fa-heart"></i></span>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createListCard(e) {
+        return `
+            <div class="list-card animate-evorra" onclick="location.href='/event/${e.id}'">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="list-card-img">
+                <div class="list-content">
+                    <span class="list-category">${e.category_name || 'Event'}</span>
+                    <h3 class="list-title">${e.title || 'Untitled Experience'}</h3>
+                    <p class="list-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                    <p class="list-price">₹${e.price_start || 0}</p>
+                </div>
+                <div class="heart-wrap">
+                    <button class="nav-link list-heart-btn">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    async function renderPromo() {
+        const container = document.getElementById('promo-container');
+        const snap = await db.collection('promo_codes').where('is_active', '==', true).limit(1).get();
+        if (!snap.empty) {
+            const data = snap.docs[0].data();
+            container.innerHTML = `
+                <div class="promo-banner animate-evorra">
+                    <div class="promo-icon-wrap">
+                        <i class="fa-solid fa-tag promo-icon"></i>
+                    </div>
+                    <div>
+                        <h4 class="promo-title">${data.title || 'Special District Offer'}</h4>
+                        <p class="promo-text">${data.description || 'Save on your next booking'} • ${data.discount_value}% OFF</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function filterByCat(id, el) {
+        selectedCatId = id;
+        document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        // Re-filter lists (for simplicity re-load data)
+        loadData();
+    }
+
+    auth.onAuthStateChanged(user => {
+        initializeHome();
+    });
+</script>
+{% endblock %}

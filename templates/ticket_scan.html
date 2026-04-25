@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Scan Pass{% endblock %}
+
+{% block head %}
+<style>
+    .scan-bg { min-height: 100vh; background: transparent; }
+    .scan-shell { width: min(760px, calc(100% - 24px)); margin: 0 auto; padding: 28px 0 100px; }
+    .scan-card {
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(160deg, rgba(9, 18, 34, 0.93), rgba(10, 20, 38, 0.85));
+        box-shadow: 0 20px 50px rgba(0,0,0,0.42);
+        padding: 20px;
+    }
+    .scan-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: .74rem;
+        letter-spacing: .45px;
+        text-transform: uppercase;
+        font-weight: 800;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.05);
+        color: #dce7ff;
+    }
+    .scan-status.ok {
+        border-color: rgba(116, 255, 202, 0.35);
+        background: rgba(116, 255, 202, 0.12);
+        color: #beffe9;
+    }
+    .scan-status.err {
+        border-color: rgba(255, 122, 146, 0.35);
+        background: rgba(255, 122, 146, 0.12);
+        color: #ffd0db;
+    }
+    .scan-title { margin: 12px 0 8px; color: #fff; font-size: clamp(1.35rem, 2.5vw, 1.75rem); font-weight: 900; }
+    .scan-sub { margin: 0; color: rgba(221, 232, 255, 0.72); line-height: 1.55; font-size: .9rem; }
+    .scan-grid { margin-top: 14px; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    .scan-item {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.03);
+        padding: 10px;
+    }
+    .scan-label { margin: 0 0 3px; color: rgba(221, 232, 255, 0.54); font-size: .72rem; font-weight: 700; }
+    .scan-value { margin: 0; color: #fff; font-size: .9rem; font-weight: 800; word-break: break-word; }
+    .scan-actions { margin-top: 14px; display: flex; gap: 10px; }
+    .scan-btn {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.18);
+        padding: 11px 14px;
+        font-size: .88rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .scan-btn.primary {
+        color: #071224;
+        background: linear-gradient(135deg, #87f4cf, #5ad2ff);
+        border-color: rgba(153, 255, 225, 0.55);
+    }
+    .scan-btn.ghost { color: #e6efff; background: rgba(255,255,255,0.03); }
+    @media (max-width: 640px) {
+        .scan-grid { grid-template-columns: 1fr; }
+        .scan-actions { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-bg">
+    <div class="scan-shell">
+        <div class="scan-card">
+            <span id="scan-status" class="scan-status"><i class="fa-solid fa-spinner fa-spin"></i> Validating</span>
+            <h1 id="scan-title" class="scan-title">Checking ticket...</h1>
+            <p id="scan-sub" class="scan-sub">Please wait while we verify this pass against live booking records.</p>
+
+            <div class="scan-grid">
+                <div class="scan-item">
+                    <p class="scan-label">Event</p>
+                    <p id="scan-event" class="scan-value">-</p>
+                </div>
+                <div class="scan-item">
+                    <p class="scan-label">Ticket ID</p>
+                    <p id="scan-ticket-id" class="scan-value">-</p>
+                </div>
+                <div class="scan-item">
+                    <p class="scan-label">Type</p>
+                    <p id="scan-type" class="scan-value">-</p>
+                </div>
+                <div class="scan-item">
+                    <p class="scan-label">Quantity</p>
+                    <p id="scan-qty" class="scan-value">-</p>
+                </div>
+            </div>
+
+            <div class="scan-actions">
+                <button id="checkin-btn" class="scan-btn primary" onclick="verifyAndCheckIn()">Check In Ticket</button>
+                <button class="scan-btn ghost" onclick="location.href='/my-events'">Back to Events</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ticketId = "{{ ticket_id }}";
+    let currentTicket = null;
+    let currentEvent = null;
+
+    function setStatus(kind, text) {
+        const el = document.getElementById('scan-status');
+        el.className = `scan-status ${kind || ''}`;
+        el.innerHTML = text;
+    }
+
+    async function verifyAndCheckIn() {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Please login as organizer to scan tickets.");
+            location.href = '/auth';
+            return;
+        }
+
+        const btn = document.getElementById('checkin-btn');
+        btn.disabled = true;
+        btn.textContent = 'Checking...';
+
+        try {
+            const ticketRef = db.collection('tickets').doc(ticketId);
+            await db.runTransaction(async (txn) => {
+                const ticketSnap = await txn.get(ticketRef);
+                if (!ticketSnap.exists) throw new Error("Ticket not found.");
+                const ticket = ticketSnap.data();
+
+                const eventRef = db.collection('events').doc(ticket.event_id);
+                const eventSnap = await txn.get(eventRef);
+                if (!eventSnap.exists) throw new Error("Event not found.");
+                const event = eventSnap.data();
+
+                if (event.organizer_id !== user.uid) {
+                    throw new Error("Only this event organizer can check in this ticket.");
+                }
+                if (ticket.status !== 'confirmed') {
+                    throw new Error("This ticket is not in confirmed state.");
+                }
+                if (ticket.checked_in === true) {
+                    throw new Error("Ticket already checked in.");
+                }
+
+                const quantity = Number(ticket.quantity || 1);
+                const now = firebase.firestore.FieldValue.serverTimestamp();
+
+                txn.update(ticketRef, {
+                    checked_in: true,
+                    scan_count: Number(ticket.scan_count || 0) + 1,
+                    scanned_at: now,
+                    last_scanned_by: user.uid
+                });
+
+                const stats = event.stats || {};
+                txn.update(eventRef, {
+                    'stats.scans_total': Number(stats.scans_total || 0) + quantity
+                });
+
+                const logRef = eventRef.collection('scan_logs').doc();
+                txn.set(logRef, {
+                    id: logRef.id,
+                    ticket_id: ticket.id || ticketId,
+                    event_id: ticket.event_id,
+                    scanned_by: user.uid,
+                    quantity,
+                    scanned_at: now
+                });
+            });
+
+            setStatus('ok', '<i class="fa-solid fa-circle-check"></i> Checked In');
+            document.getElementById('scan-title').textContent = 'Entry approved';
+            document.getElementById('scan-sub').textContent = 'Ticket marked as checked-in and organizer scan stats updated.';
+            btn.textContent = 'Checked In';
+        } catch (e) {
+            setStatus('err', '<i class="fa-solid fa-circle-xmark"></i> Check-in Failed');
+            document.getElementById('scan-title').textContent = 'Unable to check in';
+            document.getElementById('scan-sub').textContent = e.message || 'Validation failed.';
+            btn.disabled = false;
+            btn.textContent = 'Check In Ticket';
+        }
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            location.href = '/auth';
+            return;
+        }
+        try {
+            const ticketSnap = await db.collection('tickets').doc(ticketId).get();
+            if (!ticketSnap.exists) throw new Error('Ticket not found.');
+            currentTicket = ticketSnap.data();
+            const eventSnap = await db.collection('events').doc(currentTicket.event_id).get();
+            currentEvent = eventSnap.exists ? eventSnap.data() : null;
+
+            document.getElementById('scan-event').textContent = currentTicket.event_title || currentEvent?.title || '-';
+            document.getElementById('scan-ticket-id').textContent = currentTicket.id || ticketId;
+            document.getElementById('scan-type').textContent = currentTicket.ticket_type_name || '-';
+            document.getElementById('scan-qty').textContent = currentTicket.quantity || 1;
+
+            if (currentTicket.checked_in) {
+                setStatus('err', '<i class="fa-solid fa-clock-rotate-left"></i> Already Used');
+                document.getElementById('scan-title').textContent = 'Ticket already checked in';
+                document.getElementById('scan-sub').textContent = 'This QR has already been used for entry.';
+                document.getElementById('checkin-btn').disabled = true;
+                document.getElementById('checkin-btn').textContent = 'Already Checked In';
+            } else {
+                setStatus('', '<i class="fa-solid fa-shield"></i> Ready to validate');
+                document.getElementById('scan-title').textContent = 'Verify and check in';
+                document.getElementById('scan-sub').textContent = 'Confirm this ticket for venue entry and update scan logs.';
+            }
+        } catch (e) {
+            setStatus('err', '<i class="fa-solid fa-circle-xmark"></i> Invalid Ticket');
+            document.getElementById('scan-title').textContent = 'Ticket not valid';
+            document.getElementById('scan-sub').textContent = e.message || 'Unable to load this pass.';
+            document.getElementById('checkin-btn').disabled = true;
+        }
+    });
+</script>
+{% endblock %}
