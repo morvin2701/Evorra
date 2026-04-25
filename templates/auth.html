@@ -107,17 +107,34 @@
         height: 46px;
         border-radius: 12px;
         border: 1px solid rgba(255,255,255,0.13);
-        background: rgba(255,255,255,0.04);
-        color: #fff;
+        background: rgba(255,255,255,0.04) !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
         padding: 0 12px 0 38px;
         outline: none;
         font-size: .92rem;
+        font-weight: 600;
         transition: .2s ease;
         box-sizing: border-box;
+        caret-color: #eaf2ff;
+        text-shadow: none !important;
+        opacity: 1 !important;
     }
     .auth-input:focus {
         border-color: rgba(133, 201, 255, 0.55);
         box-shadow: 0 0 0 4px rgba(106, 190, 255, 0.12);
+    }
+    .auth-input::placeholder { color: rgba(218, 229, 255, 0.45); }
+    .auth-input:-webkit-autofill,
+    .auth-input:-webkit-autofill:hover,
+    .auth-input:-webkit-autofill:focus,
+    .auth-input:-webkit-autofill:active {
+        -webkit-text-fill-color: #ffffff !important;
+        box-shadow: 0 0 0 1000px rgba(13, 25, 46, 0.96) inset !important;
+        -webkit-box-shadow: 0 0 0 1000px rgba(13, 25, 46, 0.96) inset !important;
+        transition: background-color 9999s ease-in-out 0s;
+        caret-color: #ffffff;
+        opacity: 1 !important;
     }
     .role-group {
         display: grid;
