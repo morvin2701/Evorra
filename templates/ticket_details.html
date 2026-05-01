@@ -492,6 +492,11 @@
                 location.href = '/my-tickets';
                 return;
             }
+            if (String(ticket.status || '').toLowerCase() === 'shared_pending') {
+                alert("This shared ticket is pending. Accept it first from Shared Tickets.");
+                location.href = '/shared-tickets';
+                return;
+            }
 
             const eventData = ticket.event_snapshot || {};
             
@@ -614,16 +619,20 @@
                 const transferAmount = Math.max(0, Math.round(unit * qty));
                 const remainingQty = currentQty - qty;
                 const rootId = src.shared_from_ticket_id || ticketId;
-                const msg = `${user.displayName || 'A user'} shared ${qty} ticket(s) for ${src.event_title || 'an event'} with you.`;
+                const msg = `${user.displayName || 'A user'} shared ${qty} ticket(s) for ${src.event_title || 'an event'} with you. Accept or reject it from Shared Tickets.`;
 
                 if (remainingQty <= 0) {
                     txn.update(ticketRef, {
                         user_id: targetUid,
                         quantity: qty,
                         total_amount: transferAmount || currentAmount,
+                        status: 'shared_pending',
                         shared_by: user.uid,
+                        shared_to_email: email.toLowerCase(),
                         shared_from_ticket_id: rootId,
-                        shared_at: firebase.firestore.FieldValue.serverTimestamp()
+                        shared_at: firebase.firestore.FieldValue.serverTimestamp(),
+                        accepted_at: null,
+                        rejected_at: null
                     });
                     notificationPayload = {
                         user_id: targetUid,
@@ -652,9 +661,13 @@
                     total_amount: transferAmount,
                     qr_code: `EV-${newId}-${Date.now()}`,
                     qr_dynamic_url: `${publicBase}/scan-pass/${newId}`,
+                    status: 'shared_pending',
                     shared_from_ticket_id: rootId,
                     shared_by: user.uid,
+                    shared_to_email: email.toLowerCase(),
                     shared_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    accepted_at: null,
+                    rejected_at: null,
                     scan_count: 0,
                     checked_in: false,
                     scanned_at: null,
@@ -696,7 +709,7 @@
                 }
             }
 
-            alert(`Successfully shared ${qty} ticket(s).`);
+            alert(`Successfully shared ${qty} ticket(s). Recipient must accept or reject from Shared Tickets.`);
             document.getElementById('share-email').value = '';
             await loadTicketDetails();
         } catch (e) {

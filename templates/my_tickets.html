@@ -157,6 +157,9 @@
                       snapshot.forEach(doc => {
                           const data = doc.data();
                           data.id = doc.id;
+                          const status = String(data.status || '').toLowerCase();
+                          // Pending shared tickets should stay in Shared Tickets page only.
+                          if (status === 'shared_pending') return;
                           allTickets.push(data);
                       });
                       updateCounts();

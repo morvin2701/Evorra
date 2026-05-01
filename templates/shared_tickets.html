@@ -13,6 +13,30 @@
     }
     .shared-title { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.02em; }
     .shared-sub { color: rgba(220,236,255,0.66); font-size: .82rem; margin-top: 4px; }
+    .shared-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 12px 0 4px;
+    }
+    .shared-filter-btn {
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.05);
+        color: rgba(226,238,255,0.85);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-weight: 900;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+    .shared-filter-btn.active {
+        border-color: rgba(126, 233, 201, 0.5);
+        background: rgba(126, 233, 201, 0.16);
+        color: #d9fff3;
+    }
     .shared-list { display: grid; gap: 12px; margin-top: 12px; }
     .shared-card {
         border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
@@ -45,6 +69,47 @@
     .shared-open {
         color: #d8e8ff; text-decoration: none; font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 900;
     }
+    .shared-chip.pending {
+        border: 1px solid rgba(255, 202, 109, 0.42);
+        color: #ffdca0;
+        background: rgba(255, 202, 109, 0.12);
+    }
+    .shared-chip.confirmed {
+        border: 1px solid rgba(128, 236, 198, 0.38);
+        color: #88f5cb;
+        background: rgba(136,245,203,0.12);
+    }
+    .shared-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .shared-action-btn {
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: .68rem;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        font-weight: 900;
+        cursor: pointer;
+        color: #fff;
+        background: rgba(255,255,255,0.07);
+    }
+    .shared-action-btn.accept {
+        border-color: rgba(128, 236, 198, 0.45);
+        background: rgba(136,245,203,0.16);
+        color: #bbffe7;
+    }
+    .shared-action-btn.reject {
+        border-color: rgba(255, 141, 141, 0.45);
+        background: rgba(255, 141, 141, 0.16);
+        color: #ffd0d0;
+    }
+    .shared-action-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
     .shared-state {
         border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
         text-align: center; padding: 44px 20px;
@@ -69,6 +134,12 @@
                 <p class="shared-sub">Tickets you received from another user</p>
             </div>
         </div>
+        <div class="shared-filters" id="shared-filters">
+            <button type="button" class="shared-filter-btn active" data-filter="all" data-base-label="All">All (0)</button>
+            <button type="button" class="shared-filter-btn" data-filter="pending" data-base-label="Pending">Pending (0)</button>
+            <button type="button" class="shared-filter-btn" data-filter="accepted" data-base-label="Accepted">Accepted (0)</button>
+            <button type="button" class="shared-filter-btn" data-filter="rejected" data-base-label="Rejected">Rejected (0)</button>
+        </div>
 
         <div id="shared-container" class="shared-list">
             <div id="shared-loading" class="shared-state"><div class="spinner"></div></div>
@@ -84,6 +155,7 @@
 {% block scripts %}
 <script>
     let allShared = [];
+    let activeFilter = 'all';
 
     function formatDate(val) {
         if (!val) return 'TBA';
@@ -92,30 +164,69 @@
         return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     }
 
+    function getTicketViewStatus(ticket) {
+        const status = String(ticket.status || '').toLowerCase();
+        if (status === 'shared_pending') return 'pending';
+        if (status === 'rejected' || ticket.rejected_at) return 'rejected';
+        return 'accepted';
+    }
+
+    function matchesFilter(ticket) {
+        if (activeFilter === 'all') return true;
+        return getTicketViewStatus(ticket) === activeFilter;
+    }
+
+    function updateFilterCounts() {
+        const counts = { all: allShared.length, pending: 0, accepted: 0, rejected: 0 };
+        allShared.forEach((ticket) => {
+            const key = getTicketViewStatus(ticket);
+            if (counts[key] !== undefined) counts[key] += 1;
+        });
+        document.querySelectorAll('.shared-filter-btn').forEach((btn) => {
+            const key = btn.getAttribute('data-filter') || 'all';
+            const base = btn.getAttribute('data-base-label') || key;
+            const count = counts[key] || 0;
+            btn.textContent = `${base} (${count})`;
+        });
+    }
+
     function renderShared() {
         const container = document.getElementById('shared-container');
         document.getElementById('shared-loading').classList.add('hide');
         container.querySelectorAll('.shared-card').forEach(el => el.remove());
-        if (!allShared.length) {
+        updateFilterCounts();
+        const filteredShared = allShared.filter(matchesFilter);
+        if (!filteredShared.length) {
             document.getElementById('shared-empty').classList.remove('hide');
+            const emptyEl = document.getElementById('shared-empty');
+            const msg = activeFilter === 'all'
+                ? 'When someone shares tickets with you, they will appear here.'
+                : `No ${activeFilter} shared tickets right now.`;
+            emptyEl.querySelector('p').textContent = msg;
             return;
         }
         document.getElementById('shared-empty').classList.add('hide');
 
-        allShared
+        filteredShared
             .sort((a, b) => (b.created_time?.seconds || 0) - (a.created_time?.seconds || 0))
             .forEach(t => {
                 const eventData = t.event_snapshot || {};
+                const ticketViewStatus = getTicketViewStatus(t);
+                const isPending = ticketViewStatus === 'pending';
                 const el = document.createElement('div');
                 el.className = 'shared-card';
                 el.onclick = () => {
+                    if (isPending) {
+                        alert('Accept this ticket first from Shared Tickets to open details.');
+                        return;
+                    }
                     location.href = `/ticket/${encodeURIComponent(t.id)}`;
                 };
                 el.innerHTML = `
                     <div class="shared-main">
                         <img class="shared-cover" src="${eventData.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}">
                         <div class="shared-body">
-                            <span class="shared-chip">Shared to you</span>
+                            <span class="shared-chip ${isPending ? 'pending' : 'confirmed'}">${isPending ? 'Pending your action' : 'Accepted shared ticket'}</span>
                             <h3 class="shared-name">${t.event_title || eventData.title || 'Untitled Event'}</h3>
                             <p class="shared-meta">${eventData.city || 'District'} • ${eventData.venue || 'Venue'}</p>
                             <div class="shared-mini">
@@ -128,11 +239,110 @@
                     </div>
                     <div class="shared-foot">
                         <span class="shared-foot-note">Ticket ID: ${t.id}</span>
-                        <span class="shared-open">Open Pass</span>
+                        ${isPending ? `
+                            <div class="shared-actions">
+                                <button class="shared-action-btn reject" data-action="reject" data-ticket-id="${t.id}">Reject</button>
+                                <button class="shared-action-btn accept" data-action="accept" data-ticket-id="${t.id}">Accept</button>
+                            </div>
+                        ` : `<span class="shared-open">Open Pass</span>`}
                     </div>
                 `;
                 container.appendChild(el);
             });
+
+        container.querySelectorAll('.shared-action-btn').forEach((btn) => {
+            btn.addEventListener('click', async (ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
+                const action = btn.getAttribute('data-action');
+                const tid = btn.getAttribute('data-ticket-id');
+                if (!action || !tid) return;
+                await handleSharedAction(tid, action, btn);
+            });
+        });
+    }
+
+    async function notifyUser(userId, title, message, refTicketId) {
+        if (!userId) return;
+        try {
+            const notifRef = db.collection('notifications').doc();
+            await notifRef.set({
+                id: notifRef.id,
+                user_id: userId,
+                title,
+                message,
+                type: 'ticket_share_update',
+                ref_ticket_id: refTicketId,
+                is_read: false,
+                created_time: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (err) {
+            console.warn('Notification skipped:', err?.code || err?.message || err);
+        }
+    }
+
+    async function handleSharedAction(ticketId, action, btn) {
+        const user = auth.currentUser;
+        if (!user) return;
+        if (action !== 'accept' && action !== 'reject') return;
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = action === 'accept' ? 'Accepting...' : 'Rejecting...';
+        try {
+            const ticketRef = db.collection('tickets').doc(ticketId);
+            let senderUid = '';
+            let eventTitle = '';
+            await db.runTransaction(async (txn) => {
+                const snap = await txn.get(ticketRef);
+                if (!snap.exists) throw new Error('Ticket not found.');
+                const ticket = snap.data() || {};
+                if (String(ticket.user_id || '') !== user.uid) throw new Error('Unauthorized action.');
+                if (String(ticket.status || '').toLowerCase() !== 'shared_pending') {
+                    throw new Error('Ticket is already processed.');
+                }
+                senderUid = String(ticket.shared_by || '');
+                eventTitle = String(ticket.event_title || ticket.event_snapshot?.title || 'event');
+                if (!senderUid) throw new Error('Sender details not found.');
+
+                if (action === 'accept') {
+                    txn.update(ticketRef, {
+                        status: 'confirmed',
+                        accepted_at: firebase.firestore.FieldValue.serverTimestamp(),
+                        updated_time: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return;
+                }
+
+                txn.update(ticketRef, {
+                    user_id: senderUid,
+                    status: 'confirmed',
+                    rejected_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+
+            if (action === 'accept') {
+                await notifyUser(
+                    senderUid,
+                    'Ticket accepted',
+                    `${user.displayName || user.email || 'Recipient'} accepted your shared ticket for ${eventTitle}.`,
+                    ticketId
+                );
+                alert('Ticket accepted successfully.');
+            } else {
+                await notifyUser(
+                    senderUid,
+                    'Ticket rejected',
+                    `${user.displayName || user.email || 'Recipient'} rejected the shared ticket for ${eventTitle}. It has been returned to you.`,
+                    ticketId
+                );
+                alert('Ticket rejected. It has been returned to sender.');
+            }
+        } catch (err) {
+            alert(err.message || 'Unable to process this ticket.');
+            btn.disabled = false;
+            btn.textContent = original;
+        }
     }
 
     auth.onAuthStateChanged((user) => {
@@ -151,6 +361,16 @@
                 });
                 renderShared();
             });
+    });
+
+    document.querySelectorAll('.shared-filter-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const nextFilter = btn.getAttribute('data-filter') || 'all';
+            activeFilter = nextFilter;
+            document.querySelectorAll('.shared-filter-btn').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderShared();
+        });
     });
 </script>
 {% endblock %}
