@@ -51,13 +51,11 @@
     .my-event-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.35); }
     .my-event-img-wrap {
         width: 100%;
-        aspect-ratio: 3 / 4;
-        max-height: 260px;
         background: #182338;
         position: relative;
         overflow: hidden;
     }
-    .my-event-img { width: 100%; height: 100%; object-fit: cover; }
+    .my-event-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
     .my-event-body { padding: 14px; }
     .my-event-title { color: white; font-weight: 900; font-size: 1.1rem; margin-bottom: 4px; line-height: 1.22; }
     .my-event-sub { color: rgba(255,255,255,0.62); font-size: 0.76rem; margin-bottom: 6px; }
@@ -227,7 +225,7 @@
 
         const cardHtml = `
             <div class="my-event-card animate-evorra" onclick="openEventDetails('${e.id}')">
-                <div class="my-event-img-wrap">
+                <div class="my-event-img-wrap ev-poster-frame">
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="my-event-img">
                 </div>
                 <div class="my-event-body">

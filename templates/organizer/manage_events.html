@@ -4,20 +4,59 @@
 
 {% block head %}
 <style>
-    .dashboard-bg { background: transparent; min-height: 100vh; }
-    .dashboard-shell { width: min(1280px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 120px; }
-    .dashboard-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-    .dashboard-back {
-        width: 40px; height: 40px; border-radius: 12px; color: #fff; text-decoration: none;
-        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
-        display: inline-flex; align-items: center; justify-content: center;
+    .dashboard-bg {
+        background: transparent;
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
     }
+    .dashboard-bg::before,
+    .dashboard-bg::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(70px);
+        opacity: 0.28;
+    }
+    .dashboard-bg::before {
+        width: 430px;
+        height: 430px;
+        top: -170px;
+        right: -120px;
+        background: radial-gradient(circle, rgba(98, 226, 255, 0.95), rgba(98, 226, 255, 0));
+    }
+    .dashboard-bg::after {
+        width: 380px;
+        height: 380px;
+        bottom: -140px;
+        left: -110px;
+        background: radial-gradient(circle, rgba(142, 125, 255, 0.9), rgba(142, 125, 255, 0));
+    }
+    .dashboard-shell {
+        width: min(1280px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 120px;
+        position: relative;
+        z-index: 1;
+    }
+    .dashboard-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .dashboard-back {
+        width: 42px; height: 42px; border-radius: 12px; color: #fff; text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06);
+        display: inline-flex; align-items: center; justify-content: center;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+        transition: transform .22s ease, border-color .22s ease, background .22s ease;
+    }
+    .dashboard-back:hover { transform: translateY(-2px); border-color: rgba(98,226,255,0.45); background: rgba(98,226,255,0.1); }
     .dashboard-title { font-size: 1.78rem; font-weight: 900; letter-spacing: -0.02em; }
     .hero-overview {
         margin-bottom: 18px; border-radius: 24px; padding: 20px;
         display: grid; grid-template-columns: 70px 1fr; gap: 14px; align-items: center;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.3));
+        border: 1px solid rgba(255,255,255,0.16);
+        background: linear-gradient(135deg, rgba(96,83,255,0.45), rgba(13,178,235,0.32));
+        box-shadow: 0 18px 36px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.18);
     }
     .hero-icon {
         width: 70px; height: 70px; border-radius: 20px; background: rgba(255,255,255,0.2);
@@ -27,25 +66,33 @@
     .hero-label { color: rgba(255,255,255,0.88); font-size: 0.82rem; font-weight: 700; }
     #hero-event-count { font-size: 2.35rem; font-weight: 900; letter-spacing: -0.02em; margin: 4px 0; }
     #hero-summary { font-size: 0.84rem; color: rgba(255,255,255,0.93); }
-    .dashboard-stats-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px;
-    }
+    .dashboard-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-card {
-        border-radius: 16px; padding: 16px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(150deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        backdrop-filter: blur(6px);
+        box-shadow: 0 14px 26px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.1);
+        transition: transform .24s ease, border-color .24s ease;
     }
-    .stat-card i {
+    .stat-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.38); }
+    .stat-icon {
         width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
         margin-bottom: 10px;
     }
+    .stat-label { color: rgba(255,255,255,0.75); font-size: 0.8rem; font-weight: 700; margin: 0; }
+    .stat-value { color: #fff; font-size: 2.15rem; font-weight: 900; margin: 8px 0; line-height: 1; }
+    .stat-value--money { font-size: 1.72rem; }
+    .stat-sub { color: rgba(255,255,255,0.45); font-size: 0.7rem; margin: 0; }
     .charts-grid {
         display: grid; grid-template-columns: 1.8fr 1fr; gap: 12px; margin-bottom: 18px;
     }
     .chart-card {
         border-radius: 18px; padding: 16px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(150deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        box-shadow: 0 14px 28px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.1);
     }
     .chart-title { color: #fff; font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
     .chart-sub { color: rgba(255,255,255,0.58); font-size: 0.76rem; margin-bottom: 12px; }
@@ -87,30 +134,49 @@
     .dot { width: 9px; height: 9px; border-radius: 50%; }
     .events-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .events-title { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; }
-    .events-add { padding: 10px 20px; font-size: 0.85rem; width: auto; border-radius: 14px; }
+    .events-add { padding: 10px 20px; font-size: 0.85rem; width: auto; border-radius: 14px; box-shadow: 0 12px 24px rgba(98,226,255,0.2); }
     #dashboard-events-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 12px; }
     .dashboard-event-card {
         border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
         background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+        box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+        transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
     }
+    .dashboard-event-card:hover { transform: translateY(-4px); border-color: rgba(98,226,255,0.4); box-shadow: 0 24px 36px rgba(0,0,0,0.24); }
     .status-pill { border-radius: 999px; padding: 6px 10px; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
     .status-pill.live { color: #8CF0C6; background: rgba(140,240,198,0.12); border: 1px solid rgba(140,240,198,0.32); }
     .status-pill.upcoming { color: #77D7FF; background: rgba(119,215,255,0.12); border: 1px solid rgba(119,215,255,0.32); }
     .status-pill.completed { color: #ffc77a; background: rgba(255,199,122,0.12); border: 1px solid rgba(255,199,122,0.32); }
     .status-pill.cancelled { color: #ff9fb2; background: rgba(255,159,178,0.12); border: 1px solid rgba(255,159,178,0.32); }
     .status-pill.inactive { color: #ffb8c6; background: rgba(255,97,130,0.12); border: 1px solid rgba(255,97,130,0.32); }
-    .mini-metric { border-radius: 10px; padding: 8px; }
-    .mini-metric .label { font-size: 0.62rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.06em; }
-    .mini-metric .value { margin-top: 2px; font-size: 0.8rem; font-weight: 800; }
+    .mini-metric {
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(7,16,33,0.72);
+        border: 1px solid rgba(255,255,255,0.14);
+    }
+    .mini-metric .label {
+        color: rgba(236,245,255,0.92);
+        font-size: 0.66rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 1;
+    }
+    .mini-metric .value {
+        margin-top: 3px;
+        font-size: 1.34rem;
+        font-weight: 900;
+        line-height: 1.05;
+        color: #fff;
+    }
     .dash-card-cover {
         width: 100%;
-        aspect-ratio: 3 / 4;
-        max-height: 280px;
         background: #182338;
         position: relative;
         overflow: hidden;
     }
-    .dash-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .dash-card-cover img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
     .dash-card-badge-pos { position: absolute; top: 15px; right: 15px; }
     .dash-card-body { padding: 20px; }
     .dash-card-title { color: #fff; font-weight: 900; font-size: 1.1rem; line-height: 1.2; margin: 0 0 12px; }
@@ -121,9 +187,23 @@
     .dash-progress-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
     .dash-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#8cf0c6,#58d4ff); transition: width .45s ease; }
     .dash-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
-    .dash-mini-sold { background: rgba(140, 240, 198, 0.1); color: #8CF0C6; }
-    .dash-mini-left { background: rgba(119, 215, 255, 0.1); color: #77D7FF; }
-    .dash-mini-rev { background: rgba(255, 200, 87, 0.1); color: #FFC857; }
+    .dash-mini-sold { background: linear-gradient(135deg, rgba(12,43,42,0.95), rgba(12,33,33,0.95)); border-color: rgba(121,246,215,0.35); }
+    .dash-mini-sold .value { color: #79f6d7; }
+    .dash-mini-left { background: linear-gradient(135deg, rgba(10,39,68,0.95), rgba(9,29,52,0.95)); border-color: rgba(117,200,255,0.35); }
+    .dash-mini-left .value { color: #75c8ff; }
+    .dash-mini-rev { background: linear-gradient(135deg, rgba(74,38,7,0.95), rgba(55,28,6,0.95)); border-color: rgba(255,178,92,0.35); }
+    .dash-mini-rev .value { color: #ffb25c; }
+    .dash-mini-rev .value { white-space: nowrap; font-size: 1.08rem; }
+    body.theme-showmates .mini-metric .label { color: #475569 !important; }
+    body.theme-showmates .dash-mini-sold,
+    body.theme-showmates .dash-mini-left,
+    body.theme-showmates .dash-mini-rev {
+        background: #f8fbff !important;
+        border-color: #d9e7f5 !important;
+    }
+    body.theme-showmates .dash-mini-sold .value { color: #0f766e !important; }
+    body.theme-showmates .dash-mini-left .value { color: #0369a1 !important; }
+    body.theme-showmates .dash-mini-rev .value { color: #ea580c !important; }
     .dash-foot-grid { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; display: flex; justify-content: space-around; text-align: center; }
     .dash-foot-label { color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px; }
     .dash-foot-val { color: #fff; font-weight: 800; font-size: 0.85rem; margin: 0; }
@@ -135,7 +215,11 @@
         .dashboard-shell { width: calc(100% - 20px); padding-top: 14px; }
         .dashboard-title { font-size: 1.45rem; }
         #hero-event-count { font-size: 1.95rem; }
+        .hero-overview { grid-template-columns: 56px 1fr; padding: 16px; }
+        .hero-icon { width: 56px; height: 56px; border-radius: 16px; font-size: 1.2rem; }
         .events-title { font-size: 1.2rem; }
+        .dash-card-body { padding: 16px; }
+        .dash-mini-grid { gap: 8px; }
     }
 </style>
 {% endblock %}
@@ -163,28 +247,28 @@
         <!-- Stats Grid -->
         <div class="dashboard-stats-grid">
             <div class="stat-card">
-                <i class="fa-solid fa-calendar-check" style="background: rgba(142, 125, 255, 0.18); color: #8E7DFF;"></i>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Total Events</p>
-                <h3 id="stat-events" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
-                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Published events</p>
+                <i class="fa-solid fa-calendar-check stat-icon" style="background: rgba(142, 125, 255, 0.18); color: #8E7DFF;"></i>
+                <p class="stat-label">Total Events</p>
+                <h3 id="stat-events" class="stat-value">0</h3>
+                <p class="stat-sub">Published events</p>
             </div>
             <div class="stat-card">
-                <i class="fa-solid fa-ticket" style="background: rgba(140, 240, 198, 0.18); color: #8CF0C6;"></i>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Tickets Sold</p>
-                <h3 id="stat-sold" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
-                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Across all events</p>
+                <i class="fa-solid fa-ticket stat-icon" style="background: rgba(140, 240, 198, 0.18); color: #8CF0C6;"></i>
+                <p class="stat-label">Tickets Sold</p>
+                <h3 id="stat-sold" class="stat-value">0</h3>
+                <p class="stat-sub">Across all events</p>
             </div>
             <div class="stat-card">
-                <i class="fa-solid fa-users" style="background: rgba(119, 215, 255, 0.18); color: #77D7FF;"></i>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Attendees</p>
-                <h3 id="stat-attendees" style="font-size: 2.2rem; font-weight: 900; margin: 8px 0;">0</h3>
-                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Confirmed bookings</p>
+                <i class="fa-solid fa-users stat-icon" style="background: rgba(119, 215, 255, 0.18); color: #77D7FF;"></i>
+                <p class="stat-label">Attendees</p>
+                <h3 id="stat-attendees" class="stat-value">0</h3>
+                <p class="stat-sub">Confirmed bookings</p>
             </div>
             <div class="stat-card">
-                <i class="fa-solid fa-indian-rupee-sign" style="background: rgba(255, 200, 87, 0.18); color: #FFC857;"></i>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 700;">Revenue</p>
-                <h3 id="stat-revenue" style="font-size: 1.8rem; font-weight: 900; margin: 12px 0;">Rs. 0</h3>
-                <p style="color: rgba(255,255,255,0.4); font-size: 0.7rem;">Total earnings</p>
+                <i class="fa-solid fa-indian-rupee-sign stat-icon" style="background: rgba(255, 200, 87, 0.18); color: #FFC857;"></i>
+                <p class="stat-label">Revenue</p>
+                <h3 id="stat-revenue" class="stat-value stat-value--money">Rs. 0</h3>
+                <p class="stat-sub">Total earnings</p>
             </div>
         </div>
 
@@ -357,8 +441,8 @@
                                 eventConfirmedQty += Number(td.quantity || 1);
                             });
                         } catch (ticketErr) {
-                            eventRevenue = Number(event.total_revenue || 0);
-                            eventConfirmedQty = Number(event.tickets_sold || 0);
+                            eventRevenue = 0;
+                            eventConfirmedQty = 0;
                         }
                         if (!Number.isFinite(eventRevenue)) eventRevenue = 0;
                         if (!Number.isFinite(eventConfirmedQty)) eventConfirmedQty = 0;
@@ -407,7 +491,7 @@
     }
 
     function renderEventCard(event, container) {
-        const ticketsSold = Number(event.display_sold_qty ?? event.tickets_sold ?? 0);
+        const ticketsSold = Number(event.display_sold_qty ?? 0);
         const inventory = Number(event.ticket_inventory || 0);
         const left = Math.max(0, inventory - ticketsSold);
         const revenue = event.display_revenue || 0;
@@ -420,7 +504,7 @@
         const dateText = startDate ? startDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'}) : 'TBA';
         const cardHtml = `
             <div class="dashboard-event-card animate-evorra" onclick="location.href='/event/${event.id}'" style="cursor: pointer;">
-                <div class="dash-card-cover">
+                <div class="dash-card-cover ev-poster-frame">
                     <img src="${event.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" alt="">
                     <div class="dash-card-badge-pos">
                         <span class="status-pill ${lifecycle}">${lifecycleLabel}</span>
