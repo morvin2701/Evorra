@@ -24,11 +24,25 @@
     {% block head %}{% endblock %}
 </head>
 <body class="theme-showmates{% block body_class %}{% endblock %}">
-    <!-- Top nav — Showmates-style: primary CTA + clean links -->
-    <nav class="top-navbar sm-topnav">
-        <a href="/" class="nav-logo">EVORRA</a>
+    <!-- Top nav — premium shell for attendee + organiser dashboards -->
+    <nav class="top-navbar sm-topnav sm-navbar-shell" role="navigation" aria-label="Main">
+        <div class="nav-leading sm-nav-zone-leading">
+            <a href="/" class="nav-logo">EVORRA</a>
+            <a href="/profile" id="nav-location-link" class="sm-nav-location" title="City and location — opens Profile">
+                <span class="sm-nav-location-glow" aria-hidden="true"></span>
+                <span class="sm-nav-location-icon-wrap" aria-hidden="true">
+                    <i class="fa-solid fa-location-crosshairs sm-nav-location-icon"></i>
+                </span>
+                <span class="sm-nav-location-copy">
+                    <span class="sm-nav-location-inline">
+                        <span class="sm-nav-location-prefix">Near</span>
+                        <span id="nav-location-label" class="sm-nav-location-label" aria-live="polite">…</span>
+                    </span>
+                </span>
+            </a>
+        </div>
 
-        <div class="nav-links">
+        <div class="nav-links sm-nav-links-dock">
             <a href="/" class="nav-link {% if request.path == '/' or request.path == '/home-mobile' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a>
             <a href="/explore" class="nav-link {% if request.path == '/explore' %}active{% endif %}"><i class="fa-solid fa-ticket"></i> Events</a>
             <a href="/add-event" id="nav-add-event" class="nav-link hide"><i class="fa-solid fa-plus"></i> Studio</a>
@@ -39,7 +53,7 @@
             <a href="/auth" id="nav-login" class="nav-link hide">Login</a>
         </div>
 
-        <div class="nav-actions">
+        <div class="nav-actions sm-nav-zone-actions">
             {# Desktop: organisers only (hidden by default; JS reveals). Attendees never see this CTA. #}
             <a href="/add-event" class="nav-cta hide hide-on-mobile" id="nav-list-event">List your event</a>
             {# Mobile: nav-links row is collapsed; same CTA for organisers only. #}
@@ -165,6 +179,8 @@
         const db = firebase.firestore();
 
         let usersNavProfileUnsubscribe = null;
+        var navLatestProfilePayload = {};
+        var navGeoRequestSerial = 0;
 
         /** True for platform admin / organiser — not plain attendees. */
         function profileCanListEvents(profile) {
@@ -191,20 +207,235 @@
             });
         }
 
+        /** Resolved place label stored on Firestore user doc (handles city, cities[], city_name…). */
+        function navPickCityStringFromProfile(p) {
+            if (!p || typeof p !== 'object') return '';
+            function pick(parts) {
+                for (var i = 0; i < parts.length; i++) {
+                    var q = parts[i];
+                    if (q == null) continue;
+                    var t = typeof q === 'string' ? q.trim() : '';
+                    if (t) return t;
+                }
+                return '';
+            }
+            var c = pick([
+                typeof p.city === 'string' ? p.city : null,
+                typeof p.city_name === 'string' ? p.city_name : null,
+                typeof p.cityName === 'string' ? p.cityName : null
+            ]);
+            if (c) return c;
+            var citiesVal = p.cities;
+            if (Array.isArray(citiesVal) && citiesVal.length) {
+                c = pick([citiesVal[0]]);
+                if (c) return c;
+            }
+            if (typeof citiesVal === 'string' && citiesVal.trim()) {
+                var first = citiesVal.split(',')[0];
+                return first ? String(first).trim() : '';
+            }
+            return pick([
+                typeof p.district === 'string' ? p.district : null,
+                typeof p.area === 'string' ? p.area : null,
+                typeof p.region === 'string' ? p.region : null
+            ]);
+        }
+
+        /** Placeholders / junk values → do not pin navbar to GPS-browse; prefer geolocation instead. */
+        function navIsWeakPlaceName(raw) {
+            if (!raw || typeof raw !== 'string') return true;
+            var s = raw.trim().toLowerCase().replace(/\s+/g, ' ');
+            if (s.length < 2) return true;
+            var bad =
+                ',test,tst,testing,aaa,a a,xxx,xyz,xyzx,abcdef,qwerty,asdf,qwer,dummy,demo,sample,fake,temp,' +
+                'city,hometown,my city,mycity,location,unknown,placeholder,tbd,null,none,n/a,na,--,-,.,..' +
+                ',untitled,lorem,ipsum,foo,bar,baz,blah,blah blah,whatever,asd,sss,abc,123,12345,';
+            return bad.indexOf(',' + s + ',') >= 0;
+        }
+
+        /** Firestore GeoPoint or plain latitude/longitude fields saved on users/{uid}. */
+        function navCoordsFromProfile(p) {
+            if (!p || typeof p !== 'object') return null;
+            var la = p.latitude;
+            var lo = p.longitude;
+            if (typeof la === 'number' && typeof lo === 'number' && Number.isFinite(la) && Number.isFinite(lo)) {
+                return { lat: la, lng: lo };
+            }
+            la = p.lat;
+            lo = p.lng != null ? p.lng : p.lon;
+            if (typeof la === 'number' && typeof lo === 'number' && Number.isFinite(la) && Number.isFinite(lo)) {
+                return { lat: la, lng: lo };
+            }
+            var loc = p.location;
+            if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+                return { lat: loc.latitude, lng: loc.longitude };
+            }
+            return null;
+        }
+
+        function navApplyLocationChip(text, titleAttr) {
+            var el = document.getElementById('nav-location-label');
+            var link = document.getElementById('nav-location-link');
+            if (!el) return;
+            if (text && String(text).trim()) {
+                text = String(text).trim();
+                el.textContent = text.length > 30 ? text.slice(0, 29) + '…' : text;
+                if (link) {
+                    link.classList.remove('sm-nav-location--empty');
+                    link.setAttribute('title', titleAttr || ('Near ' + text + ' — open Profile'));
+                }
+            } else {
+                el.textContent = 'Set location';
+                if (link) {
+                    link.classList.add('sm-nav-location--empty');
+                    link.setAttribute('title', titleAttr || 'Set city in Profile or allow location access for GPS');
+                }
+            }
+        }
+
+        function navHumanLabelFromReversePayload(j, lat, lng) {
+            if (!j) return String(lat.toFixed(3)) + '°, ' + String(lng.toFixed(3)) + '°';
+            var place =
+                j.city ||
+                j.locality ||
+                j.principalSubdivision ||
+                j.countryName;
+            return place ||
+                String(lat.toFixed(3)) +
+                    '°, ' +
+                    String(lng.toFixed(3)) +
+                    '°';
+        }
+
+        function navReverseGeocodeLatLng(lat, lng) {
+            var url =
+                'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' +
+                encodeURIComponent(lat) +
+                '&longitude=' +
+                encodeURIComponent(lng) +
+                '&localityLanguage=en';
+            return fetch(url).then(function (r) {
+                if (!r.ok) throw new Error('geo');
+                return r.json();
+            });
+        }
+
+        function navHydrateChipFromCoordinates(lat, lng, reason) {
+            var serial = ++navGeoRequestSerial;
+            navReverseGeocodeLatLng(lat, lng).then(function (data) {
+                if (serial !== navGeoRequestSerial) return;
+                var label = navHumanLabelFromReversePayload(data, lat, lng);
+                var coordLine = '';
+                try {
+                    coordLine = lat.toFixed(5) + ', ' + lng.toFixed(5);
+                } catch (e2) {
+                    coordLine = '';
+                }
+                var detail =
+                    (reason ? reason + ' · ' : '') +
+                    coordLine +
+                    ' — tap to open Profile and save your city.';
+                navApplyLocationChip(label, detail);
+            }).catch(function () {
+                if (serial !== navGeoRequestSerial) return;
+                navApplyLocationChip(
+                    lat.toFixed(4) + ', ' + lng.toFixed(4),
+                    'GPS coordinates — tap Profile to edit your city.'
+                );
+            });
+        }
+
+        function navTryNavigatorGeolocation(onDeniedOrError) {
+            if (typeof navigator === 'undefined' || !navigator.geolocation) {
+                if (typeof onDeniedOrError === 'function') onDeniedOrError();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    navHydrateChipFromCoordinates(
+                        pos.coords.latitude,
+                        pos.coords.longitude,
+                        'Device location'
+                    );
+                },
+                function () {
+                    if (typeof onDeniedOrError === 'function') onDeniedOrError();
+                },
+                { enableHighAccuracy: true, timeout: 16000, maximumAge: 60000 }
+            );
+        }
+
+        function navNavbarLocationAfterGeoFailure() {
+            var snap = navLatestProfilePayload || {};
+            var saved = navPickCityStringFromProfile(snap);
+            if (saved && !navIsWeakPlaceName(saved)) {
+                navApplyLocationChip(saved, saved + ' (from Profile) — tap to edit.');
+                return;
+            }
+            if (saved) {
+                navApplyLocationChip(
+                    'Set location',
+                    'Profile value “' + saved + '” isn’t usable for maps — set a real city or allow GPS.'
+                );
+                return;
+            }
+            navApplyLocationChip(
+                '',
+                'Allow location access or add your city in Profile for neighbourhood picks.'
+            );
+        }
+
+        /** Strong Profile city wins; placeholders + empty → coords on profile, then device GPS + reverse-geocode. */
+        function navLocationApplyLabel(profile) {
+            if (profile === null || profile === undefined) {
+                navGeoRequestSerial++;
+                navLatestProfilePayload = {};
+                navApplyLocationChip('', 'Sign in to set city and GPS-based picks.');
+                return;
+            }
+            navLatestProfilePayload = typeof profile === 'object' ? profile : {};
+            var resolved = navPickCityStringFromProfile(navLatestProfilePayload);
+            var strong = resolved && !navIsWeakPlaceName(resolved);
+            if (strong) {
+                var coo = navCoordsFromProfile(navLatestProfilePayload);
+                var extra =
+                    coo && Number.isFinite(coo.lat)
+                        ? ' · ' + coo.lat.toFixed(5) + ', ' + coo.lng.toFixed(5)
+                        : '';
+                navApplyLocationChip(
+                    resolved,
+                    'Browsing near ' + resolved + extra + ' (Profile). Tap to update.'
+                );
+                navGeoRequestSerial++;
+                return;
+            }
+            navGeoRequestSerial++;
+            navApplyLocationChip('Locating…', 'Approximating area from GPS — allow permission if prompted.');
+            var pc = navCoordsFromProfile(navLatestProfilePayload);
+            if (pc && Number.isFinite(pc.lat) && Number.isFinite(pc.lng)) {
+                navHydrateChipFromCoordinates(pc.lat, pc.lng, 'Saved coordinates');
+                return;
+            }
+            navTryNavigatorGeolocation(navNavbarLocationAfterGeoFailure);
+        }
+
         function syncOrganizerNavForUser(user) {
             if (usersNavProfileUnsubscribe) {
                 try { usersNavProfileUnsubscribe(); } catch (e) {}
                 usersNavProfileUnsubscribe = null;
             }
             if (!user) {
+                navLocationApplyLabel(null);
                 setOrganizerNavVisible(false);
                 return;
             }
             setOrganizerNavVisible(false);
             usersNavProfileUnsubscribe = db.collection('users').doc(user.uid).onSnapshot(function (doc) {
                 var data = doc.exists ? doc.data() : {};
+                navLocationApplyLabel(data);
                 setOrganizerNavVisible(profileCanListEvents(data));
             }, function () {
+                navLocationApplyLabel({});
                 setOrganizerNavVisible(false);
             });
         }
@@ -382,27 +613,47 @@
         .hide-on-mobile { display: block; }
         .sm-topnav {
             flex-wrap: nowrap;
-            gap: 12px 20px;
-            min-height: 72px;
-            padding-left: max(20px, env(safe-area-inset-left));
-            padding-right: max(20px, env(safe-area-inset-right));
+            gap: 16px clamp(18px, 3vw, 36px);
+            min-height: 80px;
+            padding-left: max(clamp(16px, 3.8vw, 44px), env(safe-area-inset-left));
+            padding-right: max(clamp(16px, 3.8vw, 44px), env(safe-area-inset-right));
+        }
+        .nav-leading {
+            display: flex;
+            align-items: center;
+            gap: clamp(8px, 1.35vw, 16px);
+            flex-shrink: 0;
+            min-width: max-content;
         }
         .sm-topnav .nav-links {
             flex: 1;
             justify-content: center;
             min-width: 0;
+            padding-inline: 2px;
         }
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             flex-shrink: 0;
+            min-width: max-content;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             .hide-on-desktop { display: flex; }
             .hide-on-mobile { display: none; }
             .top-navbar .nav-links { display: none; }
-            .sm-topnav { flex-wrap: wrap; min-height: 64px; }
+            .sm-topnav {
+                flex-wrap: nowrap;
+                min-height: 68px;
+                gap: 10px 12px;
+                padding-left: max(14px, env(safe-area-inset-left));
+                padding-right: max(14px, env(safe-area-inset-right));
+            }
+            .nav-leading {
+                gap: 8px;
+                flex: 1;
+                min-width: 0;
+            }
         }
         .hide { display: none !important; }
     </style>

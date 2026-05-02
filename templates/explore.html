@@ -304,10 +304,6 @@
         const userPos = exploreGeoState === 'granted' && exploreUserCoords ? exploreUserCoords : null;
 
         return eventsList.slice().sort((a, b) => {
-            const aClosed = isEventClosed(a);
-            const bClosed = isEventClosed(b);
-            if (aClosed !== bClosed) return aClosed ? 1 : -1;
-
             if (userPos) {
                 const da = geoDistanceKmToEvent(userPos, a);
                 const db = geoDistanceKmToEvent(userPos, b);
@@ -423,7 +419,7 @@
         const catScroll = document.getElementById('category-scroll');
         const categories = new Set();
         allEvents.forEach(ev => {
-            if (ev.category_name) categories.add(ev.category_name);
+            if (ev.category_name && !isEventClosed(ev)) categories.add(ev.category_name);
         });
 
         catScroll.innerHTML = `<div class="quick-filter-chip ${currentCategory === 'all' ? 'active' : ''}" onclick="setCategory('all', this)">All</div>`;
@@ -462,7 +458,7 @@
             const matchesFeatured = !activeFilters.featured || ev.is_featured;
             const matchesOnline = !activeFilters.online || ev.is_online;
 
-            return matchesQuery && matchesCategory && matchesPrice && matchesCity && matchesFeatured && matchesOnline;
+            return matchesQuery && matchesCategory && matchesPrice && matchesCity && matchesFeatured && matchesOnline && !isEventClosed(ev);
         });
 
         const prioritized = sortExploreEvents(filtered);
@@ -487,18 +483,17 @@
 
         list.innerHTML = '';
         events.forEach(ev => {
-            const closed = isEventClosed(ev);
             const eventDate = ev.start_time
                 ? new Date(ev.start_time.toDate ? ev.start_time.toDate() : ev.start_time).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})
                 : 'TBA';
             const card = `
-                <div class="search-result-card animate-evorra ${closed ? 'closed' : ''}" onclick="openEventFromExplore('${ev.id}', ${closed})">
+                <div class="search-result-card animate-evorra" onclick="openEventFromExplore('${ev.id}', false)">
                     <div class="result-image-wrap">
                         <img src="${ev.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="result-image">
                         <div class="result-badge">
                             ${ev.category_name || 'Event'}
                         </div>
-                        ${closed ? '<div class="result-badge closed">Closed</div>' : (ev.is_featured ? '<div class="result-badge right">Featured</div>' : '')}
+                        ${ev.is_featured ? '<div class="result-badge right">Featured</div>' : ''}
                     </div>
                     <div class="result-body">
                         <h3 class="result-title">${ev.title || 'Untitled Event'}</h3>

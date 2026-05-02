@@ -13,34 +13,89 @@
         position: relative;
         z-index: 1;
         width: min(1320px, calc(100% - 40px));
-        margin: 20px auto 110px;
+        margin: 12px auto 110px;
         display: grid;
         gap: 16px;
     }
-    .hero-grid { display: grid; grid-template-columns: 1fr 260px; gap: 14px; }
-    .home-header {
+    .home-shell-body {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        min-width: 0;
+        align-content: start;
+    }
+    .home-shell-body--loading {
+        min-height: min(560px, 72vh);
+    }
+    /* Brand strip — events-first home (no profile stats) */
+    .home-brand-strip {
         position: relative;
         overflow: hidden;
-        padding: 30px;
-        border-radius: 30px;
-        background: linear-gradient(145deg, #1f1f1f 0%, #121212 48%, #0d0d0d 100%);
+        padding: 22px 28px;
+        border-radius: 26px;
+        background: linear-gradient(148deg, #1a1a1a 0%, #0c0c0c 52%, #121212 100%);
         border: 1px solid rgba(255,255,255,0.09);
-        box-shadow: 0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+        box-shadow: 0 24px 68px rgba(0,0,0,0.58), inset 0 1px 0 rgba(255,255,255,0.06);
     }
-    .home-header::after {
+    .home-brand-strip::after {
         content: "";
         position: absolute;
-        width: 280px;
-        height: 280px;
-        top: -100px;
-        right: -70px;
-        background: radial-gradient(circle, rgba(255, 61, 0, 0.2), transparent 68%);
+        width: 320px;
+        height: 320px;
+        top: -120px;
+        right: -90px;
+        background: radial-gradient(circle, rgba(255, 61, 0, 0.18), transparent 70%);
         pointer-events: none;
     }
-    .welcome-copy { color: rgba(255,255,255,0.66); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 12px; }
-    .header-title { font-size: clamp(1.65rem, 2.35vw, 2.35rem); font-weight: 800; color: #fff; letter-spacing: -0.01em; line-height: 1.14; }
-    .header-actions { display: flex; gap: 12px; align-items: center; }
+    .brand-strip-accent {
+        position: absolute;
+        left: 22px;
+        right: 22px;
+        top: 0;
+        height: 2px;
+        border-radius: 0 0 6px 6px;
+        background: linear-gradient(90deg, transparent, rgba(255,61,0,0.75), rgba(255,215,0,0.55), transparent);
+        opacity: 0.95;
+        pointer-events: none;
+    }
+    .brand-strip-inner {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .brand-mark-block { min-width: 0; }
+    .evorra-wordmark {
+        margin: 0;
+        padding: 0;
+        font-size: clamp(1.95rem, 3.8vw, 2.65rem);
+        font-weight: 900;
+        letter-spacing: -0.045em;
+        line-height: 1.05;
+        background: linear-gradient(125deg, #fff 0%, #ffe6c7 42%, #ff8a50 72%, #ff3d00 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: evorraShift 14s ease-in-out infinite alternate;
+    }
+    @keyframes evorraShift {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
+    .brand-strip-tagline {
+        margin: 8px 0 0;
+        color: rgba(210, 225, 245, 0.72);
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1.35;
+        max-width: 36ch;
+    }
+    .brand-strip-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
     .notif-wrap {
         position: relative;
         width: 46px;
@@ -71,62 +126,51 @@
         justify-content: center;
         font-weight: 700;
     }
-    .header-subtitle { margin-top: 8px; color: rgba(220,236,255,0.76); font-size: 0.88rem; }
-    .hero-presence {
-        margin-top: 16px;
+    .spotlight-block {
+        display: grid;
+        gap: 12px;
+    }
+    .spotlight-kicker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        flex-wrap: wrap;
+    }
+    .spotlight-kicker-label {
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        font-size: 0.67rem;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 215, 120, 0.78);
+        padding: 6px 12px;
         border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(255,255,255,0.06);
-        color: rgba(233,244,255,0.9);
-        font-size: 0.73rem;
-        font-weight: 600;
-        padding: 7px 12px;
-    }
-    .hero-presence-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: #ff3d00;
-        box-shadow: 0 0 0 5px rgba(255,61,0,0.25);
-        animation: pulseDot 1.7s ease-in-out infinite;
-    }
-    .hero-highlights {
-        margin-top: 16px;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-    .hero-highlight-chip {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
-        color: rgba(232,244,255,0.86);
-        padding: 8px 11px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-    }
-    .hero-kpis {
-        border-radius: 22px;
-        padding: 14px;
-        display: grid;
-        gap: 12px;
-        background: #141414;
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
-    }
-    .kpi-item {
-        border-radius: 14px;
-        padding: 12px 14px;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-left: 3px solid #ff3d00;
+        border: 1px solid rgba(255,215,120,0.22);
         background: rgba(0,0,0,0.35);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        animation: kickerGlow 6s ease-in-out infinite alternate;
     }
-    .kpi-label { color: rgba(208,226,255,0.65); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em; }
-    .kpi-value { color: #fff; font-size: 1.26rem; margin-top: 4px; font-weight: 800; line-height: 1; }
+    @keyframes kickerGlow {
+        from { box-shadow: 0 8px 24px rgba(0,0,0,0.25), 0 0 0 rgba(255,61,0,0); }
+        to { box-shadow: 0 12px 32px rgba(0,0,0,0.35), 0 0 24px rgba(255,61,0,0.12); }
+    }
+    .spotlight-kicker-hint {
+        color: rgba(180,192,212,0.78);
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.35;
+        max-width: min(54ch, 100%);
+        margin: 0;
+        padding-left: 2px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .evorra-wordmark { animation: none !important; background-position: 0% 50% !important; }
+        .spotlight-kicker-label { animation: none !important; }
+    }
     .discovery-empty {
         color: rgba(180, 190, 210, 0.65);
         font-size: 0.88rem;
@@ -521,18 +565,33 @@
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px) scale(0.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes promoSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
     @keyframes horizontalMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    @keyframes pulseDot {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(0.8); opacity: 0.72; }
-    }
 
     /* —— Smart discovery + premium rows —— */
+    /* Overlay skeleton: avoids layout collapsing (jump) when switching to loaded content */
     .home-skeleton-wrap {
         display: grid;
         gap: 14px;
-        margin-bottom: 4px;
+        position: absolute;
+        inset: 0;
+        z-index: 14;
+        margin: 0;
+        align-content: start;
+        box-sizing: border-box;
+        padding-bottom: 10px;
+        pointer-events: none;
+        background: rgba(14, 14, 18, 0.82);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition:
+            opacity 0.35s ease,
+            visibility 0.35s ease;
     }
-    .home-skeleton-wrap.hide { display: none; }
+    .home-skeleton-wrap.hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition-delay: 0ms, 0.12s;
+    }
     .skel-block {
         border-radius: 22px;
         border: 1px solid rgba(255,255,255,0.08);
@@ -777,6 +836,7 @@
         margin-bottom: 8px;
     }
     @media (prefers-reduced-motion: reduce) {
+        .home-skeleton-wrap { transition: none !important; }
         .skel-block { animation: none; opacity: 0.55; }
         .hero-spotlight-slide .hs-img { transition: none; }
         .hero-spotlight-slide:hover .hs-img { transform: none; }
@@ -792,48 +852,21 @@
 
     @media (max-width: 980px) {
         .home-shell { width: calc(100% - 28px); }
-        .hero-grid { grid-template-columns: 1fr; }
-        .hero-kpis { grid-template-columns: repeat(3, 1fr); display: grid; }
         .section-head { align-items: flex-start; }
         .section-title { font-size: 1.15rem; }
     }
     @media (max-width: 820px) {
         .home-shell { margin-top: 14px; }
-        .home-header {
-            padding: 22px;
-            border-radius: 24px;
-        }
-        .header-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .header-title {
-            font-size: clamp(1.42rem, 7vw, 1.85rem);
-            line-height: 1.18;
-            word-break: break-word;
-        }
-        .header-actions {
-            width: 100%;
-            justify-content: flex-start;
-        }
-        .hero-highlights {
-            gap: 8px;
-        }
-        .hero-highlight-chip {
-            font-size: 0.68rem;
-            padding: 7px 9px;
-        }
+        .home-brand-strip { padding: 20px 20px 22px; border-radius: 22px; }
         .promo-banner {
             align-items: flex-start;
         }
     }
     @media (max-width: 640px) {
         .home-shell { width: calc(100% - 20px); margin-top: 14px; gap: 14px; margin-bottom: 120px; }
-        .home-header { padding: 21px; border-radius: 22px; }
-        .hero-kpis { grid-template-columns: 1fr; }
-        .kpi-item { padding: 10px 11px; }
-        .kpi-value { font-size: 1.14rem; }
+        .home-shell-body { gap: 14px; }
+        .home-shell-body--loading { min-height: min(500px, 68vh); }
+        .home-brand-strip { padding: 18px 17px 20px; border-radius: 20px; }
         .section-head {
             flex-direction: column;
             gap: 7px;
@@ -883,7 +916,6 @@
     }
     @media (max-width: 420px) {
         .home-shell { width: calc(100% - 16px); }
-        .home-header { padding: 18px; border-radius: 20px; }
         .section-panel { padding: 13px; border-radius: 18px; }
         .featured-card { width: 82vw; }
         .marquee-card { width: 82vw; }
@@ -901,7 +933,7 @@
         }
     }
     @media (max-width: 900px) {
-        .home-bg, .home-shell, .section-panel, .hero-grid, .cards-stack,
+        .home-bg, .home-shell, .section-panel, .cards-stack,
         .horizontal-feed, .featured-scroll, .marquee-shell, .marquee-track,
         .upcoming-grid, .list-card, .featured-card, .marquee-card, .upcoming-card {
             max-width: 100% !important;
@@ -910,13 +942,6 @@
             width: calc(100% - 16px) !important;
             margin: 10px auto 126px !important;
             overflow-x: clip !important;
-        }
-        .hero-grid {
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-        }
-        .hero-kpis {
-            grid-template-columns: 1fr !important;
         }
         .section-panel {
             overflow: hidden !important;
@@ -970,80 +995,63 @@
 {% block content %}
 <div class="home-bg home-premium">
     <div class="home-shell">
-        <div class="hero-grid">
-            <!-- Header Section (Dynamic) -->
-            <div class="home-header" id="dynamic-header">
-                <p class="welcome-copy">Welcome back</p>
-                <div class="header-row">
-                    <h1 id="user-display-name" class="header-title">Guest</h1>
-                    <div class="header-actions">
-                        <div class="notif-wrap" onclick="location.href='/notifications'">
-                            <i class="fa-regular fa-bell notif-icon"></i>
-                            <span id="notif-badge" class="hide notif-badge">0</span>
-                        </div>
+        <header class="home-brand-strip" id="dynamic-header">
+            <div class="brand-strip-accent" aria-hidden="true"></div>
+            <div class="brand-strip-inner">
+                <div class="brand-mark-block">
+                    <h1 class="evorra-wordmark">Evorra</h1>
+                    <p class="brand-strip-tagline">Spotlight picks, trending events, and discoveries tailored to where you roam.</p>
+                </div>
+                <div class="brand-strip-actions">
+                    <div class="notif-wrap" role="button" tabindex="0" onclick="location.href='/notifications'" aria-label="Notifications">
+                        <i class="fa-regular fa-bell notif-icon"></i>
+                        <span id="notif-badge" class="hide notif-badge">0</span>
                     </div>
                 </div>
-                <p id="user-city" class="header-subtitle">Your district</p>
-                <div class="hero-presence">
-                    <span class="hero-presence-dot"></span>
-                    <span>Live discovery mode enabled</span>
-                </div>
-                <div class="hero-highlights">
-                    <span class="hero-highlight-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> Curated Picks</span>
-                    <span class="hero-highlight-chip"><i class="fa-solid fa-bolt"></i> Instant Booking</span>
-                    <span class="hero-highlight-chip"><i class="fa-solid fa-shield-heart"></i> Trusted Venues</span>
-                </div>
             </div>
+        </header>
 
-            <div class="hero-kpis">
-                <div class="kpi-item">
-                    <p class="kpi-label">Active Categories</p>
-                    <p class="kpi-value" id="kpi-categories">0</p>
-                </div>
-                <div class="kpi-item">
-                    <p class="kpi-label">Live Events</p>
-                    <p class="kpi-value" id="kpi-events">0</p>
-                </div>
-                <div class="kpi-item">
-                    <p class="kpi-label">Featured</p>
-                    <p class="kpi-value" id="kpi-featured">0</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="home-skeleton-wrap" class="home-skeleton-wrap">
+        <div class="home-shell-body home-shell-body--loading">
+        <div id="home-skeleton-wrap" class="home-skeleton-wrap" aria-busy="true" aria-live="polite">
             <div class="skel-block tall"></div>
             <div class="skel-block"></div>
             <div class="skel-block"></div>
         </div>
 
-        <div id="hero-spotlight" class="hero-spotlight hide" aria-roledescription="carousel">
-            <div id="hero-spotlight-track" class="hero-spotlight-track"></div>
-            <div id="hero-spotlight-dots" class="hs-dots"></div>
+        <div id="spotlight-home-wrap" class="spotlight-block hide">
+            <div class="spotlight-kicker">
+                <span class="spotlight-kicker-label"><i class="fa-solid fa-bolt"></i> Spotlight</span>
+                <p class="spotlight-kicker-hint">Tonight’s marquee experiences — swipe or tap dots to browse.</p>
+            </div>
+            <div id="hero-spotlight" class="hero-spotlight hide" aria-roledescription="carousel">
+                <div id="hero-spotlight-track" class="hero-spotlight-track"></div>
+                <div id="hero-spotlight-dots" class="hs-dots"></div>
+            </div>
         </div>
 
         <div class="section-panel hide" id="section-trending-wrap">
             <div class="section-head">
                 <div>
-                    <p class="section-eyebrow"><i class="fa-solid fa-fire-flame-curved"></i> Trending now</p>
-                    <h2 class="section-title">Trending Events</h2>
-                    <p class="section-subtitle">Most booked &amp; talked-about experiences right now</p>
+                    <p class="section-eyebrow"><i class="fa-solid fa-chart-line"></i> Trending event</p>
+                    <h2 class="section-title">What everyone’s booking now</h2>
+                    <p class="section-subtitle">Fast-moving picks ranked by bookings, buzz, and ratings.</p>
                 </div>
                 <a href="/explore" class="see-all">See all</a>
             </div>
             <div id="trending-row" class="netflix-row-scroll"></div>
         </div>
 
-        <div class="section-panel hide" id="section-near-wrap">
+        <div class="section-panel">
             <div class="section-head">
                 <div>
-                    <p class="section-eyebrow"><i class="fa-solid fa-location-crosshairs"></i> Near Ahmedabad</p>
-                    <h2 class="section-title">Happening around Ahmedabad</h2>
-                    <p class="section-subtitle">Geo-ranked picks within ~55 km or Ahmedabad city</p>
+                    <p class="section-eyebrow"><i class="fa-solid fa-layer-group"></i> Discover categories</p>
+                    <h2 class="section-title">Find your vibe</h2>
+                    <p class="section-subtitle">Filter the feed — categories update every row instantly.</p>
                 </div>
-                <a href="/explore" class="see-all">Explore</a>
             </div>
-            <div id="near-row" class="netflix-row-scroll"></div>
+            <div class="horizontal-feed category-strip" id="categories-scroll">
+                <div class="category-chip active" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>
+            </div>
         </div>
 
         <div class="section-panel hide" id="section-foryou-wrap">
@@ -1051,7 +1059,7 @@
                 <div>
                     <p class="section-eyebrow"><i class="fa-solid fa-sparkles"></i> Personalised</p>
                     <h2 class="section-title">Because you booked before</h2>
-                    <p class="section-subtitle">Matches categories from your past tickets</p>
+                    <p class="section-subtitle">Stronger when you’re signed in — built from your ticket history.</p>
                 </div>
                 <a href="/explore" class="see-all">See all</a>
             </div>
@@ -1059,26 +1067,24 @@
             <p id="foryou-hint" class="section-subtitle hide" style="margin-top:10px;">Book or save events to sharpen these picks.</p>
         </div>
 
-        <!-- Categories Section -->
-        <div class="section-panel">
+        <div class="section-panel hide" id="section-near-wrap">
             <div class="section-head">
                 <div>
-                    <h2 class="section-title">Discover Categories</h2>
-                    <p class="section-subtitle">Choose a vibe and explore curated experiences</p>
+                    <p class="section-eyebrow"><i class="fa-solid fa-location-crosshairs"></i> Near Ahmedabad</p>
+                    <h2 class="section-title">Around the city</h2>
+                    <p class="section-subtitle">Within ~55 km or Ahmedabad — distance-ranked when we have your location.</p>
                 </div>
+                <a href="/explore" class="see-all">Explore</a>
             </div>
-            <div class="horizontal-feed category-strip" id="categories-scroll">
-                <div class="category-chip active" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>
-                <!-- Dynamic Categories -->
-            </div>
+            <div id="near-row" class="netflix-row-scroll"></div>
         </div>
 
-        <!-- Featured Section -->
         <div class="section-panel">
             <div class="section-head">
                 <div>
-                    <h2 class="section-title">Featured Events</h2>
-                    <p class="section-subtitle">Handpicked headline experiences near you</p>
+                    <p class="section-eyebrow"><i class="fa-solid fa-star"></i> Featured</p>
+                    <h2 class="section-title">Handpicked headline events</h2>
+                    <p class="section-subtitle">Curated showcases from organisers — spotlight on quality.</p>
                 </div>
                 <a href="/explore" class="see-all">See all</a>
             </div>
@@ -1118,6 +1124,8 @@
             <div class="cards-stack upcoming-stack" id="upcoming-list">
                 <!-- Dynamic List Cards -->
             </div>
+        </div>
+
         </div>
     </div>
 </div>
@@ -1223,7 +1231,6 @@
         return ranked.slice(0, 14).map((x) => x.e);
     }
     function renderPremiumCard(e) {
-        const closed = isEventClosed(e);
         const img = escapeHtml(e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
         const title = escapeHtml(e.title || 'Event');
         const cat = escapeHtml(e.category_name || 'Event');
@@ -1233,8 +1240,8 @@
         const trendLabel = ts > 120 ? 'Hot' : (sold > 8 ? 'Selling fast' : '');
         const trendCls = ts > 120 ? 'dcp-trend dcp-trend--hot' : (sold > 8 ? 'dcp-trend dcp-trend--fast' : 'dcp-trend');
         return `
-            <article class="discovery-card-premium animate-evorra ${closed ? 'event-card-closed' : ''}" role="button" tabindex="0"
-                onclick="handleEventCardTap('${e.id}', ${closed})">
+            <article class="discovery-card-premium animate-evorra" role="button" tabindex="0"
+                onclick="handleEventCardTap('${e.id}', false)">
                 <div class="ev-poster-frame">
                 <img class="dcp-img" src="${img}" alt="">
                 </div>
@@ -1253,6 +1260,7 @@
         const el = document.getElementById(containerId);
         if (!el) return;
         el.innerHTML = '';
+        list = list.filter(e => !isEventClosed(e));
         if (!list.length) {
             el.innerHTML = '<p class="discovery-empty">Nothing here yet — try another category or explore all events.</p>';
             return;
@@ -1262,8 +1270,12 @@
         });
     }
     function toggleDiscoveryVisibility(hasTrending, hasNear, hasForYou) {
+        document.querySelector('.home-shell-body')?.classList.remove('home-shell-body--loading');
         const sk = document.getElementById('home-skeleton-wrap');
-        if (sk) sk.classList.add('hide');
+        if (sk) {
+            sk.classList.add('hide');
+            sk.removeAttribute('aria-busy');
+        }
         document.getElementById('section-trending-wrap')?.classList.toggle('hide', !hasTrending);
         document.getElementById('section-near-wrap')?.classList.toggle('hide', !hasNear);
         const fyWrap = document.getElementById('section-foryou-wrap');
@@ -1275,6 +1287,7 @@
         }
     }
     function mountHeroCarousel(sourceEvents) {
+        const section = document.getElementById('spotlight-home-wrap');
         const wrap = document.getElementById('hero-spotlight');
         const track = document.getElementById('hero-spotlight-track');
         const dots = document.getElementById('hero-spotlight-dots');
@@ -1285,17 +1298,18 @@
             .slice(0, 5);
         if (!heroCarouselSlides.length) {
             wrap.classList.add('hide');
+            if (section) section.classList.add('hide');
             if (heroCarouselTimer) clearInterval(heroCarouselTimer);
             return;
         }
+        if (section) section.classList.remove('hide');
         wrap.classList.remove('hide');
         track.innerHTML = heroCarouselSlides.map((e, i) => {
             const img = escapeHtml(e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2');
             const title = escapeHtml(e.title || 'Featured');
             const meta = `${escapeHtml(e.city || '')} • ${escapeHtml(e.category_name || 'Live')}`;
-            const closed = isEventClosed(e);
             return `
-                <div class="hero-spotlight-slide" data-i="${i}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="hero-spotlight-slide" data-i="${i}" onclick="handleEventCardTap('${e.id}', false)">
                     <div class="hs-media">
                         <img class="hs-img" src="${img}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}">
                     </div>
@@ -1417,32 +1431,6 @@
         const bf = Number.isFinite(bd) ? bd : Number.POSITIVE_INFINITY;
         return af - bf;
     }
-    function compareByClosedThenDistance(a, b) {
-        const closedDiff = Number(isEventClosed(a)) - Number(isEventClosed(b));
-        if (closedDiff !== 0) return closedDiff;
-        return compareByProximity(a, b);
-    }
-    async function reverseGeocodeLabel(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=1`;
-        try {
-            const controller = new AbortController();
-            const t = setTimeout(() => controller.abort(), 4500);
-            const res = await fetch(url, {
-                signal: controller.signal,
-                headers: { 'Accept': 'application/json' }
-            });
-            clearTimeout(t);
-            if (!res.ok) return '';
-            const data = await res.json();
-            const a = data?.address || {};
-            const locality = a.suburb || a.neighbourhood || a.quarter || a.city_district || a.town || a.village || '';
-            const city = a.city || a.town || a.county || a.state_district || a.state || '';
-            if (locality && city && locality.toLowerCase() !== city.toLowerCase()) return `${city} • ${locality}`;
-            return city || locality || '';
-        } catch (_) {
-            return '';
-        }
-    }
     function showToast(message) {
         const toast = document.getElementById('home-toast');
         if (!toast) return;
@@ -1465,15 +1453,10 @@
     async function initializeHome() {
         const user = auth.currentUser;
         if (user) {
-            const userSnap = await db.collection('users').doc(user.uid).get();
-            const userData = userSnap.data() || {};
-            document.getElementById('user-display-name').textContent = userData.displayName || user.displayName || 'Guest';
-            document.getElementById('user-city').textContent = userData.city || 'Your district';
-            
-            // Notifications badge
             db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
                 .onSnapshot(snap => {
                     const badge = document.getElementById('notif-badge');
+                    if (!badge) return;
                     if (!snap.empty) {
                         badge.textContent = snap.size > 9 ? '9+' : snap.size;
                         badge.classList.remove('hide');
@@ -1493,12 +1476,6 @@
                     lat: pos.coords.latitude,
                     lng: pos.coords.longitude
                 };
-                const cityEl = document.getElementById('user-city');
-                if (cityEl && cityEl.textContent) {
-                    cityEl.textContent = `${cityEl.textContent} • Near you`;
-                }
-                const label = await reverseGeocodeLabel(userGeo.lat, userGeo.lng);
-                if (cityEl && label) cityEl.textContent = label;
                 await rerenderHomeLists();
             },
             () => {},
@@ -1526,16 +1503,17 @@
             });
             const enriched = enrichEventsWithDistance(events);
             allEventsCache = enriched;
-            const publishedEvents = enriched.filter(e => e.is_published !== false);
-            const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
-            document.getElementById('kpi-events').textContent = liveEvents.length;
-
             await rerenderHomeLists();
             renderPromo();
 
         } catch (e) {
             console.error(e);
-            document.getElementById('home-skeleton-wrap')?.classList.add('hide');
+            document.querySelector('.home-shell-body')?.classList.remove('home-shell-body--loading');
+            const skMissing = document.getElementById('home-skeleton-wrap');
+            if (skMissing) {
+                skMissing.classList.add('hide');
+                skMissing.removeAttribute('aria-busy');
+            }
         }
     }
 
@@ -1543,16 +1521,17 @@
         const scroll = document.getElementById('categories-scroll');
         const allChipClass = selectedCatId === '' ? 'category-chip active' : 'category-chip';
         scroll.innerHTML = `<div class="${allChipClass}" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>`;
+        const openEv = events.filter(e => e.is_published !== false && !isEventClosed(e));
         const bucket = {};
-        events.forEach(e => {
+        openEv.forEach(e => {
             const id = e.category_id || 'other';
             const name = e.category_name || 'Event';
             if (!bucket[id]) bucket[id] = { name, count: 0 };
             bucket[id].count++;
         });
 
-        document.getElementById('count-all').textContent = events.length;
-        
+        document.getElementById('count-all').textContent = openEv.length;
+
         Object.entries(bucket).forEach(([id, cat]) => {
             if (id === 'other') return;
             const chip = document.createElement('div');
@@ -1561,29 +1540,30 @@
             chip.onclick = () => filterByCat(id, chip);
             scroll.appendChild(chip);
         });
-        document.getElementById('kpi-categories').textContent = Object.keys(bucket).filter(id => id !== 'other').length;
     }
 
     function renderFeatured(events) {
         const scroll = document.getElementById('featured-scroll');
         scroll.innerHTML = '';
         const featured = events
-            .filter(e => e.is_featured && e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e =>
+                e.is_featured &&
+                e.is_published !== false &&
+                matchesSelectedCategory(e) &&
+                !isEventClosed(e)
+            )
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return Number(b.rating_average || 0) - Number(a.rating_average || 0);
             });
-        document.getElementById('kpi-featured').textContent = featured.length;
         featured.forEach(e => {
-            const closed = isEventClosed(e);
             const card = `
-                <div class="featured-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="featured-card animate-evorra" onclick="handleEventCardTap('${e.id}', false)">
                     <div class="ev-poster-frame">
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="featured-card-img" alt="">
                     </div>
                     <span class="featured-tag">${e.category_name || 'Featured'}</span>
-                    ${closed ? '<span class="closed-tag">Closed</span>' : ''}
                     <div class="featured-card-body">
                         <h3 class="featured-title">${e.title || 'Untitled'}</h3>
                         <p class="featured-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
@@ -1602,10 +1582,10 @@
         const list = document.getElementById('popular-list');
         list.innerHTML = '';
         const popular = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return (b.tickets_sold || 0) - (a.tickets_sold || 0);
             })
             .slice(0, 5);
@@ -1633,9 +1613,8 @@
     }
 
     function createMarqueeCard(e) {
-        const closed = isEventClosed(e);
         return `
-            <div class="marquee-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+            <div class="marquee-card animate-evorra" onclick="handleEventCardTap('${e.id}', false)">
                 <div class="ev-poster-frame">
                 <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="marquee-card-img" alt="">
                 </div>
@@ -1645,7 +1624,7 @@
                     <p class="marquee-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                     <div class="marquee-card-bottom">
                         <span class="marquee-card-price">₹${e.price_start || 0}</span>
-                        ${closed ? '<span class="marquee-closed-label">Closed</span>' : '<span class="marquee-card-heart"><i class="fa-regular fa-heart"></i></span>'}
+                        <span class="marquee-card-heart"><i class="fa-regular fa-heart"></i></span>
                     </div>
                 </div>
             </div>
@@ -1657,10 +1636,10 @@
         list.innerHTML = '<div class="upcoming-grid" id="upcoming-grid"></div>';
         const grid = document.getElementById('upcoming-grid');
         const upcoming = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return new Date(a.start_time) - new Date(b.start_time);
             })
             .slice(0, 5);
@@ -1670,9 +1649,8 @@
     }
 
     function createUpcomingCard(e) {
-        const closed = isEventClosed(e);
         return `
-            <div class="upcoming-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+            <div class="upcoming-card animate-evorra" onclick="handleEventCardTap('${e.id}', false)">
                 <div class="ev-poster-frame">
                 <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="upcoming-card-img" alt="">
                 </div>
@@ -1682,7 +1660,7 @@
                     <p class="upcoming-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                     <div class="upcoming-bottom">
                         <span class="upcoming-price">₹${e.price_start || 0}</span>
-                        ${closed ? '<span class="upcoming-closed-label">Closed</span>' : '<span class="upcoming-heart"><i class="fa-regular fa-heart"></i></span>'}
+                        <span class="upcoming-heart"><i class="fa-regular fa-heart"></i></span>
                     </div>
                 </div>
             </div>

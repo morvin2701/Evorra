@@ -174,7 +174,15 @@
                 document.getElementById('edit-name').value = data.display_name || user.displayName || '';
                 document.getElementById('edit-email').value = data.email || user.email || '';
                 document.getElementById('edit-phone').value = data.phone_number || '';
-                document.getElementById('edit-city').value = data.city || '';
+                var prefCity =
+                    (data.city && String(data.city).trim()) ||
+                    (Array.isArray(data.cities) && data.cities.length
+                        ? String(data.cities[0] || '').trim()
+                        : '') ||
+                    (typeof data.cities === 'string' && data.cities.trim()
+                        ? String(data.cities.split(',')[0] || '').trim()
+                        : '');
+                document.getElementById('edit-city').value = prefCity;
                 
                 if (data.role) setRole(data.role.toLowerCase());
 

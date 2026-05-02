@@ -22,22 +22,66 @@
         padding: 16px;
         box-shadow: 0 16px 44px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
     }
-    .m-header {
-        padding: 18px 16px;
+    .m-brand-strip {
+        position: relative;
+        overflow: hidden;
+        padding: 16px 16px 18px;
         border-radius: 20px;
         border: 1px solid rgba(255,255,255,0.1);
-        background: linear-gradient(160deg, #1f1f1f 0%, #101010 100%);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+        background: linear-gradient(152deg, #1a1a1a 0%, #0a0a0a 52%, #121212 100%);
+        box-shadow: 0 22px 52px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
     }
-    .m-welcome { color: rgba(215, 233, 255, 0.64); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
-    .m-row { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .m-title { color: #fff; font-size: 1.7rem; line-height: 1.15; margin: 0; font-weight: 900; }
+    .m-brand-accent {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        top: 0;
+        height: 2px;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(90deg, transparent, rgba(255,61,0,0.7), rgba(255,215,0,0.45), transparent);
+        pointer-events: none;
+    }
+    .m-brand-inner {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .m-brand-wordmark {
+        margin: 0;
+        padding: 0;
+        font-size: clamp(1.75rem, 7vw, 2.05rem);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        background: linear-gradient(125deg, #fff 0%, #ffe6c7 45%, #ff7a42 72%, #ff3d00 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: mEvorraShift 14s ease-in-out infinite alternate;
+    }
+    @keyframes mEvorraShift {
+        0% { background-position: 0% 50%; }
+        100% { background-position: 100% 50%; }
+    }
+    .m-brand-sub {
+        margin: 6px 0 0;
+        color: rgba(210, 225, 245, 0.7);
+        font-size: 0.74rem;
+        font-weight: 600;
+        line-height: 1.35;
+        max-width: 28ch;
+    }
     .m-bell {
-        width: 42px; height: 42px; border-radius: 12px;
+        width: 44px; height: 44px; border-radius: 14px;
         display: inline-flex; align-items: center; justify-content: center;
         border: 1px solid rgba(255,255,255,0.18);
         background: rgba(255,255,255,0.06);
         color: #fff; position: relative;
+        flex-shrink: 0;
     }
     .m-badge {
         position: absolute; top: -4px; right: -4px;
@@ -45,36 +89,17 @@
         background: #ff5070; border: 2px solid #11182b;
         font-size: 0.62rem; display: flex; align-items: center; justify-content: center; font-weight: 800;
     }
-    .m-sub { margin-top: 4px; color: rgba(220, 236, 255, 0.72); font-size: 0.82rem; }
-    .m-presence {
-        margin-top: 11px;
-        display: inline-flex; align-items: center; gap: 8px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.15);
-        background: rgba(255,255,255,0.05);
-        color: rgba(236,244,255,0.92);
-        padding: 6px 10px;
-        font-size: 0.7rem;
-        font-weight: 700;
-    }
-    .m-dot {
-        width: 8px; height: 8px; border-radius: 999px;
-        background: #ff3d00; box-shadow: 0 0 0 4px rgba(255,61,0,0.22);
-    }
-    .m-kpis {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
+    .section-eyebrow-m {
+        display: inline-flex;
+        align-items: center;
         gap: 8px;
+        font-size: 0.61rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 215, 0, 0.62);
+        margin: 0 0 8px;
     }
-    .m-kpi {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-left: 3px solid #ff3d00;
-        background: rgba(0,0,0,0.35);
-        padding: 12px 11px;
-    }
-    .m-kpi-label { color: rgba(208,226,255,0.64); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.11em; font-weight: 800; }
-    .m-kpi-value { color: #fff; font-size: 1.14rem; margin-top: 4px; font-weight: 900; line-height: 1; }
     .m-head { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
     .m-head h2 { margin: 0; color: #fff; font-size: 1.22rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.2; }
     .m-subtitle { color: rgba(217,233,255,0.62); font-size: 0.78rem; margin-top: 3px; }
@@ -186,14 +211,8 @@
             padding: 0 6px;
             margin-top: 8px;
         }
-        .m-header {
-            padding: 14px;
-        }
-        .m-title {
-            font-size: 1.45rem;
-        }
-        .m-kpis {
-            grid-template-columns: 1fr;
+        .m-brand-strip {
+            padding: 14px 14px 16px;
         }
         .m-pop-card {
             grid-template-columns: 1fr;
@@ -274,6 +293,157 @@
         text-transform: uppercase;
         color: #ffc857;
     }
+    .spotlight-m-wrap {
+        display: grid;
+        gap: 10px;
+    }
+    .spotlight-m-kicker {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0;
+    }
+    .spotlight-m-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.6rem;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 215, 120, 0.8);
+        padding: 6px 11px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,215,120,0.24);
+        background: rgba(0,0,0,0.4);
+    }
+    .spotlight-m-hint {
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+        font-size: 0.72rem;
+        color: rgba(180,194,214,0.75);
+        font-weight: 600;
+        line-height: 1.35;
+    }
+    .hero-spotlight {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #0a0a0a;
+        min-height: min(280px, 48vw);
+        box-shadow: 0 28px 64px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,61,0,0.06);
+    }
+    .hero-spotlight-track {
+        display: flex;
+        transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hero-spotlight-slide {
+        position: relative;
+        min-width: 100%;
+        flex-shrink: 0;
+        cursor: pointer;
+        min-height: min(280px, 48vw);
+    }
+    .hero-spotlight-slide .hs-media {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: linear-gradient(155deg, #1e293b 0%, #0f172a 55%, #020617 100%);
+    }
+    .hero-spotlight-slide .hs-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
+        transform: scale(1.02);
+        transition: transform 8s ease-out;
+    }
+    .hero-spotlight-slide .hs-grad {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(120deg, rgba(4, 10, 22, 0.45) 0%, rgba(6, 14, 28, 0.55) 38%, rgba(5, 8, 18, 0.78) 68%, rgba(2, 6, 15, 0.9) 100%);
+    }
+    .hero-spotlight-slide .hs-body {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        padding: 18px 16px 46px;
+        z-index: 2;
+    }
+    .hs-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,61,0,0.35);
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(10px);
+        color: #fff;
+    }
+    .hs-title {
+        margin: 10px 0 5px;
+        font-size: clamp(1.22rem, 5.2vw, 1.55rem);
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        max-width: 95%;
+    }
+    .hs-meta {
+        margin: 0;
+        color: rgba(220,236,255,0.85);
+        font-size: 0.78rem;
+        line-height: 1.42;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .hs-dots {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 7px;
+        z-index: 3;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(8px);
+    }
+    .hs-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.28);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease, width 0.2s ease;
+    }
+    .hs-dot.active {
+        width: 20px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #ff3d00, #ffd700);
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(255,61,0,0.4);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .m-brand-wordmark { animation: none !important; background-position: 0% 50% !important; }
+        .hero-spotlight-slide .hs-img { transition: none !important; }
+        .hero-spotlight-slide:hover .hs-img { transform: none !important; }
+    }
 </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home-premium.css') }}">
 {% endblock %}
@@ -281,62 +451,56 @@
 {% block content %}
 <div class="home-m-bg home-m-premium">
     <div class="home-m-shell">
-        <div class="m-header">
-            <p class="m-welcome">Welcome back</p>
-            <div class="m-row">
-                <h1 id="user-display-name" class="m-title">Guest</h1>
-                <button class="m-bell" onclick="location.href='/notifications'">
+        <header class="m-brand-strip">
+            <div class="m-brand-accent" aria-hidden="true"></div>
+            <div class="m-brand-inner">
+                <div>
+                    <h1 class="m-brand-wordmark">Evorra</h1>
+                    <p class="m-brand-sub">Spotlight, trending picks, categories, personalised &amp; near Ahmedabad.</p>
+                </div>
+                <button type="button" class="m-bell" onclick="location.href='/notifications'" aria-label="Notifications">
                     <i class="fa-regular fa-bell"></i>
                     <span id="notif-badge" class="hide m-badge">0</span>
                 </button>
             </div>
-            <p id="user-city" class="m-sub">Your district</p>
-            <div class="m-presence">
-                <span class="m-dot"></span>
-                <span>Live discovery mode enabled</span>
-            </div>
-        </div>
+        </header>
 
         <div class="m-quick-bar" role="navigation" aria-label="Quick actions">
             <a href="/explore" class="m-quick-btn m-quick-primary"><i class="fa-solid fa-compass"></i> Explore</a>
             <a href="/my-tickets" class="m-quick-btn"><i class="fa-solid fa-ticket"></i> My tickets</a>
         </div>
 
-        <div class="m-panel">
-            <div class="m-kpis">
-                <div class="m-kpi">
-                    <p class="m-kpi-label">Categories</p>
-                    <p class="m-kpi-value" id="kpi-categories">0</p>
-                </div>
-                <div class="m-kpi">
-                    <p class="m-kpi-label">Live Events</p>
-                    <p class="m-kpi-value" id="kpi-events">0</p>
-                </div>
-                <div class="m-kpi">
-                    <p class="m-kpi-label">Featured</p>
-                    <p class="m-kpi-value" id="kpi-featured">0</p>
-                </div>
+        <div id="m-discovery-skel" class="m-panel m-skel-panel"></div>
+
+        <div id="spotlight-m-outer" class="spotlight-m-wrap hide">
+            <div class="spotlight-m-kicker">
+                <span class="spotlight-m-pill"><i class="fa-solid fa-bolt"></i> Spotlight</span>
+                <p class="spotlight-m-hint">Top experiences — autoplay rotates every few seconds.</p>
+            </div>
+            <div id="hero-spotlight" class="hero-spotlight hide" aria-roledescription="carousel">
+                <div id="hero-spotlight-track" class="hero-spotlight-track"></div>
+                <div id="hero-spotlight-dots" class="hs-dots"></div>
             </div>
         </div>
 
-        <div id="m-discovery-skel" class="m-panel m-skel-panel"></div>
-
-        <div id="m-discovery-wrap" class="m-panel hide">
+        <div id="m-trending-wrap" class="m-panel hide">
             <div class="m-head">
                 <div>
-                    <h2>🔥 Trending · Ahmedabad · For you</h2>
-                    <p class="m-subtitle">Smart-ranked picks from bookings, buzz &amp; distance</p>
+                    <p class="section-eyebrow-m"><i class="fa-solid fa-chart-line"></i> Trending event</p>
+                    <h2 style="margin:0;color:#fff;font-size:1.15rem;font-weight:900;line-height:1.2;">What everyone’s booking</h2>
+                    <p class="m-subtitle">Ranked by sales, hype &amp; ratings</p>
                 </div>
                 <a href="/explore" class="m-link">All</a>
             </div>
-            <div class="m-scroll" id="m-discovery-scroll" style="scroll-snap-type:x mandatory;"></div>
+            <div class="m-scroll" id="trending-row-m" style="scroll-snap-type:x mandatory;"></div>
         </div>
 
         <div class="m-panel">
             <div class="m-head">
                 <div>
-                    <h2>Discover Categories</h2>
-                    <p class="m-subtitle">Choose a vibe and explore curated experiences</p>
+                    <p class="section-eyebrow-m"><i class="fa-solid fa-layer-group"></i> Discover categories</p>
+                    <h2 style="margin:0;color:#fff;font-size:1.15rem;font-weight:900;">Find your vibe</h2>
+                    <p class="m-subtitle">Tap a chip — every row refreshes instantly</p>
                 </div>
             </div>
             <div class="m-scroll" id="categories-scroll">
@@ -344,11 +508,37 @@
             </div>
         </div>
 
+        <div id="m-foryou-wrap" class="m-panel hide">
+            <div class="m-head">
+                <div>
+                    <p class="section-eyebrow-m"><i class="fa-solid fa-sparkles"></i> Personalised</p>
+                    <h2 style="margin:0;color:#fff;font-size:1.15rem;font-weight:900;">Because you booked</h2>
+                    <p class="m-subtitle">From your ticket history when signed in</p>
+                </div>
+                <a href="/explore" class="m-link">All</a>
+            </div>
+            <div class="m-scroll" id="foryou-row-m" style="scroll-snap-type:x mandatory;"></div>
+            <p id="foryou-hint-m" class="m-subtitle hide" style="margin-top:8px;">Book events to sharpen this row.</p>
+        </div>
+
+        <div id="m-near-wrap" class="m-panel hide">
+            <div class="m-head">
+                <div>
+                    <p class="section-eyebrow-m"><i class="fa-solid fa-location-crosshairs"></i> Near Ahmedabad</p>
+                    <h2 style="margin:0;color:#fff;font-size:1.15rem;font-weight:900;">Around the city</h2>
+                    <p class="m-subtitle">~55 km radius &amp; Ahmedabad listings</p>
+                </div>
+                <a href="/explore" class="m-link">Map</a>
+            </div>
+            <div class="m-scroll" id="near-row-m" style="scroll-snap-type:x mandatory;"></div>
+        </div>
+
         <div class="m-panel">
             <div class="m-head">
                 <div>
-                    <h2>Featured Events</h2>
-                    <p class="m-subtitle">Handpicked headline experiences near you</p>
+                    <p class="section-eyebrow-m"><i class="fa-solid fa-star"></i> Featured</p>
+                    <h2 style="margin:0;color:#fff;font-size:1.15rem;font-weight:900;">Handpicked headlines</h2>
+                    <p class="m-subtitle">Showcase drops from organisers</p>
                 </div>
             </div>
             <div class="m-featured-list" id="featured-scroll"></div>
@@ -389,6 +579,9 @@
     let userGeo = null;
     const AHM_CENTER = { lat: 23.0225, lng: 72.5714 };
     let preferredCategoryIds = new Set();
+    let heroCarouselSlides = [];
+    let heroCarouselIndex = 0;
+    let heroCarouselTimer = null;
 
     function esc(s) {
         return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -438,48 +631,142 @@
         if (preferredCategoryIds.has(String(e.category_id || ''))) s += 90;
         return s;
     }
-    function buildMobileDiscoveryList(events) {
-        const open = events.filter(e => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e));
-        const trending = [...open].sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 8);
-        const taken = new Set(trending.map((x) => x.id));
-        const near = [...open].filter(e => nearAhmedabad(e) && !taken.has(e.id))
-            .sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 5);
-        near.forEach((e) => taken.add(e.id));
-        const forMore = [...open].filter(e => !taken.has(e.id))
-            .sort((a, b) => scoreYou(b) - scoreYou(a)).slice(0, 6);
-        return [...trending, ...near, ...forMore].slice(0, 14);
+    function rankNearAhmedabadList(events) {
+        const pool = events.filter(e =>
+            e.is_published !== false
+            && !isEventClosed(e)
+            && matchesSelectedCategory(e)
+            && nearAhmedabad(e)
+        );
+        return pool.sort((a, b) => {
+            const da = Number(a.__distanceKm);
+            const db = Number(b.__distanceKm);
+            const ad = Number.isFinite(da) && da !== Number.POSITIVE_INFINITY ? da : 9999;
+            const bd = Number.isFinite(db) && db !== Number.POSITIVE_INFINITY ? db : 9999;
+            if (Math.abs(ad - bd) > 3) return ad - bd;
+            return trendingScore(b) - trendingScore(a);
+        });
     }
-    function renderMobileDiscovery(events) {
-        const wrap = document.getElementById('m-discovery-wrap');
-        const row = document.getElementById('m-discovery-scroll');
-        const sk = document.getElementById('m-discovery-skel');
-        if (sk) sk.classList.add('hide');
-        const list = buildMobileDiscoveryList(events);
-        if (!wrap || !row) return;
+    function buildForYouList(events) {
+        const pool = events.filter(e =>
+            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e)
+        );
+        const ranked = pool.map(e => ({ e, s: scoreYou(e) }));
+        ranked.sort((a, b) => b.s - a.s);
+        return ranked.slice(0, 12).map(x => x.e);
+    }
+    function mobileDiscoveryCardHtml(e, badgeTag) {
+        const img = esc(e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
+        return `
+            <div class="m-disc-card" onclick="handleEventCardTap('${e.id}', false)">
+                <div class="ev-poster-frame">
+                <img class="m-disc-img" src="${img}" alt="">
+                </div>
+                <div class="m-disc-body">
+                    <span class="m-disc-badge">${esc(badgeTag)}</span>
+                    <h3 class="m-card-title" style="margin-top:6px;">${esc(e.title || 'Event')}</h3>
+                    <p class="m-card-meta">${esc(e.city || '')} · ₹${Number(e.price_start || 0)}</p>
+                </div>
+            </div>`;
+    }
+    function fillMobileScrollRow(panelId, rowId, list, badgeFallback) {
+        const panel = document.getElementById(panelId);
+        const row = document.getElementById(rowId);
+        if (!panel || !row) return;
+        row.innerHTML = '';
+        list = list.filter(e => !isEventClosed(e));
         if (!list.length) {
-            wrap.classList.add('hide');
+            panel.classList.add('hide');
             return;
         }
-        wrap.classList.remove('hide');
-        row.innerHTML = '';
+        panel.classList.remove('hide');
         list.forEach((e) => {
-            const closed = isEventClosed(e);
-            const img = esc(e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
-            let tag = 'For you';
-            if (nearAhmedabad(e)) tag = 'Near Ahmedabad';
-            else if (trendingScore(e) >= 85) tag = 'Trending';
-            row.innerHTML += `
-                <div class="m-disc-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <div class="ev-poster-frame">
-                    <img class="m-disc-img" src="${img}" alt="">
+            row.innerHTML += mobileDiscoveryCardHtml(e, badgeFallback);
+        });
+    }
+    function toggleMobileSmartPanels(hasTrend, hasNear, hasYou) {
+        const sk = document.getElementById('m-discovery-skel');
+        if (sk) sk.classList.add('hide');
+        document.getElementById('m-trending-wrap')?.classList.toggle('hide', !hasTrend);
+        document.getElementById('m-near-wrap')?.classList.toggle('hide', !hasNear);
+        const fy = document.getElementById('m-foryou-wrap');
+        const hint = document.getElementById('foryou-hint-m');
+        if (fy) fy.classList.toggle('hide', !hasYou);
+        const logged = !!(typeof auth !== 'undefined' && auth.currentUser);
+        if (hint) {
+            hint.classList.toggle('hide', !logged || preferredCategoryIds.size > 0 || !hasYou);
+        }
+    }
+    function mountHeroCarousel(sourceEvents) {
+        const outer = document.getElementById('spotlight-m-outer');
+        const wrap = document.getElementById('hero-spotlight');
+        const track = document.getElementById('hero-spotlight-track');
+        const dots = document.getElementById('hero-spotlight-dots');
+        if (!wrap || !track || !dots) return;
+        heroCarouselSlides = sourceEvents
+            .filter(e => e.is_published !== false && !isEventClosed(e))
+            .sort((a, b) => trendingScore(b) - trendingScore(a))
+            .slice(0, 5);
+        if (!heroCarouselSlides.length) {
+            wrap.classList.add('hide');
+            if (outer) outer.classList.add('hide');
+            if (heroCarouselTimer) clearInterval(heroCarouselTimer);
+            return;
+        }
+        if (outer) outer.classList.remove('hide');
+        wrap.classList.remove('hide');
+        track.innerHTML = heroCarouselSlides.map((e, i) => {
+            const img = esc(e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2');
+            const title = esc(e.title || 'Featured');
+            const meta = `${esc(e.city || '')} • ${esc(e.category_name || 'Live')}`;
+            return `
+                <div class="hero-spotlight-slide" data-i="${i}" onclick="handleEventCardTap('${e.id}', false)">
+                    <div class="hs-media">
+                        <img class="hs-img" src="${img}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}">
                     </div>
-                    <div class="m-disc-body">
-                        <span class="m-disc-badge">${esc(tag)}</span>
-                        <h3 class="m-card-title" style="margin-top:6px;">${esc(e.title || 'Event')}</h3>
-                        <p class="m-card-meta">${esc(e.city || '')} · ₹${Number(e.price_start || 0)}</p>
+                    <div class="hs-grad"></div>
+                    <div class="hs-body">
+                        <span class="hs-badge"><i class="fa-solid fa-bolt"></i> Spotlight</span>
+                        <h2 class="hs-title">${title}</h2>
+                        <p class="hs-meta">${meta}${formatDistance(e) ? ` • ${esc(formatDistance(e))}` : ''}</p>
                     </div>
                 </div>`;
+        }).join('');
+        dots.innerHTML = heroCarouselSlides.map((_, i) =>
+            `<button type="button" class="hs-dot ${i === 0 ? 'active' : ''}" aria-label="Slide ${i + 1}" onclick="goHeroSlide(${i})"></button>`
+        ).join('');
+        heroCarouselIndex = 0;
+        applyHeroSlideTransform();
+        if (heroCarouselTimer) clearInterval(heroCarouselTimer);
+        heroCarouselTimer = setInterval(() => {
+            if (heroCarouselSlides.length < 2) return;
+            heroCarouselIndex = (heroCarouselIndex + 1) % heroCarouselSlides.length;
+            applyHeroSlideTransform();
+        }, 6500);
+    }
+    function goHeroSlide(idx) {
+        if (!heroCarouselSlides.length) return;
+        heroCarouselIndex = ((idx % heroCarouselSlides.length) + heroCarouselSlides.length) % heroCarouselSlides.length;
+        applyHeroSlideTransform();
+    }
+    function applyHeroSlideTransform() {
+        const track = document.getElementById('hero-spotlight-track');
+        if (track) track.style.transform = `translateX(-${heroCarouselIndex * 100}%)`;
+        document.querySelectorAll('#hero-spotlight-dots .hs-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === heroCarouselIndex);
         });
+    }
+    function renderMobileSmartSections(events) {
+        const open = events.filter(e => e.is_published !== false && !isEventClosed(e));
+        const trendingPool = [...open].filter(e => matchesSelectedCategory(e))
+            .sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 12);
+        const nearPool = rankNearAhmedabadList(events).slice(0, 12);
+        const forYouPool = buildForYouList(events);
+        mountHeroCarousel(trendingPool.length ? trendingPool : open.filter(e => matchesSelectedCategory(e)));
+        fillMobileScrollRow('m-trending-wrap', 'trending-row-m', trendingPool, 'Trending');
+        fillMobileScrollRow('m-near-wrap', 'near-row-m', nearPool, 'Near Ahmedabad');
+        fillMobileScrollRow('m-foryou-wrap', 'foryou-row-m', forYouPool, 'Personalised');
+        toggleMobileSmartPanels(trendingPool.length > 0, nearPool.length > 0, forYouPool.length > 0);
     }
 
     function isEventClosed(eventItem) {
@@ -555,33 +842,6 @@
         const bf = Number.isFinite(bd) ? bd : Number.POSITIVE_INFINITY;
         return af - bf;
     }
-    function compareByClosedThenDistance(a, b) {
-        const closedDiff = Number(isEventClosed(a)) - Number(isEventClosed(b));
-        if (closedDiff !== 0) return closedDiff;
-        return compareByProximity(a, b);
-    }
-    async function reverseGeocodeLabel(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=1`;
-        try {
-            const controller = new AbortController();
-            const t = setTimeout(() => controller.abort(), 4500);
-            const res = await fetch(url, {
-                signal: controller.signal,
-                headers: { 'Accept': 'application/json' }
-            });
-            clearTimeout(t);
-            if (!res.ok) return '';
-            const data = await res.json();
-            const a = data?.address || {};
-            const locality = a.suburb || a.neighbourhood || a.quarter || a.city_district || a.town || a.village || '';
-            const city = a.city || a.town || a.county || a.state_district || a.state || '';
-            if (locality && city && locality.toLowerCase() !== city.toLowerCase()) return `${city} • ${locality}`;
-            return city || locality || '';
-        } catch (_) {
-            return '';
-        }
-    }
-
     function showToast(message) {
         const toast = document.getElementById('home-toast');
         if (!toast) return;
@@ -603,14 +863,10 @@
     async function initializeHome() {
         const user = auth.currentUser;
         if (user) {
-            const userSnap = await db.collection('users').doc(user.uid).get();
-            const userData = userSnap.data() || {};
-            document.getElementById('user-display-name').textContent = userData.displayName || user.displayName || 'Guest';
-            document.getElementById('user-city').textContent = userData.city || 'Your district';
-
             db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
                 .onSnapshot(snap => {
                     const badge = document.getElementById('notif-badge');
+                    if (!badge) return;
                     if (!snap.empty) {
                         badge.textContent = snap.size > 9 ? '9+' : snap.size;
                         badge.classList.remove('hide');
@@ -630,12 +886,6 @@
                     lat: pos.coords.latitude,
                     lng: pos.coords.longitude
                 };
-                const cityEl = document.getElementById('user-city');
-                if (cityEl && cityEl.textContent) {
-                    cityEl.textContent = `${cityEl.textContent} • Near you`;
-                }
-                const label = await reverseGeocodeLabel(userGeo.lat, userGeo.lng);
-                if (cityEl && label) cityEl.textContent = label;
                 await rerenderHomeLists();
             },
             () => {},
@@ -646,7 +896,7 @@
         if (!allEventsCache.length) return;
         renderCategories(allEventsCache);
         await refreshPreferredCategories();
-        renderMobileDiscovery(allEventsCache);
+        renderMobileSmartSections(allEventsCache);
         renderFeatured(allEventsCache);
         renderPopular(allEventsCache);
         renderUpcoming(allEventsCache);
@@ -663,10 +913,6 @@
             });
             const enriched = enrichEventsWithDistance(events);
             allEventsCache = enriched;
-            const publishedEvents = enriched.filter(e => e.is_published !== false);
-            const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
-            document.getElementById('kpi-events').textContent = liveEvents.length;
-
             await rerenderHomeLists();
             renderPromo();
         } catch (e) {
@@ -679,14 +925,15 @@
         const scroll = document.getElementById('categories-scroll');
         const allChipClass = selectedCatId === '' ? 'category-chip active' : 'category-chip';
         scroll.innerHTML = `<div class="${allChipClass}" onclick="filterByCat('', this)">All <span class="category-badge" id="count-all">0</span></div>`;
+        const openEv = events.filter(e => e.is_published !== false && !isEventClosed(e));
         const bucket = {};
-        events.forEach(e => {
+        openEv.forEach(e => {
             const id = e.category_id || 'other';
             const name = e.category_name || 'Event';
             if (!bucket[id]) bucket[id] = { name, count: 0 };
             bucket[id].count++;
         });
-        document.getElementById('count-all').textContent = events.length;
+        document.getElementById('count-all').textContent = openEv.length;
 
         Object.entries(bucket).forEach(([id, cat]) => {
             if (id === 'other') return;
@@ -696,24 +943,26 @@
             chip.onclick = () => filterByCat(id, chip);
             scroll.appendChild(chip);
         });
-        document.getElementById('kpi-categories').textContent = Object.keys(bucket).filter(id => id !== 'other').length;
     }
 
     function renderFeatured(events) {
         const scroll = document.getElementById('featured-scroll');
         scroll.innerHTML = '';
         const featured = events
-            .filter(e => e.is_featured && e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e =>
+                e.is_featured &&
+                e.is_published !== false &&
+                matchesSelectedCategory(e) &&
+                !isEventClosed(e)
+            )
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return Number(b.rating_average || 0) - Number(a.rating_average || 0);
             });
-        document.getElementById('kpi-featured').textContent = featured.length;
         featured.forEach(e => {
-            const closed = isEventClosed(e);
             scroll.innerHTML += `
-                <div class="m-featured-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="m-featured-card" onclick="handleEventCardTap('${e.id}', false)">
                     <div class="ev-poster-frame">
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="m-featured-img" alt="">
                     </div>
@@ -722,7 +971,7 @@
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
-                            ${closed ? '<span class="closed-label">Closed</span>' : `<span class="m-rating"><i class="fa-solid fa-star"></i> ${e.rating_average || '0.0'}</span>`}
+                            <span class="m-rating"><i class="fa-solid fa-star"></i> ${e.rating_average || '0.0'}</span>
                         </div>
                     </div>
                 </div>
@@ -734,17 +983,16 @@
         const list = document.getElementById('popular-list');
         list.innerHTML = '';
         const popular = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return (b.tickets_sold || 0) - (a.tickets_sold || 0);
             })
             .slice(0, 6);
         popular.forEach(e => {
-            const closed = isEventClosed(e);
             list.innerHTML += `
-                <div class="m-pop-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="m-pop-card" onclick="handleEventCardTap('${e.id}', false)">
                     <div class="ev-poster-frame ev-poster-frame--m-pop">
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-pop-img" alt="">
                     </div>
@@ -753,7 +1001,7 @@
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
-                            ${closed ? '<span class="closed-label">Closed</span>' : '<span class="m-rating"><i class="fa-regular fa-heart"></i></span>'}
+                            <span class="m-rating"><i class="fa-regular fa-heart"></i></span>
                         </div>
                     </div>
                 </div>
@@ -765,17 +1013,16 @@
         const list = document.getElementById('upcoming-list');
         list.innerHTML = '';
         const upcoming = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
             .sort((a, b) => {
-                const base = compareByClosedThenDistance(a, b);
-                if (base !== 0) return base;
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
                 return new Date(a.start_time) - new Date(b.start_time);
             })
             .slice(0, 6);
         upcoming.forEach(e => {
-            const closed = isEventClosed(e);
             list.innerHTML += `
-                <div class="m-upcoming-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="m-upcoming-card" onclick="handleEventCardTap('${e.id}', false)">
                     <div class="ev-poster-frame">
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-upcoming-img" alt="">
                     </div>
@@ -784,7 +1031,7 @@
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
-                            ${closed ? '<span class="closed-label">Closed</span>' : '<span class="m-rating"><i class="fa-regular fa-heart"></i></span>'}
+                            <span class="m-rating"><i class="fa-regular fa-heart"></i></span>
                         </div>
                     </div>
                 </div>

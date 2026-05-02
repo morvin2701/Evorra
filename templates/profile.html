@@ -257,13 +257,21 @@
                     document.getElementById('p-role').textContent = role.toUpperCase();
                     document.getElementById('p-name').textContent = data.display_name || user.displayName || 'Guest';
                     document.getElementById('p-email').textContent = data.email || user.email;
-                    document.getElementById('p-city').textContent = data.city || 'Location not set';
+                    var showCity =
+                        (data.city && String(data.city).trim()) ||
+                        (Array.isArray(data.cities) && data.cities.length
+                            ? String(data.cities[0] || '').trim()
+                            : '') ||
+                        (typeof data.cities === 'string' && data.cities.trim()
+                            ? String(data.cities.split(',')[0] || '').trim()
+                            : '');
+                    document.getElementById('p-city').textContent = showCity || 'Location not set';
 
                     // Details
                     document.getElementById('d-name').textContent = data.display_name || user.displayName || 'Guest';
                     document.getElementById('d-email').textContent = data.email || user.email;
                     document.getElementById('d-phone').textContent = data.phone_number || 'N/A';
-                    document.getElementById('d-city').textContent = data.city || 'N/A';
+                    document.getElementById('d-city').textContent = showCity || 'N/A';
                     document.getElementById('d-role').textContent = role.charAt(0).toUpperCase() + role.slice(1);
 
                     // Interests
