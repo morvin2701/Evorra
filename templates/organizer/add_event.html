@@ -4,45 +4,63 @@
 
 {% block head %}
 <style>
-    /* Focus Mode Overrides */
+    /* Studio focus mode — inherits Showmates tokens from body.theme-showmates */
     .top-navbar, .bottom-nav { display: none !important; }
+    body:has(.studio-layout) .site-footer { display: none !important; }
     main { padding: 0; margin: 0; max-width: 100% !important; }
-    
-    :root {
-        --studio-dark: #070F1D;
-        --studio-glass: rgba(22, 31, 54, 0.7);
-        --studio-accent: #8E7DFF;
-        --studio-text: #FFFFFF;
-        --studio-muted: rgba(255, 255, 255, 0.5);
-        --sidebar-width: 280px;
-        --preview-width: 380px;
-    }
 
-    body { overflow: hidden; background: #070F1D; margin: 0; }
+    body:has(.studio-layout) {
+        overflow: hidden;
+        margin: 0;
+        background: var(--sm-bg) !important;
+    }
 
     .studio-layout {
+        --studio-accent: var(--sm-primary);
+        --studio-text: var(--sm-text);
+        --studio-muted: var(--sm-muted);
+        --studio-surface: var(--sm-surface);
+        --studio-bg: var(--sm-bg);
+        --studio-border: var(--sm-border);
+        --studio-primary-hover: var(--sm-primary-hover);
+        --sidebar-width: 280px;
+        --preview-width: 380px;
+
         display: flex;
         height: 100vh;
-        width: 100vw;
-        background: radial-gradient(circle at 30% 20%, rgba(95, 82, 255, 0.1), transparent 40%), #070F1D;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+        background:
+            radial-gradient(circle at 18% 12%, rgba(220, 38, 38, 0.06), transparent 42%),
+            radial-gradient(circle at 90% 80%, rgba(15, 23, 42, 0.04), transparent 45%),
+            var(--studio-bg);
         color: var(--studio-text);
         overflow: hidden;
+        font-family: 'Outfit', system-ui, sans-serif;
     }
 
-    /* Sidebar Navigation */
     .studio-sidebar {
         width: var(--sidebar-width);
-        background: rgba(11, 20, 36, 0.98);
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--studio-surface);
+        border-right: 1px solid var(--studio-border);
         display: flex;
         flex-direction: column;
         padding: 40px 30px;
         flex-shrink: 0;
         z-index: 100;
+        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.04);
     }
 
-    .sidebar-logo { font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 50px; color: var(--studio-accent); text-align: center; }
-    
+    .sidebar-logo {
+        font-size: 1.45rem;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        margin-bottom: 48px;
+        color: var(--studio-accent);
+        text-align: center;
+    }
+
     .studio-nav { flex: 1; }
     .nav-step {
         display: flex;
@@ -52,135 +70,456 @@
         border-radius: 18px;
         margin-bottom: 12px;
         cursor: pointer;
-        transition: 0.3s;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
         border: 1px solid transparent;
         background: transparent;
     }
-    .nav-step.active { background: rgba(142, 125, 255, 0.12); border-color: rgba(142, 125, 255, 0.2); }
-    .nav-step:hover:not(.active) { background: rgba(255, 255, 255, 0.04); }
+    .nav-step.active {
+        background: rgba(220, 38, 38, 0.08);
+        border-color: rgba(220, 38, 38, 0.22);
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.08);
+    }
+    .nav-step:hover:not(.active) {
+        background: var(--studio-bg);
+    }
 
-    .nav-number { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800; color: var(--studio-muted); transition: 0.3s; }
-    .nav-step.active .nav-number { background: var(--studio-accent); color: white; box-shadow: 0 0 20px var(--studio-accent); }
+    .nav-number {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--studio-muted);
+        transition: 0.25s ease;
+    }
+    .nav-step.active .nav-number {
+        background: var(--studio-accent);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35);
+    }
 
-    .nav-info p { font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; color: var(--studio-muted); margin: 0; }
+    .nav-info p {
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+        color: var(--studio-muted);
+        margin: 0;
+    }
     .nav-step.active .nav-info p { color: var(--studio-accent); }
-    .nav-info span { font-size: 0.95rem; font-weight: 700; display: block; margin-top: 2px; }
+    .nav-info span {
+        font-size: 0.95rem;
+        font-weight: 700;
+        display: block;
+        margin-top: 2px;
+        color: var(--studio-text);
+    }
+    .nav-step:not(.active) .nav-info span {
+        color: var(--studio-muted);
+        font-weight: 600;
+    }
 
-    .sidebar-footer { padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .sidebar-footer a { color: var(--studio-accent); font-size: 0.8rem; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .sidebar-footer {
+        padding-top: 20px;
+        border-top: 1px solid var(--studio-border);
+    }
+    .sidebar-footer a {
+        color: var(--studio-accent);
+        font-size: 0.8rem;
+        text-decoration: none;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.2s ease;
+    }
+    .sidebar-footer a:hover { opacity: 0.85; }
 
-    /* Content Area */
     .studio-content {
         flex: 1;
         overflow-y: auto;
-        padding: 100px 60px 150px; /* Increased top padding */
+        padding: 72px 48px 120px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        scrollbar-width: none;
+        scrollbar-width: thin;
+        scrollbar-color: var(--studio-border) transparent;
         z-index: 10;
-        background: linear-gradient(180deg, rgba(9, 16, 31, 0.96), rgba(7, 15, 29, 0.94));
-        border-left: 1px solid rgba(255,255,255,0.06);
-        border-right: 1px solid rgba(255,255,255,0.06);
+        background: linear-gradient(180deg, #ffffff 0%, var(--studio-bg) 100%);
+        border-left: 1px solid var(--studio-border);
+        border-right: 1px solid var(--studio-border);
     }
-    .studio-content::-webkit-scrollbar { display: none; }
 
     .form-scroll-area { width: 100%; max-width: 650px; }
-    
-    .step-intro { margin-bottom: 45px; }
-    .step-intro h2 { font-size: 2.8rem; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 12px; line-height: 1.1; color: white; }
-    .step-intro p { color: var(--studio-muted); font-size: 1.1rem; }
 
-    /* Form Step Visibility */
+    .step-intro { margin-bottom: 40px; }
+    .step-intro h2 {
+        font-size: clamp(1.85rem, 4vw, 2.65rem);
+        font-weight: 900;
+        letter-spacing: -0.06em;
+        margin-bottom: 12px;
+        line-height: 1.12;
+        color: var(--studio-text);
+    }
+    .step-intro p {
+        color: var(--studio-muted);
+        font-size: 1.05rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
     .form-step { display: none; width: 100%; }
-    .form-step.active-step { display: block; animation: studioFadeIn 0.5s ease-out; }
+    .form-step.active-step { display: block; animation: studioFadeIn 0.45s ease-out; }
 
     @keyframes studioFadeIn {
-        from { opacity: 0; transform: translateY(20px); }
+        from { opacity: 0; transform: translateY(14px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Preview Sidebar */
     .studio-preview-sidebar {
         width: var(--preview-width);
-        background: linear-gradient(180deg, rgba(11, 20, 36, 0.9), rgba(10, 22, 40, 0.86));
-        border-left: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 100px 35px 50px;
+        background: var(--studio-surface);
+        border-left: 1px solid var(--studio-border);
+        padding: 72px 28px 48px;
         flex-shrink: 0;
-        backdrop-filter: blur(15px);
         z-index: 50;
+        box-shadow: -6px 0 32px rgba(15, 23, 42, 0.05);
     }
 
-    .preview-header { font-size: 0.75rem; font-weight: 900; letter-spacing: 2px; color: var(--studio-muted); margin-bottom: 30px; text-transform: uppercase; }
-    
+    .preview-header {
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        color: var(--studio-muted);
+        margin-bottom: 24px;
+        text-transform: uppercase;
+    }
+
     .event-preview-card {
-        background: #121C30;
-        border-radius: 28px;
+        background: var(--studio-surface);
+        border-radius: 24px;
         overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        border: 1px solid var(--studio-border);
+        box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1);
     }
-    .preview-cover-placeholder { height: 200px; background: #1A2640; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.08); font-size: 3.5rem; overflow: hidden; position: relative; }
+    .preview-cover-placeholder {
+        height: 200px;
+        background: linear-gradient(145deg, #e8ecf1 0%, #f1f5f9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cbd5e1;
+        font-size: 3.25rem;
+        overflow: hidden;
+        position: relative;
+    }
     .preview-cover-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-    
-    .preview-body { padding: 25px; }
-    .preview-tag { background: var(--studio-accent); color: white; padding: 5px 12px; border-radius: 8px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
-    .preview-body h3 { font-size: 1.4rem; font-weight: 900; margin: 15px 0 8px; line-height: 1.2; color: white; }
-    .preview-body p { font-size: 0.85rem; color: var(--studio-muted); display: flex; align-items: center; gap: 8px; }
-    
-    .preview-footer { display: flex; justify-content: space-between; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .preview-date p, .preview-price p { font-size: 0.65rem; font-weight: 900; color: var(--studio-muted); text-transform: uppercase; margin-bottom: 4px; }
-    .preview-date span, .preview-price span { font-size: 0.95rem; font-weight: 900; color: white; }
 
-    .premium-card { background: rgba(22, 31, 54, 0.82); border: 1px solid rgba(255,255,255,0.12); border-radius: 28px; padding: 34px; box-shadow: 0 20px 40px rgba(0,0,0,0.28); }
-    .input-group-premium { margin-bottom: 30px; }
-    .input-group-premium label { display: block; font-size: 0.75rem; font-weight: 900; color: var(--studio-muted); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.8px; }
-    
-    .premium-input { 
-        background: rgba(255,255,255,0.05); 
-        border: 1px solid rgba(255,255,255,0.1); 
-        border-radius: 18px; 
-        padding: 18px 22px; 
-        color: white; 
-        width: 100%; 
-        outline: none; 
-        font-size: 1.05rem; 
-        transition: 0.4s;
+    .preview-body { padding: 22px 24px 26px; }
+    .preview-tag {
+        background: var(--studio-accent);
+        color: #fff;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.65rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    .preview-body h3 {
+        font-size: 1.35rem;
+        font-weight: 900;
+        margin: 14px 0 8px;
+        line-height: 1.2;
+        color: var(--studio-text);
+        letter-spacing: -0.03em;
+    }
+    .preview-body p {
+        font-size: 0.88rem;
+        color: var(--studio-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .preview-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid var(--studio-border);
+    }
+    .preview-date p, .preview-price p {
+        font-size: 0.65rem;
+        font-weight: 900;
+        color: var(--studio-muted);
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        letter-spacing: 0.06em;
+    }
+    .preview-date span, .preview-price span {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--studio-text);
+    }
+
+    .premium-card {
+        background: var(--studio-surface);
+        border: 1px solid var(--studio-border);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 16px 48px rgba(15, 23, 42, 0.07);
+    }
+    .input-group-premium { margin-bottom: 26px; }
+    .input-group-premium label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 900;
+        color: var(--studio-muted);
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        letter-spacing: 0.08em;
+    }
+
+    .premium-input,
+    select.premium-input {
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        border-radius: 16px;
+        padding: 16px 20px;
+        color: var(--studio-text);
+        width: 100%;
+        outline: none;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         font-family: inherit;
         box-sizing: border-box;
     }
-    .premium-input:focus { border-color: var(--studio-accent); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 6px rgba(142, 125, 255, 0.12); }
-
-    .btn-next-studio { 
-        background: linear-gradient(135deg, #685BFF, #8A7EFF); 
-        color: white; 
-        border: none; 
-        padding: 20px 45px; 
-        border-radius: 22px; 
-        font-weight: 900; 
-        font-size: 1.05rem;
-        cursor: pointer; 
-        transition: 0.4s;
-        box-shadow: 0 10px 30px rgba(104, 91, 255, 0.3);
+    .premium-input::placeholder { color: #94a3b8; }
+    .premium-input:focus {
+        border-color: rgba(220, 38, 38, 0.45);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
     }
-    .btn-next-studio:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(104, 91, 255, 0.4); }
+    textarea.premium-input { resize: vertical; min-height: 120px; }
+    .premium-input--story { min-height: 150px; }
+    .premium-input--address { min-height: 80px; }
+    .input-group-premium--tight { margin-bottom: 0; }
+    .studio-ticket-card .tk-name { margin-bottom: 15px; padding: 12px 18px; }
 
-    .media-drop-zone { width: 100%; height: 280px; border: 2px dashed rgba(255,255,255,0.12); border-radius: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.4s; overflow: hidden; }
-    .media-drop-zone:hover { border-color: var(--studio-accent); background: rgba(142, 125, 255, 0.05); }
-    .mini-media-preview { margin-top: 14px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); }
-    .mini-media-preview video, .mini-media-preview img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
-    .gallery-preview-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .gallery-preview-item { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); height: 70px; }
+    .btn-next-studio {
+        background: linear-gradient(135deg, var(--studio-accent), var(--studio-primary-hover));
+        color: #fff;
+        border: none;
+        padding: 18px 40px;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 28px rgba(220, 38, 38, 0.28);
+        font-family: inherit;
+    }
+    .btn-next-studio:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(220, 38, 38, 0.34);
+    }
+
+    .btn-back-studio {
+        background: var(--studio-bg);
+        color: var(--studio-text);
+        border: 1px solid var(--studio-border);
+        padding: 16px 28px;
+        border-radius: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-back-studio:hover {
+        background: var(--studio-surface);
+        border-color: #cbd5e1;
+    }
+
+    .btn-add-studio {
+        width: 100%;
+        padding: 18px 20px;
+        border-radius: 16px;
+        background: rgba(220, 38, 38, 0.06);
+        border: 1px dashed rgba(220, 38, 38, 0.45);
+        color: var(--studio-accent);
+        font-weight: 800;
+        cursor: pointer;
+        margin-bottom: 20px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-add-studio:hover {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: var(--studio-accent);
+    }
+
+    .btn-publish-studio {
+        flex: 1;
+        margin-left: 20px;
+        background: linear-gradient(135deg, var(--studio-accent), var(--studio-primary-hover));
+        color: #fff;
+        border: none;
+        padding: 18px 24px;
+        border-radius: 16px;
+        font-weight: 900;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1rem;
+        box-shadow: 0 10px 28px rgba(220, 38, 38, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .btn-publish-studio:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 32px rgba(220, 38, 38, 0.33);
+    }
+    .btn-publish-studio:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .studio-step-actions {
+        margin-top: 36px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .studio-step-actions--end { justify-content: flex-end; }
+
+    .media-drop-zone {
+        width: 100%;
+        min-height: 260px;
+        border: 2px dashed var(--studio-border);
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.25s ease, background 0.25s ease;
+        overflow: hidden;
+        background: var(--studio-bg);
+    }
+    .media-drop-zone:hover {
+        border-color: rgba(220, 38, 38, 0.4);
+        background: rgba(220, 38, 38, 0.03);
+    }
+    .media-drop-inner { text-align: center; }
+    .media-drop-icon {
+        font-size: 3rem;
+        color: var(--studio-accent);
+        margin-bottom: 12px;
+        display: block;
+    }
+    .media-drop-title {
+        margin: 0 0 6px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--studio-text);
+    }
+    .media-drop-hint {
+        font-size: 0.78rem;
+        color: var(--studio-muted);
+        margin: 0;
+    }
+
+    .studio-media-tile {
+        padding: 15px;
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .studio-media-tile:hover {
+        border-color: rgba(220, 38, 38, 0.25);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+    .studio-media-tile .studio-media-eyebrow {
+        font-size: 0.6rem;
+        color: var(--studio-muted);
+        margin: 0;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+    }
+    .studio-media-tile .studio-media-label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--studio-text);
+    }
+    .studio-media-tile i { color: var(--studio-accent); font-size: 1.2rem; }
+
+    .studio-consent {
+        margin-top: 32px;
+        background: var(--studio-bg);
+        padding: 18px 20px;
+        border-radius: 16px;
+        border: 1px solid var(--studio-border);
+    }
+    .studio-consent label {
+        display: flex;
+        gap: 14px;
+        cursor: pointer;
+        align-items: flex-start;
+        margin: 0;
+    }
+    .studio-consent span {
+        font-size: 0.88rem;
+        color: var(--studio-muted);
+        line-height: 1.45;
+    }
+
+    .mini-media-preview {
+        margin-top: 14px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--studio-border);
+        background: var(--studio-bg);
+    }
+    .mini-media-preview video, .mini-media-preview img {
+        width: 100%;
+        max-height: 180px;
+        object-fit: cover;
+        display: block;
+    }
+    .gallery-preview-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    .gallery-preview-item {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--studio-border);
+        background: var(--studio-bg);
+        height: 70px;
+    }
     .gallery-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .media-remove-btn {
         position: absolute;
         top: 6px;
         right: 6px;
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.25);
-        background: rgba(0,0,0,0.62);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        background: rgba(15, 23, 42, 0.72);
         color: #fff;
         font-size: 0.68rem;
         display: inline-flex;
@@ -190,25 +529,57 @@
     }
     .media-inline-remove {
         margin-top: 8px;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(255,255,255,0.06);
-        color: #fff;
+        border: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+        color: var(--studio-text);
         border-radius: 10px;
         padding: 8px 12px;
         font-size: 0.78rem;
         font-weight: 700;
         cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s ease, border-color 0.2s ease;
     }
-    .studio-ticket-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
-    .btn-back-studio { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.14); padding: 18px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; }
-    .btn-publish-studio:disabled { opacity: 0.6; cursor: not-allowed; }
+    .media-inline-remove:hover {
+        background: var(--studio-bg);
+        border-color: #cbd5e1;
+    }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    .studio-ticket-card {
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+    .studio-ticket-head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        align-items: center;
+    }
+    .studio-ticket-tier {
+        font-size: 0.7rem;
+        font-weight: 900;
+        color: var(--studio-accent);
+        letter-spacing: 0.06em;
+    }
+    .studio-ticket-remove {
+        color: var(--studio-muted);
+        cursor: pointer;
+        padding: 4px;
+        transition: color 0.2s ease;
+    }
+    .studio-ticket-remove:hover { color: var(--studio-text); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .studio-grid-tight { margin-top: 22px; }
+
     .studio-date-tile {
         padding: 14px 16px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 18px;
+        background: var(--studio-bg);
+        border: 1px solid var(--studio-border);
+        border-radius: 16px;
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -217,46 +588,108 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         font-weight: 900;
         color: var(--studio-muted);
-        letter-spacing: 0.6px;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
     }
+    .studio-date-label i { color: var(--studio-accent); font-size: 1rem; }
     .studio-date-input {
         width: 100%;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.06);
-        color: #fff;
+        border: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+        color: var(--studio-text);
         border-radius: 12px;
         padding: 10px 12px;
         font-size: 0.88rem;
         outline: none;
+        font-family: inherit;
+    }
+    .studio-date-input:focus {
+        border-color: rgba(220, 38, 38, 0.4);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     }
     .studio-date-input::-webkit-calendar-picker-indicator {
-        filter: invert(1) brightness(1.2);
         cursor: pointer;
+        opacity: 0.55;
     }
     .studio-date-value {
         font-size: 0.8rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--studio-text);
     }
-    @media (max-width: 768px) {
-        .studio-sidebar, .studio-preview-sidebar { display: none; }
-        .studio-content { padding: 40px 20px; height: 100vh; }
-        .grid-2 { grid-template-columns: 1fr; }
-    }
+
+    .studio-cover-ok { font-size: 2.5rem !important; color: var(--studio-accent) !important; margin-bottom: 0 !important; }
+    .studio-cover-change-text { margin-top: 6px; color: var(--studio-text); font-size: 0.95rem; font-weight: 700; }
 
     #publish-overlay {
         position: fixed;
         inset: 0;
-        background: var(--studio-dark);
         z-index: 9999;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-direction: column;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(8px);
+    }
+    #publish-overlay.hide { display: none !important; }
+
+    .publish-overlay-card {
+        background: var(--sm-surface);
+        border: 1px solid var(--sm-border);
+        border-radius: 22px;
+        padding: 36px 40px;
+        text-align: center;
+        max-width: 360px;
+        width: 100%;
+        box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
+    }
+    .publish-overlay-card h3 {
+        margin: 20px 0 0;
+        font-weight: 900;
+        font-size: 1.2rem;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+    }
+    .publish-overlay-card #publish-status-text {
+        margin-top: 10px;
+        font-size: 0.88rem;
+        color: var(--sm-muted);
+    }
+
+    .studio-loader-ring {
+        width: 52px;
+        height: 52px;
+        border: 4px solid var(--sm-border);
+        border-top-color: var(--sm-primary);
+        border-radius: 50%;
+        animation: studio-spin 0.9s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes studio-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .studio-sidebar, .studio-preview-sidebar { display: none; }
+        .studio-content {
+            padding: 48px 20px 100px;
+            min-height: 100vh;
+            border-left: none;
+            border-right: none;
+        }
+        .grid-2 { grid-template-columns: 1fr; }
+        .studio-step-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .studio-step-actions--end { align-items: stretch; }
+        .studio-step-actions .btn-next-studio { width: 100%; text-align: center; }
+        .btn-publish-studio { margin-left: 0; width: 100%; }
     }
 </style>
 {% endblock %}
@@ -329,13 +762,13 @@
                             </select>
                         </div>
                     </div>
-                    <div class="input-group-premium" style="margin-bottom:0;">
+                    <div class="input-group-premium input-group-premium--tight">
                         <label>Story / Description</label>
-                        <textarea id="ev-description" placeholder="Explain the vibe, the line-up, and the details..." class="premium-input" style="height:150px;"></textarea>
+                        <textarea id="ev-description" placeholder="Explain the vibe, the line-up, and the details..." class="premium-input premium-input--story"></textarea>
                     </div>
                 </div>
-                <div style="margin-top:40px; text-align:right;">
-                    <button class="btn-next-studio" onclick="nextStep(2)">Media Assets <i class="fa-solid fa-arrow-right"></i></button>
+                <div class="studio-step-actions studio-step-actions--end">
+                    <button type="button" class="btn-next-studio" onclick="nextStep(2)">Media Assets <i class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
@@ -347,32 +780,38 @@
                 </div>
                 <div class="premium-card">
                     <div class="media-drop-zone" onclick="document.getElementById('cover-input').click()">
-                        <div id="cover-wrap" style="text-align:center;">
-                            <i class="fa-solid fa-cloud-arrow-up" style="font-size:3rem; color:var(--studio-accent); margin-bottom:15px;"></i>
-                            <h4 style="margin-bottom:5px;">Main Cover Image</h4>
-                            <p style="font-size:0.75rem; color:var(--studio-muted);">Click to upload (Recommended 16:9)</p>
+                        <div id="cover-wrap" class="media-drop-inner">
+                            <i class="fa-solid fa-cloud-arrow-up media-drop-icon" aria-hidden="true"></i>
+                            <h4 class="media-drop-title">Main Cover Image</h4>
+                            <p class="media-drop-hint">Click to upload (Recommended 16:9)</p>
                         </div>
                         <input type="file" id="cover-input" class="hide" accept="image/*" onchange="previewStudioMedia(this)">
                     </div>
                     
-                    <div class="grid-2" style="margin-top:25px;">
-                        <div class="studio-date-tile" onclick="document.getElementById('gallery-input').click()" style="padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; display:flex; align-items:center; gap:15px; cursor:pointer;">
-                            <i class="fa-solid fa-images" style="color:var(--studio-accent); font-size:1.2rem;"></i>
-                            <div><p style="font-size:0.6rem; color:var(--studio-muted); margin:0;">GALLERY</p><span id="gallery-info" style="font-size:0.8rem; font-weight:700;">Add Photos</span></div>
+                    <div class="grid-2 studio-grid-tight">
+                        <div class="studio-media-tile" onclick="document.getElementById('gallery-input').click()">
+                            <i class="fa-solid fa-images" aria-hidden="true"></i>
+                            <div>
+                                <p class="studio-media-eyebrow">GALLERY</p>
+                                <span id="gallery-info" class="studio-media-label">Add Photos</span>
+                            </div>
                             <input type="file" id="gallery-input" class="hide" multiple accept="image/*" onchange="updateGalleryStatus()">
                         </div>
-                        <div class="studio-date-tile" onclick="document.getElementById('video-input').click()" style="padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; display:flex; align-items:center; gap:15px; cursor:pointer;">
-                            <i class="fa-solid fa-clapperboard" style="color:var(--studio-accent); font-size:1.2rem;"></i>
-                            <div><p style="font-size:0.6rem; color:var(--studio-muted); margin:0;">PROMO</p><span id="video-info" style="font-size:0.8rem; font-weight:700;">Add Video</span></div>
+                        <div class="studio-media-tile" onclick="document.getElementById('video-input').click()">
+                            <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+                            <div>
+                                <p class="studio-media-eyebrow">PROMO</p>
+                                <span id="video-info" class="studio-media-label">Add Video</span>
+                            </div>
                             <input type="file" id="video-input" class="hide" accept="video/*" onchange="updateVideoStatus()">
                         </div>
                     </div>
                     <div id="gallery-preview" class="gallery-preview-grid"></div>
                     <div id="video-preview" class="mini-media-preview hide"></div>
                 </div>
-                <div style="margin-top:40px; display:flex; justify-content:space-between;">
-                    <button class="btn-back-studio" onclick="prevStep(1)">Back</button>
-                    <button class="btn-next-studio" onclick="nextStep(3)">Logistics <i class="fa-solid fa-arrow-right"></i></button>
+                <div class="studio-step-actions">
+                    <button type="button" class="btn-back-studio" onclick="prevStep(1)">Back</button>
+                    <button type="button" class="btn-next-studio" onclick="nextStep(3)">Logistics <i class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
@@ -399,24 +838,24 @@
                     </div>
                     <div class="input-group-premium">
                         <label>Full Address</label>
-                        <textarea id="ev-address" placeholder="Exact coordinates..." class="premium-input" style="height:80px;"></textarea>
+                        <textarea id="ev-address" placeholder="Exact coordinates..." class="premium-input premium-input--address"></textarea>
                     </div>
-                    <div class="grid-2" style="margin-top:10px;">
+                    <div class="grid-2 studio-grid-tight">
                         <div class="studio-date-tile">
-                            <div class="studio-date-label"><i class="fa-solid fa-calendar-plus" style="color:var(--studio-accent); font-size:1rem;"></i> START TIME</div>
+                            <div class="studio-date-label"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> START TIME</div>
                             <input type="datetime-local" id="ev-start" class="studio-date-input" onchange="syncStudioDateText(this, 'ev-start-text')">
                             <span id="ev-start-text" class="studio-date-value">Select</span>
                         </div>
                         <div class="studio-date-tile">
-                            <div class="studio-date-label"><i class="fa-solid fa-calendar-check" style="color:var(--studio-accent); font-size:1rem;"></i> END TIME</div>
+                            <div class="studio-date-label"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> END TIME</div>
                             <input type="datetime-local" id="ev-end" class="studio-date-input" onchange="syncStudioDateText(this, 'ev-end-text')">
                             <span id="ev-end-text" class="studio-date-value">Select</span>
                         </div>
                     </div>
                 </div>
-                <div style="margin-top:40px; display:flex; justify-content:space-between;">
-                    <button class="btn-back-studio" onclick="prevStep(2)">Back</button>
-                    <button class="btn-next-studio" onclick="nextStep(4)">Ticketing <i class="fa-solid fa-arrow-right"></i></button>
+                <div class="studio-step-actions">
+                    <button type="button" class="btn-back-studio" onclick="prevStep(2)">Back</button>
+                    <button type="button" class="btn-next-studio" onclick="nextStep(4)">Ticketing <i class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
@@ -426,21 +865,23 @@
                     <h2>Ticketing</h2>
                     <p>Configure pricing and stock for your experience.</p>
                 </div>
-                <div id="studio-ticket-list"></div>
-                <button class="btn-add-studio" onclick="addStudioTicket()" style="width:100%; padding:20px; border-radius:20px; background:rgba(142, 125, 255, 0.1); border:1px dashed var(--studio-accent); color:var(--studio-accent); font-weight:800; cursor:pointer; margin-bottom:20px;">
-                    <i class="fa-solid fa-plus-circle"></i> Add Ticket Tier
-                </button>
+                <div class="premium-card">
+                    <div id="studio-ticket-list"></div>
+                    <button type="button" class="btn-add-studio" onclick="addStudioTicket()">
+                        <i class="fa-solid fa-plus-circle"></i> Add Ticket Tier
+                    </button>
+                </div>
 
-                <div style="margin-top:35px; background:rgba(255,255,255,0.03); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.06);">
-                    <label style="display:flex; gap:15px; cursor:pointer; align-items:center;">
+                <div class="studio-consent">
+                    <label>
                         <input type="checkbox" id="publish-consent" checked>
-                        <span style="font-size:0.85rem; color:var(--studio-muted); line-height:1.4;">I confirm all details are accurate and I have rights to host this event.</span>
+                        <span>I confirm all details are accurate and I have rights to host this event.</span>
                     </label>
                 </div>
 
-                <div style="margin-top:40px; display:flex; justify-content:space-between;">
-                    <button class="btn-back-studio" onclick="prevStep(3)">Back</button>
-                    <button id="launch-btn" class="btn-publish-studio" onclick="launchExperience()" style="flex:1; margin-left:20px; background:linear-gradient(135deg, #00D2FF, #3A7BD5); color:white; border:none; padding:20px; border-radius:22px; font-weight:900;">Launch Experience</button>
+                <div class="studio-step-actions">
+                    <button type="button" class="btn-back-studio" onclick="prevStep(3)">Back</button>
+                    <button type="button" id="launch-btn" class="btn-publish-studio" onclick="launchExperience()">Launch Experience</button>
                 </div>
             </div>
         </div>
@@ -473,9 +914,11 @@
 </div>
 
 <div id="publish-overlay" class="hide">
-    <div class="studio-loader-ring" style="width:60px; height:60px; border:4px solid rgba(142, 125, 255, 0.1); border-top:4px solid var(--studio-accent); border-radius:50%; animation:spin 1s linear infinite;"></div>
-    <h3 style="margin-top:20px; font-weight:900;">Curating Experience...</h3>
-    <p id="publish-status-text" style="margin-top:8px; font-size:0.85rem; color:rgba(255,255,255,0.65);">Preparing files...</p>
+    <div class="publish-overlay-card">
+        <div class="studio-loader-ring" aria-hidden="true"></div>
+        <h3>Curating Experience...</h3>
+        <p id="publish-status-text">Preparing files...</p>
+    </div>
 </div>
 {% endblock %}
 
@@ -547,8 +990,8 @@
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('preview-cover-box').innerHTML = `<img src="${e.target.result}">`;
-                document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-check-circle" style="font-size:2.5rem; color:#4CC2FF;"></i><p style="margin-top:5px; color:white;">Change Cover</p><button type="button" class="media-inline-remove" onclick="removeCoverMedia()">Remove Cover</button>`;
+                document.getElementById('preview-cover-box').innerHTML = `<img src="${e.target.result}" alt="">`;
+                document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-check-circle studio-cover-ok" aria-hidden="true"></i><p class="studio-cover-change-text">Change Cover</p><button type="button" class="media-inline-remove" onclick="removeCoverMedia()">Remove Cover</button>`;
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -557,7 +1000,7 @@
         const coverInput = document.getElementById('cover-input');
         coverInput.value = '';
         document.getElementById('preview-cover-box').innerHTML = '<i class="fa-solid fa-image"></i>';
-        document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-cloud-arrow-up" style="font-size:3rem; color:var(--studio-accent); margin-bottom:15px;"></i><h4 style="margin-bottom:5px;">Main Cover Image</h4><p style="font-size:0.75rem; color:var(--studio-muted);">Click to upload (Recommended 16:9)</p>`;
+        document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-cloud-arrow-up media-drop-icon" aria-hidden="true"></i><h4 class="media-drop-title">Main Cover Image</h4><p class="media-drop-hint">Click to upload (Recommended 16:9)</p>`;
     };
 
     window.removeGalleryImage = function(index) {
@@ -638,11 +1081,11 @@
         const id = `tk-${ticketCount}`;
         const html = `
             <div class="studio-ticket-card" id="${id}">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                    <span style="font-size:0.7rem; font-weight:900; color:var(--studio-accent);">TIER 0${ticketCount}</span>
-                    <i class="fa-solid fa-times" style="color:rgba(255,255,255,0.2); cursor:pointer;" onclick="document.getElementById('${id}').remove(); updateMinPrice();"></i>
+                <div class="studio-ticket-head">
+                    <span class="studio-ticket-tier">TIER 0${ticketCount}</span>
+                    <i class="fa-solid fa-times studio-ticket-remove" role="button" tabindex="0" aria-label="Remove tier" onclick="document.getElementById('${id}').remove(); updateMinPrice();"></i>
                 </div>
-                <input type="text" class="premium-input tk-name" placeholder="Tier Name" style="margin-bottom:15px; padding:12px 18px;">
+                <input type="text" class="premium-input tk-name" placeholder="Tier Name">
                 <div class="grid-2">
                     <input type="number" class="premium-input tk-price" placeholder="Price (₹)" oninput="updateMinPrice()">
                     <input type="number" class="premium-input tk-qty" placeholder="Stock">

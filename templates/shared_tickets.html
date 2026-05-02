@@ -4,127 +4,373 @@
 
 {% block head %}
 <style>
-    .shared-bg { min-height: 100vh; background: transparent; }
-    .shared-shell { width: min(1220px, calc(100% - 34px)); margin: 0 auto; padding: 20px 0 110px; }
-    .shared-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .shared-back {
-        width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;
-        color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
+    /* Shared tickets — Showmates premium (with evorra-pages overrides) */
+    .shared-bg {
+        min-height: 100vh;
+        background:
+            radial-gradient(ellipse 90% 60% at 50% -15%, rgba(220, 38, 38, 0.06), transparent 55%),
+            var(--sm-bg);
     }
-    .shared-title { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.02em; }
-    .shared-sub { color: rgba(220,236,255,0.66); font-size: .82rem; margin-top: 4px; }
+    .shared-shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 26px 0 118px;
+    }
+
+    .shared-topbar {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+    .shared-back {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--sm-text);
+        text-decoration: none;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        flex-shrink: 0;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .shared-back:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .shared-heading-block {
+        flex: 1;
+        min-width: 0;
+    }
+    .shared-title {
+        font-size: clamp(1.45rem, 3.5vw, 1.85rem);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        color: var(--sm-text);
+        line-height: 1.15;
+    }
+    .shared-sub {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        margin-top: 6px;
+        font-weight: 600;
+        line-height: 1.45;
+        max-width: 36rem;
+    }
+
     .shared-filters {
         display: flex;
-        gap: 8px;
+        gap: 10px;
         flex-wrap: wrap;
-        margin: 12px 0 4px;
+        margin: 8px 0 6px;
     }
     .shared-filter-btn {
-        border: 1px solid rgba(255,255,255,0.15);
-        background: rgba(255,255,255,0.05);
-        color: rgba(226,238,255,0.85);
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
         border-radius: 999px;
-        padding: 7px 12px;
-        font-size: .72rem;
+        padding: 9px 16px;
+        font-size: 0.72rem;
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: 0.08em;
         font-weight: 900;
         cursor: pointer;
-        transition: all .2s ease;
+        transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        font-family: inherit;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .shared-filter-btn:hover {
+        border-color: #cbd5e1;
     }
     .shared-filter-btn.active {
-        border-color: rgba(126, 233, 201, 0.5);
-        background: rgba(126, 233, 201, 0.16);
-        color: #d9fff3;
+        border-color: rgba(220, 38, 38, 0.35);
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+        color: var(--sm-primary);
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.12);
     }
-    .shared-list { display: grid; gap: 12px; margin-top: 12px; }
+
+    .shared-list {
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+    }
+
     .shared-card {
-        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
-        overflow: hidden; box-shadow: 0 14px 26px rgba(0,0,0,0.2);
+        border-radius: 22px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        overflow: hidden;
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+            0 14px 36px rgba(15, 23, 42, 0.08);
         cursor: pointer;
-        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+        transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+        position: relative;
     }
-    .shared-card:hover { transform: translateY(-2px); border-color: rgba(101, 230, 255, 0.38); box-shadow: 0 18px 30px rgba(0,0,0,0.24); }
-    .shared-main { display: grid; grid-template-columns: 102px 1fr; }
-    .shared-cover { width: 100%; height: 100%; min-height: 138px; object-fit: cover; }
-    .shared-body { padding: 12px; }
+    .shared-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.03) 0%, transparent 45%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+    .shared-card:hover::before {
+        opacity: 1;
+    }
+    .shared-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(220, 38, 38, 0.18);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+            0 20px 48px rgba(15, 23, 42, 0.12);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .shared-card:hover { transform: none; }
+    }
+
+    .shared-main {
+        display: grid;
+        grid-template-columns: minmax(96px, 118px) 1fr;
+    }
+    .shared-cover {
+        width: 100%;
+        height: 100%;
+        min-height: 148px;
+        object-fit: cover;
+        display: block;
+    }
+    .shared-body {
+        padding: 16px 16px 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
     .shared-chip {
-        display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 10px;
-        font-size: .65rem; font-weight: 900; text-transform: uppercase; letter-spacing: .07em;
-        border: 1px solid rgba(128, 236, 198, 0.38); color: #88f5cb; background: rgba(136,245,203,0.12);
-    }
-    .shared-name { margin: 8px 0 4px; color: #fff; font-size: 1rem; font-weight: 900; line-height: 1.25; }
-    .shared-meta { color: rgba(255,255,255,0.6); font-size: .76rem; }
-    .shared-mini { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
-    .shared-mini-box {
-        border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 7px 8px;
-    }
-    .shared-mini-label { color: rgba(255,255,255,0.58); font-size: .61rem; text-transform: uppercase; letter-spacing: .05em; }
-    .shared-mini-value { color: #fff; margin-top: 2px; font-size: .73rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .shared-foot {
-        background: rgba(0,0,0,0.16); border-top: 1px solid rgba(255,255,255,0.08); padding: 10px 12px;
-        display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .shared-foot-note { color: rgba(255,255,255,0.7); font-size: .76rem; font-weight: 700; }
-    .shared-open {
-        color: #d8e8ff; text-decoration: none; font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 900;
+        display: inline-flex;
+        align-items: center;
+        align-self: flex-start;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.65rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
     }
     .shared-chip.pending {
-        border: 1px solid rgba(255, 202, 109, 0.42);
-        color: #ffdca0;
-        background: rgba(255, 202, 109, 0.12);
+        border: 1px solid rgba(234, 88, 12, 0.35);
+        color: #c2410c;
+        background: rgba(234, 88, 12, 0.08);
     }
     .shared-chip.confirmed {
-        border: 1px solid rgba(128, 236, 198, 0.38);
-        color: #88f5cb;
-        background: rgba(136,245,203,0.12);
+        border: 1px solid rgba(5, 150, 105, 0.35);
+        color: #047857;
+        background: rgba(16, 185, 129, 0.1);
     }
     .shared-chip.rejected {
-        border: 1px solid rgba(255, 141, 141, 0.45);
-        color: #ffb4b4;
-        background: rgba(255, 100, 120, 0.12);
+        border: 1px solid rgba(220, 38, 38, 0.35);
+        color: #b91c1c;
+        background: rgba(220, 38, 38, 0.08);
     }
+
+    .shared-name {
+        margin: 10px 0 5px;
+        color: var(--sm-text);
+        font-size: 1.05rem;
+        font-weight: 900;
+        line-height: 1.28;
+        letter-spacing: -0.02em;
+    }
+    .shared-meta {
+        color: var(--sm-muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .shared-mini {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .shared-mini-box {
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 9px 10px;
+        transition: border-color 0.2s ease;
+    }
+    .shared-card:hover .shared-mini-box {
+        border-color: #e2e8f0;
+    }
+    .shared-mini-label {
+        color: var(--sm-muted);
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 800;
+    }
+    .shared-mini-value {
+        color: var(--sm-text);
+        margin-top: 4px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .shared-foot {
+        background: var(--sm-bg);
+        border-top: 1px solid var(--sm-border);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .shared-foot-note {
+        color: var(--sm-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+    .shared-open {
+        color: var(--sm-primary);
+        text-decoration: none;
+        font-size: 0.74rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 900;
+    }
+    .shared-open:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .shared-open--muted {
+        opacity: 0.72;
+        cursor: default;
+        pointer-events: none;
+    }
+
     .shared-actions {
         display: inline-flex;
         align-items: center;
         gap: 8px;
     }
     .shared-action-btn {
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: 10px;
-        padding: 6px 10px;
-        font-size: .68rem;
-        letter-spacing: .07em;
+        border-radius: 12px;
+        padding: 8px 14px;
+        font-size: 0.68rem;
+        letter-spacing: 0.07em;
         text-transform: uppercase;
         font-weight: 900;
         cursor: pointer;
-        color: #fff;
-        background: rgba(255,255,255,0.07);
+        font-family: inherit;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
+        transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .shared-action-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
     }
     .shared-action-btn.accept {
-        border-color: rgba(128, 236, 198, 0.45);
-        background: rgba(136,245,203,0.16);
-        color: #bbffe7;
+        border-color: rgba(5, 150, 105, 0.4);
+        background: linear-gradient(180deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
+        color: #047857;
     }
     .shared-action-btn.reject {
-        border-color: rgba(255, 141, 141, 0.45);
-        background: rgba(255, 141, 141, 0.16);
-        color: #ffd0d0;
+        border-color: rgba(220, 38, 38, 0.35);
+        background: linear-gradient(180deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.04));
+        color: #b91c1c;
     }
     .shared-action-btn:disabled {
-        opacity: .6;
+        opacity: 0.55;
         cursor: not-allowed;
+        transform: none;
     }
+
     .shared-state {
-        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
-        text-align: center; padding: 44px 20px;
+        border-radius: 22px;
+        border: 1px dashed var(--sm-border);
+        background: linear-gradient(180deg, var(--sm-surface) 0%, var(--sm-bg) 100%);
+        text-align: center;
+        padding: 48px 24px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
     }
+    .shared-state--loading {
+        border-style: solid;
+    }
+    .shared-empty-title {
+        font-weight: 900;
+        margin: 0 0 10px;
+        color: var(--sm-text);
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+    }
+    .shared-empty-text {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        font-weight: 600;
+        line-height: 1.55;
+        max-width: 22rem;
+        margin: 0 auto;
+    }
+
+    .shared-spinner {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid var(--sm-border);
+        border-top-color: var(--sm-primary);
+        margin: 0 auto 16px;
+        animation: shared-spin 0.75s linear infinite;
+    }
+    @keyframes shared-spin {
+        to { transform: rotate(360deg); }
+    }
+    .shared-loading-caption {
+        margin: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .shared-spinner { animation: none; border-color: var(--sm-primary); }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .shared-shell-header {
+            animation: shared-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .shared-filters {
+            animation: shared-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+        }
+    }
+    @keyframes shared-fade-up {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .shared-shell-header,
+        .shared-filters { animation: none !important; }
+    }
+
     @media (max-width: 860px) {
-        .shared-mini { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        .shared-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 640px) {
-        .shared-shell { width: calc(100% - 20px); padding-top: 14px; }
-        .shared-main { grid-template-columns: 88px 1fr; }
+        .shared-shell { width: calc(100% - 20px); padding-top: 18px; }
+        .shared-main { grid-template-columns: 92px 1fr; }
+        .shared-cover { min-height: 132px; }
+        .shared-body { padding: 12px 12px 10px; }
     }
 </style>
 {% endblock %}
@@ -132,25 +378,30 @@
 {% block content %}
 <div class="shared-bg">
     <div class="shared-shell">
-        <div class="shared-topbar">
-            <a href="/my-tickets" class="shared-back"><i class="fa-solid fa-chevron-left"></i></a>
-            <div>
-                <h1 class="shared-title">Shared Tickets</h1>
-                <p class="shared-sub">Tickets you received from another user</p>
+        <div class="shared-shell-header">
+            <div class="shared-topbar">
+                <a href="/my-tickets" class="shared-back" aria-label="Back to my tickets"><i class="fa-solid fa-chevron-left"></i></a>
+                <div class="shared-heading-block">
+                    <h1 class="shared-title">Shared tickets</h1>
+                    <p class="shared-sub">Accept or reject transfers. Accepted passes live in My Tickets with your QR.</p>
+                </div>
             </div>
-        </div>
-        <div class="shared-filters" id="shared-filters">
-            <button type="button" class="shared-filter-btn active" data-filter="all" data-base-label="All">All (0)</button>
-            <button type="button" class="shared-filter-btn" data-filter="pending" data-base-label="Pending">Pending (0)</button>
-            <button type="button" class="shared-filter-btn" data-filter="accepted" data-base-label="Accepted">Accepted (0)</button>
-            <button type="button" class="shared-filter-btn" data-filter="rejected" data-base-label="Rejected">Rejected (0)</button>
+            <div class="shared-filters" id="shared-filters">
+                <button type="button" class="shared-filter-btn active" data-filter="all" data-base-label="All">All (0)</button>
+                <button type="button" class="shared-filter-btn" data-filter="pending" data-base-label="Pending">Pending (0)</button>
+                <button type="button" class="shared-filter-btn" data-filter="accepted" data-base-label="Accepted">Accepted (0)</button>
+                <button type="button" class="shared-filter-btn" data-filter="rejected" data-base-label="Rejected">Rejected (0)</button>
+            </div>
         </div>
 
         <div id="shared-container" class="shared-list">
-            <div id="shared-loading" class="shared-state"><div class="spinner"></div></div>
+            <div id="shared-loading" class="shared-state shared-state--loading">
+                <div class="shared-spinner" role="status" aria-label="Loading"></div>
+                <p class="shared-empty-text shared-loading-caption">Loading shared tickets…</p>
+            </div>
             <div id="shared-empty" class="shared-state hide">
-                <h3 style="font-weight: 900; margin-bottom: 8px;">No shared tickets yet</h3>
-                <p style="color: rgba(255,255,255,0.62); font-size: 0.84rem;">When someone shares tickets with you, they will appear here.</p>
+                <h3 class="shared-empty-title">No shared tickets yet</h3>
+                <p class="shared-empty-text">When someone shares tickets with you, they will appear here.</p>
             </div>
         </div>
     </div>
@@ -263,7 +514,7 @@
                 const isRejected = ticketViewStatus === 'rejected';
                 const displayId = t.__rowType === 'rejection' ? (t.ticket_id || t.id) : t.id;
                 const el = document.createElement('div');
-                el.className = 'shared-card';
+                el.className = 'shared-card animate-evorra';
                 el.onclick = () => {
                     if (isPending) {
                         alert('Accept this ticket first from Shared Tickets to open details.');
@@ -281,7 +532,7 @@
                 if (isRejected) { chipClass = 'rejected'; chipLabel = 'Rejected — returned to sender'; }
                 el.innerHTML = `
                     <div class="shared-main">
-                        <img class="shared-cover" src="${eventData.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}">
+                        <img class="shared-cover" alt="" src="${eventData.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}">
                         <div class="shared-body">
                             <span class="shared-chip ${chipClass}">${chipLabel}</span>
                             <h3 class="shared-name">${t.event_title || eventData.title || 'Untitled Event'}</h3>
@@ -298,10 +549,10 @@
                         <span class="shared-foot-note">Ticket ID: ${displayId}</span>
                         ${isPending ? `
                             <div class="shared-actions">
-                                <button class="shared-action-btn reject" data-action="reject" data-ticket-id="${t.id}">Reject</button>
-                                <button class="shared-action-btn accept" data-action="accept" data-ticket-id="${t.id}">Accept</button>
+                                <button type="button" class="shared-action-btn reject" data-action="reject" data-ticket-id="${t.id}">Reject</button>
+                                <button type="button" class="shared-action-btn accept" data-action="accept" data-ticket-id="${t.id}">Accept</button>
                             </div>
-                        ` : isRejected ? `<span class="shared-open" style="opacity:.85">Returned</span>` : `<span class="shared-open">Open Pass</span>`}
+                        ` : isRejected ? `<span class="shared-open shared-open--muted">Returned</span>` : `<span class="shared-open">Open pass →</span>`}
                     </div>
                 `;
                 container.appendChild(el);
@@ -463,10 +714,10 @@
             rejectionLogRows = [];
             mergeSharedRows();
             document.getElementById('shared-container').innerHTML = `
-                <div id="shared-loading" class="shared-state hide"><div class="spinner"></div></div>
+                <div id="shared-loading" class="shared-state shared-state--loading hide"><div class="shared-spinner" role="status"></div><p class="shared-empty-text shared-loading-caption">Loading…</p></div>
                 <div id="shared-empty" class="shared-state">
-                    <h3 style="font-weight: 900; margin-bottom: 8px;">Login required</h3>
-                    <p style="color: rgba(255,255,255,0.62); font-size: 0.84rem;">Please login to view shared tickets.</p>
+                    <h3 class="shared-empty-title">Login required</h3>
+                    <p class="shared-empty-text">Please log in to view shared tickets.</p>
                 </div>`;
             return;
         }

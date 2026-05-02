@@ -69,6 +69,13 @@
     .status-pill.published { color: #8CF0C6; background: rgba(140,240,198,0.14); border-color: rgba(140,240,198,0.3); }
     .status-pill.draft { color: #b8ccff; background: rgba(133,167,255,0.14); border-color: rgba(133,167,255,0.3); }
     .status-pill.inactive { color: #ff9fb2; background: rgba(255,159,178,0.14); border-color: rgba(255,159,178,0.3); }
+    .my-event-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .my-event-chevron { font-size: 0.8rem; opacity: 0.35; }
+    .page-empty-state { text-align: center; padding: 60px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); }
+    .page-empty-icon { font-size: 3rem; opacity: 0.2; margin-bottom: 15px; }
+    .page-empty-title { color: #fff; font-weight: 900; margin: 0; font-size: 1.25rem; }
+    .page-empty-text { color: rgba(255,255,255,0.55); font-size: 0.85rem; margin-top: 10px; }
+    .page-empty-btn { margin-top: 25px; width: auto; padding: 12px 30px; }
     @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) {
         .my-events-shell { width: calc(100% - 20px); padding-top: 14px; }
@@ -156,11 +163,11 @@
                     
                     if (snapshot.empty) {
                         listContainer.innerHTML = `
-                            <div class="summary-box" style="text-align: center; padding: 60px 20px;">
-                                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 15px;"></i>
-                                <h3 style="color: white; font-weight: 900;">No events yet</h3>
-                                <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 10px;">Create your first event to get started.</p>
-                                <button onclick="location.href='/add-event'" class="btn-evorra" style="margin-top: 25px; width: auto; padding: 12px 30px;">Create Event</button>
+                            <div class="page-empty-state">
+                                <div class="page-empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+                                <h3 class="page-empty-title">No events yet</h3>
+                                <p class="page-empty-text">Create your first event to get started.</p>
+                                <button type="button" onclick="location.href='/add-event'" class="btn-evorra page-empty-btn">Create Event</button>
                             </div>
                         `;
                         updateKPIs(0, 0, 0, 0);
@@ -217,9 +224,9 @@
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="my-event-img">
                 </div>
                 <div class="my-event-body">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div class="my-event-row-top">
                         <span class="status-pill ${status.toLowerCase()}">${status.toUpperCase()}</span>
-                        <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                        <i class="fa-solid fa-chevron-right my-event-chevron"></i>
                     </div>
                     
                     <h3 class="my-event-title">${e.title}</h3>

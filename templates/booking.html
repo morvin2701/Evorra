@@ -4,147 +4,376 @@
 
 {% block head %}
 <style>
-    .booking-bg { background: transparent; min-height: 100vh; }
-    .booking-shell { width: min(1200px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 130px; }
+    /* Booking checkout — Showmates premium */
+    .booking-bg {
+        background: var(--sm-bg);
+        min-height: 100vh;
+    }
+    .booking-shell {
+        width: min(1200px, calc(100% - 30px));
+        margin: 0 auto;
+        padding: 28px 0 140px;
+    }
     .booking-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 12px;
+        margin-bottom: 18px;
     }
     .booking-back {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.15);
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
+        color: var(--sm-text);
         text-decoration: none;
-        background: rgba(8, 14, 26, 0.75);
+        background: var(--sm-surface);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .booking-back:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
     }
     .booking-badge {
-        padding: 6px 10px;
+        padding: 8px 14px;
         border-radius: 999px;
-        border: 1px solid rgba(145, 166, 255, 0.32);
-        background: rgba(105, 120, 255, 0.16);
-        font-size: .72rem;
-        letter-spacing: .5px;
-        color: #dce5ff;
-        font-weight: 800;
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--sm-primary);
+        font-weight: 900;
         text-transform: uppercase;
     }
-    .booking-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
-    .booking-main { display: grid; gap: 16px; }
+    .booking-layout { display: grid; gap: 18px; grid-template-columns: 1fr; }
+    .booking-main { display: grid; gap: 18px; }
     .booking-card {
-        border-radius: 22px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
-        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
-        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+            0 18px 44px rgba(15, 23, 42, 0.08);
+        position: relative;
+        overflow: hidden;
     }
+    @media (prefers-reduced-motion: no-preference) {
+        .booking-card {
+            animation: bk-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .booking-main > .booking-card:nth-child(1) { animation-delay: 0.02s; }
+        .booking-main > .booking-card:nth-child(2) { animation-delay: 0.08s; }
+        .booking-main > .booking-card:nth-child(3) { animation-delay: 0.12s; }
+        .booking-main > .booking-card:nth-child(4) { animation-delay: 0.16s; }
+        .booking-side > .booking-card { animation-delay: 0.1s; }
+        .booking-side .quick-note { animation-delay: 0.14s; }
+    }
+    @keyframes bk-card-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .booking-card, .quick-note { animation: none !important; }
+    }
+
     .booking-hero {
         padding: 0;
-        overflow: hidden;
-        min-height: 156px;
         display: grid;
-        grid-template-columns: 170px 1fr;
+        grid-template-columns: minmax(140px, 170px) 1fr;
+        min-height: 160px;
     }
-    .booking-hero-img { width: 100%; height: 100%; object-fit: cover; }
-    .booking-hero-body { padding: 18px; }
-    .booking-title { font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 900; margin-bottom: 6px; color: #fff; }
-    .booking-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 10px; }
-    .booking-time { color: var(--secondary); font-size: .82rem; font-weight: 800; }
-    .booking-block { padding: 16px; }
-    .booking-section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
-    #ticket-list { display: grid; gap: 10px; }
+    .booking-hero-img {
+        width: 100%;
+        height: 100%;
+        min-height: 160px;
+        object-fit: cover;
+        display: block;
+    }
+    .booking-hero-body {
+        padding: 20px 20px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .booking-title {
+        font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+        font-weight: 900;
+        margin: 0 0 8px;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+    .booking-sub {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        margin: 0 0 10px;
+        line-height: 1.45;
+    }
+    .booking-time {
+        color: var(--sm-primary);
+        font-size: 0.86rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .booking-block { padding: 20px; }
+    .booking-section-title {
+        margin: 0 0 14px;
+        font-size: 1.06rem;
+        font-weight: 900;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+    }
+    #ticket-list { display: grid; gap: 12px; }
     .ticket-select-card {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
-        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 14px 16px;
         cursor: pointer;
-        transition: .2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
-    .ticket-select-card.active { border-color: rgba(88,228,255,0.52); box-shadow: 0 0 0 2px rgba(88,228,255,0.12) inset; }
+    .ticket-select-card:hover {
+        border-color: #e2e8f0;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .ticket-select-card.active {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12) inset;
+        background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+    }
+    .ticket-opt-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+    }
+    .ticket-opt-title {
+        margin: 0;
+        color: var(--sm-text);
+        font-weight: 900;
+        font-size: 1.02rem;
+    }
+    .ticket-opt-meta {
+        margin: 5px 0 0;
+        color: var(--sm-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    .ticket-opt-price {
+        color: var(--sm-primary);
+        font-weight: 900;
+        font-size: 1.12rem;
+        white-space: nowrap;
+    }
+
     .qty-selector {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-        padding: 10px 14px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 12px 16px;
     }
     .qty-btn {
-        width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.08); color: #fff; cursor: pointer;
-    }
-    .promo-input-group { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-    .promo-input-group input {
-        height: 46px;
+        width: 44px;
+        height: 44px;
         border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.05); color: #fff; padding: 0 12px; outline: none;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
-    .promo-input-group input::placeholder { color: rgba(255,255,255,0.48); }
+    .qty-btn:hover {
+        border-color: rgba(220, 38, 38, 0.35);
+        background: #fff;
+        color: var(--sm-primary);
+    }
+    .qty-stack { text-align: center; min-width: 100px; }
+    .qty-display {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+    }
+    .qty-limit {
+        color: var(--sm-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin: 6px 0 0;
+    }
+
+    .promo-input-group {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: stretch;
+    }
+    .promo-input {
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        color: var(--sm-text);
+        padding: 0 14px;
+        outline: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        font-family: inherit;
+        text-transform: uppercase;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .promo-input::placeholder {
+        color: #94a3b8;
+        text-transform: none;
+    }
+    .promo-input:focus {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+    .promo-apply {
+        width: auto !important;
+        padding: 12px 22px !important;
+        margin: 0 !important;
+        font-size: 0.88rem !important;
+        border-radius: 12px !important;
+        white-space: nowrap;
+    }
+    #promo-msg {
+        font-size: 0.78rem;
+        margin-top: 10px;
+        margin-left: 4px;
+        font-weight: 700;
+    }
+    #promo-msg.promo-msg--error {
+        color: #b91c1c;
+    }
+    #promo-msg.promo-msg--success {
+        color: #047857;
+    }
+
     .summary-box {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 16px;
     }
     .summary-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
+        margin-bottom: 12px;
+        gap: 12px;
+        font-size: 0.9rem;
     }
+    .summary-row:last-of-type { margin-bottom: 0; }
+    .sum-label {
+        color: var(--sm-muted);
+        font-weight: 700;
+    }
+    .sum-val {
+        font-weight: 800;
+        color: var(--sm-text);
+    }
+    .sum-val--accent {
+        color: var(--sm-primary);
+        font-weight: 800;
+    }
+    .sum-val--total {
+        color: var(--sm-primary);
+        font-size: 1.22rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+    .summary-row--grand .sum-label {
+        font-weight: 800;
+        color: var(--sm-text);
+    }
+    .sum-divider {
+        border: none;
+        border-top: 1px solid var(--sm-border);
+        margin: 14px 0;
+    }
+
     .terms-box {
-        margin-top: 16px; display: flex; gap: 12px; align-items: flex-start;
-        background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.08);
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: var(--sm-bg);
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+    }
+    .terms-box input[type="checkbox"] {
+        margin-top: 4px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sm-primary);
+        flex-shrink: 0;
+    }
+    .terms-box label {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        line-height: 1.5;
+        font-weight: 600;
+        cursor: pointer;
     }
     .booking-side {
         display: grid;
-        gap: 12px;
+        gap: 14px;
         align-self: start;
     }
     .pay-btn {
         width: 100%;
         margin: 0;
-        padding: 13px 18px;
-        border-radius: 12px;
-        font-size: .92rem;
-        font-weight: 800;
-        margin-top: 12px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        font-weight: 900;
+        margin-top: 14px;
+        font-family: inherit;
+    }
+    .pay-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
     }
     .quick-note {
-        font-size: .8rem;
-        color: rgba(220,232,255,0.7);
-        line-height: 1.45;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: rgba(255,255,255,0.03);
-        border-radius: 14px;
-        padding: 12px;
+        font-size: 0.82rem;
+        color: var(--sm-muted);
+        line-height: 1.5;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, #fff 0%, var(--sm-bg) 100%);
+        border-radius: 16px;
+        padding: 14px 16px;
+        font-weight: 600;
     }
+
     @media (min-width: 860px) {
-        .booking-layout { grid-template-columns: minmax(0, 1fr) 360px; }
-        .booking-side {
-            position: static;
-            width: 100%;
-        }
+        .booking-layout { grid-template-columns: minmax(0, 1fr) 380px; }
+        .booking-side { position: static; width: 100%; }
     }
     @media (max-width: 640px) {
-        .booking-shell { width: calc(100% - 20px); padding-top: 14px; }
-        .booking-hero { grid-template-columns: 108px 1fr; min-height: 120px; }
-        .booking-hero-body { padding: 12px; }
-        .booking-block { padding: 12px; }
-        .booking-side { position: static; top: auto; }
-        .pay-btn { padding: 11px 12px; font-size: .82rem; }
+        .booking-shell { width: calc(100% - 20px); padding-top: 16px; }
+        .booking-hero { grid-template-columns: 112px 1fr; min-height: 128px; }
+        .booking-hero-img { min-height: 128px; }
+        .booking-hero-body { padding: 14px; }
+        .booking-block { padding: 16px; }
+        .pay-btn { padding: 13px 14px; font-size: 0.88rem; }
+        .promo-input-group { grid-template-columns: 1fr; }
+        .promo-apply { width: 100% !important; }
     }
 </style>
 {% endblock %}
@@ -159,7 +388,7 @@
         <div class="booking-layout">
             <div class="booking-main">
                 <div class="booking-card booking-hero">
-                    <img id="event-img" src="" class="booking-hero-img">
+                    <img id="event-img" src="" class="booking-hero-img" alt="">
                     <div class="booking-hero-body">
                         <h2 id="event-title" class="booking-title">Loading...</h2>
                         <p id="event-location" class="booking-sub">Venue • City</p>
@@ -177,22 +406,22 @@
                 <div class="booking-card booking-block">
                     <h2 class="booking-section-title">Quantity</h2>
                     <div class="qty-selector">
-                        <button class="qty-btn" onclick="updateQty(-1)"><i class="fa-solid fa-minus"></i></button>
-                        <div style="text-align: center;">
-                            <span id="qty-display" style="font-size: 1.4rem; font-weight: 800;">1</span>
-                            <p id="qty-limit" style="color: rgba(255,255,255,0.5); font-size: 0.7rem; font-weight: 600; margin-top: 4px;">Max 10 per user</p>
+                        <button type="button" class="qty-btn" onclick="updateQty(-1)" aria-label="Decrease quantity"><i class="fa-solid fa-minus"></i></button>
+                        <div class="qty-stack">
+                            <div id="qty-display" class="qty-display">1</div>
+                            <p id="qty-limit" class="qty-limit">Max 10 per user</p>
                         </div>
-                        <button class="qty-btn" onclick="updateQty(1)"><i class="fa-solid fa-plus"></i></button>
+                        <button type="button" class="qty-btn" onclick="updateQty(1)" aria-label="Increase quantity"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
 
                 <div class="booking-card booking-block">
                     <h2 class="booking-section-title">Promo Code</h2>
                     <div class="promo-input-group">
-                        <input type="text" id="promo-code" placeholder="Enter promo code" style="text-transform: uppercase;">
-                        <button class="btn-evorra" onclick="applyPromo()" style="width: auto; padding: 10px 24px; margin: 0; font-size: 0.85rem;">Apply</button>
+                        <input type="text" id="promo-code" class="promo-input" placeholder="Enter promo code" autocomplete="off" autocapitalize="characters">
+                        <button type="button" class="btn-evorra promo-apply" onclick="applyPromo()">Apply</button>
                     </div>
-                    <p id="promo-msg" style="font-size: 0.75rem; margin-top: 8px; margin-left: 10px; font-weight: 600;" class="hide"></p>
+                    <p id="promo-msg" class="hide" role="status" aria-live="polite"></p>
                 </div>
             </div>
             <aside class="booking-side">
@@ -200,35 +429,35 @@
                     <h2 class="booking-section-title">Order Summary</h2>
                     <div class="summary-box">
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Ticket Price</span>
-                            <span id="sum-price" style="font-weight: 800;">₹0</span>
+                            <span class="sum-label">Ticket Price</span>
+                            <span id="sum-price" class="sum-val">₹0</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Quantity</span>
-                            <span id="sum-qty" style="font-weight: 800;">1</span>
+                            <span class="sum-label">Quantity</span>
+                            <span id="sum-qty" class="sum-val">1</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Subtotal</span>
-                            <span id="sum-subtotal" style="font-weight: 800;">₹0</span>
+                            <span class="sum-label">Subtotal</span>
+                            <span id="sum-subtotal" class="sum-val">₹0</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Discount</span>
-                            <span id="sum-discount" style="color: var(--secondary); font-weight: 800;">- ₹0</span>
+                            <span class="sum-label">Discount</span>
+                            <span id="sum-discount" class="sum-val sum-val--accent">- ₹0</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Platform Fee (18%)</span>
-                            <span id="sum-fee" style="font-weight: 800;">₹0</span>
+                            <span class="sum-label">Platform Fee (18%)</span>
+                            <span id="sum-fee" class="sum-val">₹0</span>
                         </div>
-                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
-                        <div class="summary-row" style="margin-bottom: 0;">
-                            <span style="font-weight: 700;">Total</span>
-                            <span id="sum-total" style="color: var(--secondary); font-size: 1.2rem; font-weight: 900;">₹0</span>
+                        <hr class="sum-divider">
+                        <div class="summary-row summary-row--grand">
+                            <span class="sum-label">Total</span>
+                            <span id="sum-total" class="sum-val--total">₹0</span>
                         </div>
                     </div>
 
                     <div class="terms-box">
-                        <input type="checkbox" id="terms-check" style="margin-top: 4px;">
-                        <label for="terms-check" style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.4;">I agree to the terms, ticket policy and refund conditions.</label>
+                        <input type="checkbox" id="terms-check">
+                        <label for="terms-check">I agree to the terms, ticket policy and refund conditions.</label>
                     </div>
                     <button id="pay-btn" onclick="continueToPayment()" class="btn-evorra pay-btn">Continue to Payment</button>
                 </div>
@@ -299,12 +528,12 @@
                 card.className = 'ticket-select-card animate-evorra';
                 card.id = `t-${t.id}`;
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="ticket-opt-row">
                         <div>
-                            <h4 style="color: white; font-weight: 800;">${t.name}</h4>
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-top: 4px;">${t.stock > 0 ? t.stock + ' left' : 'Sold out'}</p>
+                            <h4 class="ticket-opt-title">${t.name}</h4>
+                            <p class="ticket-opt-meta">${t.stock > 0 ? t.stock + ' left' : 'Sold out'}</p>
                         </div>
-                        <span style="color: var(--secondary); font-weight: 900; font-size: 1.1rem;">₹${t.price}</span>
+                        <span class="ticket-opt-price">₹${t.price}</span>
                     </div>
                 `;
                 card.onclick = () => selectTicket(t);
@@ -325,12 +554,12 @@
                     card.className = 'ticket-select-card animate-evorra';
                     card.id = `t-${fallback.id}`;
                     card.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="ticket-opt-row">
                             <div>
-                                <h4 style="color: white; font-weight: 800;">${fallback.name}</h4>
-                                <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-top: 4px;">${fallback.stock > 0 ? fallback.stock + ' left' : 'Sold out'}</p>
+                                <h4 class="ticket-opt-title">${fallback.name}</h4>
+                                <p class="ticket-opt-meta">${fallback.stock > 0 ? fallback.stock + ' left' : 'Sold out'}</p>
                             </div>
-                            <span style="color: var(--secondary); font-weight: 900; font-size: 1.1rem;">₹${fallback.price}</span>
+                            <span class="ticket-opt-price">₹${fallback.price}</span>
                         </div>
                     `;
                     card.onclick = () => selectTicket(fallback);
@@ -352,7 +581,10 @@
         // Reset promo when ticket changes
         promoData = null;
         appliedDiscount = 0;
-        document.getElementById('promo-msg').classList.add('hide');
+        const pm = document.getElementById('promo-msg');
+        pm.classList.add('hide');
+        pm.classList.remove('promo-msg--error', 'promo-msg--success');
+        pm.textContent = '';
         document.getElementById('promo-code').value = '';
 
         updateSummary();
@@ -370,6 +602,15 @@
         updateSummary();
     }
 
+    function setPromoFeedback(text, kind) {
+        const msg = document.getElementById('promo-msg');
+        msg.textContent = text;
+        msg.classList.remove('promo-msg--error', 'promo-msg--success');
+        if (kind === 'error') msg.classList.add('promo-msg--error');
+        if (kind === 'success') msg.classList.add('promo-msg--success');
+        msg.classList.remove('hide');
+    }
+
     async function applyPromo() {
         const code = document.getElementById('promo-code').value.toUpperCase().trim();
         const msg = document.getElementById('promo-msg');
@@ -378,25 +619,19 @@
         try {
             const snap = await db.collection('promo_codes').doc(code).get();
             if (!snap.exists) {
-                msg.textContent = "Invalid promo code";
-                msg.style.color = "var(--error)";
-                msg.classList.remove('hide');
+                setPromoFeedback('Invalid promo code', 'error');
                 return;
             }
             const data = snap.data();
             const subtotal = selectedTicket.price * quantity;
             
             if (subtotal < (data.min_order_amount || 0)) {
-                msg.textContent = `Min order ₹${data.min_order_amount} required`;
-                msg.style.color = "var(--error)";
-                msg.classList.remove('hide');
+                setPromoFeedback(`Min order ₹${data.min_order_amount} required`, 'error');
                 return;
             }
 
             promoData = data;
-            msg.textContent = "Promo applied!";
-            msg.style.color = "var(--secondary)";
-            msg.classList.remove('hide');
+            setPromoFeedback('Promo applied!', 'success');
             updateSummary();
 
         } catch (e) { console.error(e); }

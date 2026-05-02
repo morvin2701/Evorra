@@ -1,0 +1,329 @@
+/**
+ * Evorra Home — layout, texture, hierarchy (works with home.html inline styles).
+ */
+
+@keyframes homeReveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes homeShine {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Film grain + depth (fixed overlay, does not block clicks) ── */
+.home-bg.home-premium {
+    position: relative;
+}
+
+.home-bg.home-premium::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.038;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.55) 1px, transparent 1px);
+    background-size: 5px 5px;
+}
+
+.home-bg.home-premium .home-shell {
+    position: relative;
+    z-index: 2;
+}
+
+/* Stagger shell children */
+.home-premium .home-shell > * {
+    animation: homeReveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.home-premium .home-shell > *:nth-child(1) {
+    animation-delay: 0.02s;
+}
+.home-premium .home-shell > *:nth-child(2) {
+    animation-delay: 0.05s;
+}
+.home-premium .home-shell > *:nth-child(3) {
+    animation-delay: 0.08s;
+}
+.home-premium .home-shell > *:nth-child(4) {
+    animation-delay: 0.1s;
+}
+.home-premium .home-shell > *:nth-child(5) {
+    animation-delay: 0.12s;
+}
+.home-premium .home-shell > *:nth-child(6) {
+    animation-delay: 0.14s;
+}
+.home-premium .home-shell > *:nth-child(7) {
+    animation-delay: 0.16s;
+}
+.home-premium .home-shell > *:nth-child(8) {
+    animation-delay: 0.18s;
+}
+.home-premium .home-shell > *:nth-child(9) {
+    animation-delay: 0.2s;
+}
+.home-premium .home-shell > *:nth-child(10) {
+    animation-delay: 0.22s;
+}
+
+/* Header: stack above decorative layers */
+.home-premium .home-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+.home-premium .home-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(110deg, transparent 38%, rgba(255, 215, 0, 0.045) 50%, transparent 62%);
+    background-size: 220% 100%;
+    animation: homeShine 12s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Hero KPI column: tighter “dashboard” feel */
+.home-premium .hero-kpis {
+    align-self: stretch;
+}
+
+/* Netflix rows: edge fade + scroll affordance */
+.home-premium .netflix-row-scroll {
+    padding-top: 8px;
+    padding-bottom: 18px;
+    scroll-padding: 0 16px;
+    mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+}
+
+.home-premium .netflix-row-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, rgba(255, 61, 0, 0.55), rgba(255, 215, 0, 0.35));
+}
+
+/* Spotlight bottom controls area */
+.home-premium .hs-dots {
+    bottom: 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+}
+
+.home-premium .hs-dot {
+    width: 8px;
+    height: 8px;
+    transition: transform 0.25s ease, background 0.25s ease, width 0.25s ease;
+}
+
+.home-premium .hs-dot.active {
+    width: 22px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff3d00, #ffd700);
+}
+
+/* Category strip horizontal scroll polish */
+.home-premium .horizontal-feed.category-strip {
+    padding: 4px 2px 10px;
+    gap: 10px;
+}
+
+.home-premium .category-chip:not(.active):hover {
+    border-color: rgba(255, 61, 0, 0.28);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* Featured tag readability */
+.home-premium .featured-tag {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* List cards: image frame */
+.home-premium .list-card-img {
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Toast */
+.home-premium .toast-msg {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(14, 14, 14, 0.94);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.5);
+}
+
+/* Card depth on hover (light + dark themes pick up base transforms from home.html) */
+.home-premium .featured-card,
+.home-premium .upcoming-card,
+.home-premium .marquee-card,
+.home-premium .list-card,
+.home-premium .discovery-card-premium {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.35s ease;
+}
+
+.home-premium .netflix-row-scroll {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-premium .home-shell > *,
+    .home-premium .home-header::before {
+        animation: none !important;
+    }
+
+    .home-premium .netflix-row-scroll {
+        scroll-behavior: auto;
+    }
+}
+
+/* ═══════════ MOBILE ═══════════ */
+.home-m-bg.home-m-premium {
+    position: relative;
+}
+
+.home-m-bg.home-m-premium::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.04;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+    background-size: 5px 5px;
+}
+
+.home-m-premium .home-m-shell {
+    position: relative;
+    z-index: 2;
+}
+
+/* Accent rail on panels */
+.home-m-premium .m-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.home-m-premium .m-panel:not(.m-skel-panel)::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    top: 0;
+    height: 2px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, transparent, rgba(255, 61, 0, 0.55), rgba(255, 215, 0, 0.35), transparent);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.home-m-premium .m-header {
+    position: relative;
+    z-index: 1;
+}
+
+.home-m-premium .m-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+.home-m-premium .m-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 215, 0, 0.04) 50%, transparent 65%);
+    background-size: 200% 100%;
+    animation: homeShine 14s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Discovery horizontal strip */
+.home-m-premium #m-discovery-scroll {
+    padding-top: 6px;
+    padding-bottom: 8px;
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+}
+
+/* Pop / list cards accent */
+.home-m-premium .m-pop-card {
+    border-left: 3px solid rgba(255, 61, 0, 0.45);
+    padding-left: 2px;
+}
+
+.home-m-premium .m-pop-img {
+    border-radius: 14px 0 0 14px;
+}
+
+.home-m-premium .m-featured-img,
+.home-m-premium .m-upcoming-img {
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-m-premium .m-featured-card:hover .m-featured-img,
+.home-m-premium .m-upcoming-card:hover .m-upcoming-img {
+    transform: scale(1.04);
+}
+
+.home-m-premium .m-quick-bar {
+    animation: homeReveal 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.03s backwards;
+}
+
+.home-m-premium .toast-msg {
+    border-radius: 14px;
+    background: rgba(14, 14, 14, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.home-m-premium .home-m-shell > .m-panel:nth-child(3) {
+    animation-delay: 0.04s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(4) {
+    animation-delay: 0.07s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(5) {
+    animation-delay: 0.1s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(6) {
+    animation-delay: 0.12s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(7) {
+    animation-delay: 0.14s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(9) {
+    animation-delay: 0.16s;
+}
+.home-m-premium .home-m-shell > .m-panel:nth-child(10) {
+    animation-delay: 0.18s;
+}
+
+.home-m-premium .m-panel {
+    animation: homeReveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-m-premium .m-header::before,
+    .home-m-premium .m-panel {
+        animation: none !important;
+    }
+
+    .home-m-premium .m-featured-card:hover .m-featured-img,
+    .home-m-premium .m-upcoming-card:hover .m-upcoming-img {
+        transform: none;
+    }
+}

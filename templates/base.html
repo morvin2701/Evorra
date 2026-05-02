@@ -12,7 +12,8 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/background-animation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/showmates-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/evorra-pages.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Firebase (Compat Mode for easier integration) -->
@@ -22,34 +23,25 @@
 
     {% block head %}{% endblock %}
 </head>
-<body>
-    <!-- Global Animated Background -->
-    <div class="global-bg-anim" aria-hidden="true">
-        <div class="bg-gradient-layer"></div>
-        <div class="bg-glow bg-glow-1"></div>
-        <div class="bg-glow bg-glow-2"></div>
-        <div class="bg-glow bg-glow-3"></div>
-        <div class="bg-grid-layer"></div>
-        <div id="bg-particles" class="bg-particles"></div>
-    </div>
-
-    <!-- Proper Website Top Navbar -->
-    <nav class="top-navbar">
+<body class="theme-showmates">
+    <!-- Top nav — Showmates-style: primary CTA + clean links -->
+    <nav class="top-navbar sm-topnav">
         <a href="/" class="nav-logo">EVORRA</a>
-        
+
         <div class="nav-links">
-            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="/explore" class="nav-link {% if request.path == '/explore' %}active{% endif %}"><i class="fa-solid fa-compass"></i> Explore</a>
-            <a href="/add-event" id="nav-add-event" class="nav-link hide"><i class="fa-solid fa-plus"></i> Add Event</a>
-            <a href="/scan-center" id="nav-scan-center" class="nav-link hide {% if request.path == '/scan-center' %}active{% endif %}"><i class="fa-solid fa-qrcode"></i> Scan Center</a>
-            <a href="/my-tickets" class="nav-link {% if request.path == '/my-tickets' %}active{% endif %}"><i class="fa-solid fa-ticket"></i> Tickets</a>
+            <a href="/" class="nav-link {% if request.path == '/' or request.path == '/home-mobile' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/explore" class="nav-link {% if request.path == '/explore' %}active{% endif %}"><i class="fa-solid fa-ticket"></i> Events</a>
+            <a href="/add-event" id="nav-add-event" class="nav-link hide"><i class="fa-solid fa-plus"></i> Studio</a>
+            <a href="/scan-center" id="nav-scan-center" class="nav-link hide {% if request.path == '/scan-center' %}active{% endif %}"><i class="fa-solid fa-qrcode"></i> Scan</a>
+            <a href="/my-tickets" class="nav-link {% if request.path == '/my-tickets' %}active{% endif %}"><i class="fa-solid fa-receipt"></i> Tickets</a>
             <a href="/shared-tickets" class="nav-link {% if request.path == '/shared-tickets' %}active{% endif %}"><i class="fa-solid fa-share-nodes"></i> Shared</a>
             <a href="/profile" id="nav-profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> Profile</a>
             <a href="/auth" id="nav-login" class="nav-link hide">Login</a>
         </div>
 
-        <div id="user-header">
-            <!-- Dynamic Auth Button -->
+        <div class="nav-actions">
+            <a href="/add-event" class="nav-cta hide-on-mobile" id="nav-list-event">List your event</a>
+            <div id="user-header"></div>
         </div>
     </nav>
 
@@ -57,15 +49,87 @@
         {% block content %}{% endblock %}
     </main>
 
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-inner">
+            <div class="footer-newsletter" aria-labelledby="footer-news-heading">
+                <div class="footer-newsletter-text">
+                    <p id="footer-news-heading" class="footer-newsletter-title">Never miss what&apos;s on</p>
+                    <p class="footer-newsletter-desc">Weekly picks and drops near you — short updates, zero clutter.</p>
+                </div>
+                <form class="footer-newsletter-form" id="footer-news-form" action="#" method="post" onsubmit="return false;">
+                    <label for="footer-email" class="visually-hidden">Email address</label>
+                    <input type="email" id="footer-email" name="email" class="footer-newsletter-input" placeholder="you@example.com" autocomplete="email">
+                    <button type="button" class="footer-newsletter-btn" id="footer-news-btn">Subscribe</button>
+                </form>
+            </div>
+
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <a href="/" class="footer-logo-link"><span class="footer-logo">EVORRA</span></a>
+                    <p class="footer-tagline">Browse upcoming and live events. Compare venues, dates, and book tickets in a few taps — built for how events work today.</p>
+                    <div class="footer-social" aria-label="Social">
+                        <a href="https://instagram.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://twitter.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="X"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="https://youtube.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="https://linkedin.com" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    </div>
+                    <div class="footer-store-row" aria-label="Get the app">
+                        <a href="#" class="footer-store-badge" aria-label="Get it on Google Play"><i class="fa-brands fa-google-play"></i><span><small>GET IT ON</small><strong>Google Play</strong></span></a>
+                        <a href="#" class="footer-store-badge" aria-label="Download on the App Store"><i class="fa-brands fa-apple"></i><span><small>Download on the</small><strong>App Store</strong></span></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="/explore">Music &amp; concert</a></li>
+                        <li><a href="/explore">Comedy</a></li>
+                        <li><a href="/explore">Festival &amp; celebration</a></li>
+                        <li><a href="/explore">Sports &amp; fitness</a></li>
+                        <li><a href="/explore">Workshops</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="/explore">All events</a></li>
+                        <li><a href="/explore">Ahmedabad</a></li>
+                        <li><a href="/explore">This weekend</a></li>
+                        <li><a href="/support">Help &amp; support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Organisers</h4>
+                    <ul>
+                        <li><a href="/add-event">List your event</a></li>
+                        <li><a href="/organizer/manage">Dashboard</a></li>
+                        <li><a href="/scan-center">Scan center</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/support">Privacy &amp; safety</a></li>
+                        <li><a href="/support">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span class="footer-copy">&copy; 2026 Evorra. All rights reserved.</span>
+                <span class="footer-tag">Tickets · QR entry · Trusted booking</span>
+            </div>
+        </div>
+    </footer>
+
     <!-- Mobile-only Bottom Navigation -->
     <div class="bottom-nav hide-on-desktop">
-        <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
+        <a href="/" class="nav-item {% if request.path == '/' or request.path == '/home-mobile' %}active{% endif %}">
             <i class="fa-solid fa-house"></i>
             <span>Home</span>
         </a>
         <a href="/explore" class="nav-item {% if request.path == '/explore' %}active{% endif %}">
-            <i class="fa-solid fa-compass"></i>
-            <span>Explore</span>
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Events</span>
         </a>
         <a href="/my-tickets" class="nav-item {% if request.path == '/my-tickets' %}active{% endif %}">
             <i class="fa-solid fa-ticket"></i>
@@ -113,15 +177,14 @@
                 });
 
                 userHeader.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 20px;">
-                        <a href="/notifications" style="color: white; font-size: 1.2rem; position: relative; text-decoration: none;">
+                    <div class="sm-nav-auth">
+                        <a href="/notifications" class="sm-nav-bell" aria-label="Notifications">
                             <i class="fa-regular fa-bell"></i>
-                            <span id="global-notif-badge" class="hide" style="position: absolute; top: -5px; right: -5px; background: var(--error); width: 14px; height: 14px; border-radius: 50%; font-size: 0.6rem; display: flex; align-items: center; justify-content: center;"></span>
+                            <span id="global-notif-badge" class="sm-nav-notif-badge hide"></span>
                         </a>
-                        <a href="/profile" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                            <span class="hide-on-mobile" style="color: white; font-weight: 600; font-size: 0.9rem;">${user.displayName || 'Account'}</span>
-                            <img src="${user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid}" 
-                                 style="width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);">
+                        <a href="/profile" class="sm-nav-user">
+                            <span class="sm-nav-user-name hide-on-mobile">${user.displayName || 'Account'}</span>
+                            <img class="sm-nav-avatar" src="${user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid}" alt="">
                         </a>
                     </div>
                 `;
@@ -152,81 +215,177 @@
         });
     </script>
     
-    <!-- Global Evorra Smart Alert Modal -->
-    <div id="evorra-alert-root" class="hide" style="position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
-        <div id="evorra-alert-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); opacity: 0; transition: 0.4s;"></div>
-        <div id="evorra-alert-card" style="position: relative; background: rgba(22, 31, 54, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 36px; padding: 40px; width: 100%; max-width: 420px; text-align: center; transform: scale(0.85); opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 40px 100px rgba(0,0,0,0.8);">
-            <div id="evorra-alert-icon" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: rgba(142, 125, 255, 0.1); color: #8E7DFF;">
-                <i class="fa-solid fa-bell"></i>
+    <!-- Global Evorra alert (Showmates light card; replaces native alert) -->
+    <div id="evorra-alert-root" class="evorra-alert hide" role="presentation" aria-hidden="true">
+        <div id="evorra-alert-overlay" class="evorra-alert-overlay" tabindex="-1" aria-hidden="true"></div>
+        <div
+            id="evorra-alert-card"
+            class="evorra-alert-card evorra-alert-card--info"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="evorra-alert-title"
+            aria-describedby="evorra-alert-message"
+        >
+            <div class="evorra-alert-icon-wrap">
+                <div class="evorra-alert-icon-ring" aria-hidden="true"></div>
+                <div id="evorra-alert-icon" class="evorra-alert-icon">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                </div>
             </div>
-            <h2 id="evorra-alert-title" style="font-size: 1.6rem; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.5px;">Notification</h2>
-            <p id="evorra-alert-message" style="color: rgba(255,255,255,0.6); line-height: 1.6; font-size: 1.05rem; margin-bottom: 35px;">This is a system message from Evorra.</p>
-            <button onclick="closeEvorraAlert()" style="width: 100%; padding: 18px; border-radius: 20px; border: none; background: linear-gradient(135deg, #685BFF, #8E7DFF); color: white; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(104, 91, 255, 0.3);">Dismiss</button>
+            <h2 id="evorra-alert-title" class="evorra-alert-title">Notification</h2>
+            <p id="evorra-alert-message" class="evorra-alert-body">This is a system message from Evorra.</p>
+            <button type="button" id="evorra-alert-dismiss" class="evorra-alert-btn">Dismiss</button>
         </div>
     </div>
 
     <script>
-        const alertRoot = document.getElementById('evorra-alert-root');
-        const alertOverlay = document.getElementById('evorra-alert-overlay');
-        const alertCard = document.getElementById('evorra-alert-card');
-        const alertIcon = document.getElementById('evorra-alert-icon');
-        const alertTitle = document.getElementById('evorra-alert-title');
-        const alertMsg = document.getElementById('evorra-alert-message');
+        (function () {
+            var alertRoot = document.getElementById('evorra-alert-root');
+            var alertOverlay = document.getElementById('evorra-alert-overlay');
+            var alertCard = document.getElementById('evorra-alert-card');
+            var alertIcon = document.getElementById('evorra-alert-icon');
+            var alertTitle = document.getElementById('evorra-alert-title');
+            var alertMsg = document.getElementById('evorra-alert-message');
+            var alertBtn = document.getElementById('evorra-alert-dismiss');
+            if (!alertRoot || !alertCard) return;
 
-        window.alert = function(msg, type = 'info') {
-            alertMsg.textContent = msg;
-            
-            // Customize based on type
-            if (msg.toLowerCase().includes('error') || msg.toLowerCase().includes('fail') || msg.toLowerCase().includes('required')) {
-                alertIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i>';
-                alertIcon.style.background = 'rgba(255, 76, 76, 0.1)';
-                alertIcon.style.color = '#FF4C4C';
-                alertTitle.textContent = "System Error";
-                alertCard.style.borderColor = 'rgba(255, 76, 76, 0.2)';
-            } else if (msg.toLowerCase().includes('success') || msg.toLowerCase().includes('published')) {
-                alertIcon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
-                alertIcon.style.background = 'rgba(76, 194, 255, 0.1)';
-                alertIcon.style.color = '#4CC2FF';
-                alertTitle.textContent = "Success";
-                alertCard.style.borderColor = 'rgba(76, 194, 255, 0.2)';
-            } else {
-                alertIcon.innerHTML = '<i class="fa-solid fa-bell"></i>';
-                alertIcon.style.background = 'rgba(142, 125, 255, 0.1)';
-                alertIcon.style.color = '#8E7DFF';
-                alertTitle.textContent = "Notification";
-                alertCard.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            var OPEN = 'evorra-alert--open';
+            var VARIANTS = ['info', 'success', 'error', 'warning'];
+
+            function classifyAlert(msg) {
+                var m = String(msg || '').toLowerCase();
+                if (/\b(success|published|launched|saved|copied|accepted|completed|congrats)\b/.test(m)) return 'success';
+                if (/\b(error|fail|failed|unable|invalid|not found|unauthorized|expired|denied)\b/.test(m)) return 'error';
+                if (/\b(please |must |select |enter |confirm |required|add at least|login again)\b/.test(m)) return 'warning';
+                return 'info';
             }
 
-            alertRoot.classList.remove('hide');
-            setTimeout(() => {
-                alertOverlay.style.opacity = '1';
-                alertCard.style.opacity = '1';
-                alertCard.style.transform = 'scale(1)';
-            }, 10);
-        };
+            function applyVariant(kind) {
+                VARIANTS.forEach(function (v) {
+                    alertCard.classList.remove('evorra-alert-card--' + v);
+                });
+                alertCard.classList.add('evorra-alert-card--' + kind);
 
-        function closeEvorraAlert() {
-            alertOverlay.style.opacity = '0';
-            alertCard.style.opacity = '0';
-            alertCard.style.transform = 'scale(0.85)';
-            setTimeout(() => {
-                alertRoot.classList.add('hide');
-            }, 400);
-        }
+                if (kind === 'success') {
+                    alertIcon.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true"></i>';
+                    alertTitle.textContent = 'Success';
+                } else if (kind === 'error') {
+                    alertIcon.innerHTML = '<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>';
+                    alertTitle.textContent = "Can't complete that";
+                } else if (kind === 'warning') {
+                    alertIcon.innerHTML = '<i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>';
+                    alertTitle.textContent = 'Almost there';
+                } else {
+                    alertIcon.innerHTML = '<i class="fa-solid fa-circle-info" aria-hidden="true"></i>';
+                    alertTitle.textContent = 'Notification';
+                }
+            }
+
+            window.closeEvorraAlert = function () {
+                alertRoot.classList.remove(OPEN);
+                alertRoot.setAttribute('aria-hidden', 'true');
+                document.removeEventListener('keydown', onKey);
+                setTimeout(function () {
+                    alertRoot.classList.add('hide');
+                }, 360);
+            };
+
+            function onKey(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    window.closeEvorraAlert();
+                }
+            }
+
+            function openAlert() {
+                alertRoot.classList.remove('hide');
+                alertRoot.setAttribute('aria-hidden', 'false');
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                        alertRoot.classList.add(OPEN);
+                    });
+                });
+                document.addEventListener('keydown', onKey);
+                if (alertBtn) {
+                    setTimeout(function () {
+                        try {
+                            alertBtn.focus();
+                        } catch (err) {}
+                    }, 120);
+                }
+            }
+
+            window.alert = function (msg) {
+                alertMsg.textContent = msg;
+                applyVariant(classifyAlert(msg));
+                openAlert();
+            };
+
+            if (alertOverlay) {
+                alertOverlay.addEventListener('click', function () {
+                    window.closeEvorraAlert();
+                });
+            }
+            if (alertBtn) {
+                alertBtn.addEventListener('click', function () {
+                    window.closeEvorraAlert();
+                });
+            }
+        })();
     </script>
     
     <style>
         .hide-on-desktop { display: none; }
         .hide-on-mobile { display: block; }
+        .sm-topnav {
+            flex-wrap: nowrap;
+            gap: 12px 20px;
+            min-height: 72px;
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
+        }
+        .sm-topnav .nav-links {
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
         @media (max-width: 768px) {
             .hide-on-desktop { display: flex; }
             .hide-on-mobile { display: none; }
             .top-navbar .nav-links { display: none; }
+            .sm-topnav { flex-wrap: wrap; min-height: 64px; }
         }
         .hide { display: none !important; }
     </style>
 
-    <script src="{{ url_for('static', filename='js/background-animation.js') }}"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById('footer-news-btn');
+            var input = document.getElementById('footer-email');
+            if (!btn || !input) return;
+            btn.addEventListener('click', function () {
+                var v = (input.value || '').trim();
+                if (!v) {
+                    input.focus();
+                    input.setAttribute('aria-invalid', 'true');
+                    return;
+                }
+                input.removeAttribute('aria-invalid');
+                window.location.href =
+                    'mailto:hello@evorra.com?subject=' +
+                    encodeURIComponent('Evorra newsletter') +
+                    '&body=' +
+                    encodeURIComponent('Please add this email to updates: ' + v);
+            });
+        })();
+    </script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

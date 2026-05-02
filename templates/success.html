@@ -4,161 +4,432 @@
 
 {% block head %}
 <style>
+    /* Success — premium Showmates (primary + emerald success state) */
     .success-wrap {
         min-height: calc(100vh - 88px);
-        padding: 28px 14px 96px;
+        padding: 36px 18px 118px;
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-    .success-panel {
-        width: min(920px, 100%);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 28px;
-        padding: 26px;
         background:
-            radial-gradient(circle at 15% 18%, rgba(85, 104, 255, 0.22), transparent 42%),
-            radial-gradient(circle at 80% 20%, rgba(92, 245, 200, 0.15), transparent 36%),
-            linear-gradient(160deg, rgba(8, 16, 30, 0.93), rgba(10, 18, 35, 0.88));
-        box-shadow: 0 28px 70px rgba(0,0,0,0.42);
-        backdrop-filter: blur(12px);
+            radial-gradient(ellipse 120% 80% at 50% -20%, rgba(220, 38, 38, 0.06), transparent 55%),
+            var(--sm-bg);
     }
-    .success-top {
+
+    .success-panel {
+        position: relative;
+        width: min(900px, 100%);
+        border: 1px solid var(--sm-border);
+        border-radius: 32px;
+        padding: 0;
+        background: var(--sm-surface);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.92) inset,
+            0 8px 16px rgba(15, 23, 42, 0.04),
+            0 32px 72px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+    .success-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 5px;
+        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.55), rgba(16, 185, 129, 0.45), transparent);
+        opacity: 0.95;
+        pointer-events: none;
+    }
+    .success-panel::after {
+        content: "";
+        position: absolute;
+        top: -35%;
+        right: -25%;
+        width: 65%;
+        height: 75%;
+        background: radial-gradient(ellipse, rgba(220, 38, 38, 0.07) 0%, transparent 68%);
+        pointer-events: none;
+    }
+
+    .success-panel-shine {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 90% 45% at 18% 12%, rgba(255, 255, 255, 0.85) 0%, transparent 52%),
+            radial-gradient(ellipse 70% 40% at 88% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .success-panel-inner {
+        position: relative;
+        z-index: 1;
+        padding: 40px 36px 36px;
+    }
+
+    .success-hero {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 10px;
+        gap: 18px;
         margin-bottom: 6px;
     }
+
+    .success-icon-stage {
+        position: relative;
+        width: 96px;
+        height: 96px;
+        display: grid;
+        place-items: center;
+    }
+    .success-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid rgba(16, 185, 129, 0.35);
+        pointer-events: none;
+    }
+    .success-ring--a {
+        width: 84px;
+        height: 84px;
+        opacity: 0.65;
+    }
+    .success-ring--b {
+        width: 96px;
+        height: 96px;
+        border-color: rgba(16, 185, 129, 0.18);
+        opacity: 0.9;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .success-ring--a {
+            animation: success-ring-pulse 2.4s ease-in-out infinite;
+        }
+        .success-ring--b {
+            animation: success-ring-pulse 2.4s ease-in-out 0.35s infinite;
+        }
+    }
+    @keyframes success-ring-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.55; }
+        50% { transform: scale(1.06); opacity: 0.85; }
+    }
+
     .success-dot {
-        width: 48px;
-        height: 48px;
+        position: relative;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #0c1a14;
-        font-size: 1.25rem;
-        background: radial-gradient(circle at 35% 30%, #d8ffef, #89f5d0 62%, #63ddae);
-        box-shadow: 0 0 12px rgba(118, 255, 205, 0.22);
+        color: #fff;
+        font-size: 1.5rem;
+        background: linear-gradient(155deg, #34d399 0%, #10b981 38%, #059669 100%);
+        box-shadow:
+            0 0 0 5px rgba(16, 185, 129, 0.22),
+            0 16px 36px rgba(5, 150, 105, 0.38),
+            inset 0 2px 0 rgba(255, 255, 255, 0.22);
     }
+    .success-dot::after {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.45), transparent 42%);
+        opacity: 0.35;
+        pointer-events: none;
+    }
+
     .success-chip {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
-        padding: 0;
-        border: none;
-        background: transparent;
-        color: #bdfce8;
-        font-size: .76rem;
-        letter-spacing: .45px;
+        gap: 9px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        font-weight: 800;
-        opacity: .92;
-    }
-    .success-headline {
-        margin: 18px 0 8px;
-        text-align: center;
-        font-size: clamp(1.9rem, 4.5vw, 2.8rem);
-        line-height: 1.08;
-        letter-spacing: -.8px;
-        color: #fff;
         font-weight: 900;
+        color: var(--sm-primary);
+        box-shadow: 0 2px 10px rgba(220, 38, 38, 0.08);
+    }
+    .success-chip i {
+        font-size: 0.88rem;
+        opacity: 0.95;
+    }
+
+    .success-headline {
+        margin: 22px 0 12px;
+        text-align: center;
+        font-size: clamp(1.95rem, 4.5vw, 2.75rem);
+        line-height: 1.08;
+        letter-spacing: -0.045em;
+        color: var(--sm-text);
+        font-weight: 900;
+    }
+    .success-kicker {
+        display: block;
+        margin: 0 auto 10px;
+        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+        opacity: 0.88;
     }
     .success-text {
         margin: 0 auto;
-        width: min(620px, 100%);
+        width: min(560px, 100%);
         text-align: center;
-        color: rgba(225, 235, 255, 0.74);
-        font-size: 1rem;
-        line-height: 1.7;
+        color: var(--sm-muted);
+        font-size: 1.05rem;
+        line-height: 1.68;
+        font-weight: 600;
     }
-    .success-grid {
-        margin-top: 24px;
-        display: grid;
-        grid-template-columns: 1.2fr .8fr;
-        gap: 14px;
-    }
-    .success-card {
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.04);
-        border-radius: 18px;
-        padding: 14px 15px;
-    }
-    .success-card h4 {
-        margin: 0 0 6px;
-        color: #fff;
-        font-size: .95rem;
+    .success-text strong {
+        color: var(--sm-text);
         font-weight: 800;
+    }
+
+    .success-grid {
+        margin-top: 32px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .success-card {
+        position: relative;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 20px 20px 19px;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+            0 10px 30px rgba(15, 23, 42, 0.06);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+        overflow: hidden;
+    }
+    .success-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 16px;
+        bottom: 16px;
+        width: 3px;
+        border-radius: 0 4px 4px 0;
+        background: linear-gradient(180deg, var(--sm-primary), rgba(220, 38, 38, 0.35));
+        opacity: 0.85;
+    }
+    .success-card:hover {
+        border-color: rgba(220, 38, 38, 0.15);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+            0 16px 40px rgba(15, 23, 42, 0.1);
+        transform: translateY(-3px);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .success-card:hover { transform: none; }
+    }
+
+    .success-card-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-size: 1.05rem;
+        color: var(--sm-primary);
+        background: linear-gradient(145deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.04));
+        border: 1px solid rgba(220, 38, 38, 0.12);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.06);
+    }
+    .success-card-icon--muted {
+        color: #0f766e;
+        background: linear-gradient(145deg, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0.05));
+        border-color: rgba(16, 185, 129, 0.18);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+    }
+    .success-card-body { min-width: 0; }
+    .success-card h4 {
+        margin: 0 0 8px;
+        color: var(--sm-text);
+        font-size: 1rem;
+        font-weight: 900;
+        letter-spacing: -0.025em;
     }
     .success-card p {
         margin: 0;
-        color: rgba(223, 233, 255, 0.72);
-        line-height: 1.55;
-        font-size: .86rem;
+        color: var(--sm-muted);
+        line-height: 1.6;
+        font-size: 0.875rem;
+        font-weight: 600;
     }
+
     .success-actions {
-        margin-top: 18px;
+        margin-top: 32px;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 14px;
+        align-items: stretch;
     }
-    .success-btn {
+    /* Equal size: override global .btn-evorra (margin-top, padding) on primary only */
+    .success-actions .success-btn {
         text-decoration: none;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 13px 14px;
-        font-size: .9rem;
-        font-weight: 800;
-        transition: .2s ease;
+        gap: 10px;
+        width: 100%;
+        min-height: 54px;
+        padding: 16px 20px;
+        margin: 0 !important;
+        box-sizing: border-box;
+        font-size: 0.93rem;
+        font-weight: 900;
+        font-family: inherit;
+        letter-spacing: -0.01em;
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     }
-    .success-btn:hover { transform: translateY(-1px); }
+    .success-btn:hover {
+        transform: translateY(-2px);
+    }
+    .success-btn:active {
+        transform: translateY(0);
+    }
     .success-btn.primary {
-        color: #08142b;
-        background: linear-gradient(135deg, #87f4cf, #5ad2ff);
-        box-shadow: 0 10px 24px rgba(90, 210, 255, 0.25);
+        color: #fff !important;
+        border: 1px solid transparent;
+        background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+        box-shadow: 0 12px 32px rgba(220, 38, 38, 0.32);
+    }
+    .success-btn.primary:hover {
+        box-shadow: 0 16px 40px rgba(220, 38, 38, 0.38);
     }
     .success-btn.ghost {
-        color: #e4ecff;
-        background: rgba(255,255,255,0.03);
+        color: var(--sm-text) !important;
+        border: 1px solid var(--sm-border);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
     }
+    .success-btn.ghost:hover {
+        border-color: rgba(220, 38, 38, 0.28);
+        color: var(--sm-primary) !important;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.09);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .success-panel {
+            animation: success-panel-reveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .success-panel-shine {
+            animation: success-shimmer-fade 0.9s ease 0.15s both;
+        }
+        .success-hero { animation: success-block-up 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both; }
+        .success-kicker { animation: success-block-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+        .success-headline { animation: success-block-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both; }
+        .success-text { animation: success-block-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+        .success-grid .success-card:nth-child(1) { animation: success-block-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both; }
+        .success-grid .success-card:nth-child(2) { animation: success-block-up 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both; }
+        .success-actions { animation: success-block-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both; }
+        .success-dot {
+            animation: success-dot-reveal 0.75s cubic-bezier(0.34, 1.45, 0.64, 1) 0.05s both;
+        }
+    }
+    @keyframes success-panel-reveal {
+        from { opacity: 0; transform: translateY(22px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes success-shimmer-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes success-block-up {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes success-dot-reveal {
+        from { opacity: 0; transform: scale(0.8) rotate(-8deg); }
+        to { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .success-panel,
+        .success-panel-shine,
+        .success-hero,
+        .success-kicker,
+        .success-headline,
+        .success-text,
+        .success-grid .success-card,
+        .success-actions,
+        .success-dot,
+        .success-ring--a,
+        .success-ring--b {
+            animation: none !important;
+        }
+    }
+
     @media (max-width: 760px) {
-        .success-panel { border-radius: 22px; padding: 20px 16px; }
+        .success-wrap { padding: 28px 14px 104px; }
+        .success-panel-inner { padding: 32px 20px 28px; }
+        .success-panel { border-radius: 24px; }
         .success-grid { grid-template-columns: 1fr; }
         .success-actions { grid-template-columns: 1fr; }
-        .success-dot { width: 44px; height: 44px; font-size: 1.1rem; }
+        .success-icon-stage { width: 88px; height: 88px; }
+        .success-dot {
+            width: 58px;
+            height: 58px;
+            font-size: 1.35rem;
+        }
+        .success-ring--a { width: 76px; height: 76px; }
+        .success-ring--b { width: 88px; height: 88px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="success-wrap">
-    <div class="success-panel animate-fade">
-        <div class="success-top">
-            <div class="success-dot"><i class="fa-solid fa-check"></i></div>
-            <span class="success-chip"><i class="fa-solid fa-shield-check"></i> Transaction Verified</span>
-        </div>
-        <h1 class="success-headline">Payment Successful!</h1>
-        <p class="success-text">Your ticket has been confirmed. You can find your QR pass in the "My Tickets" section.</p>
-
-        <div class="success-grid">
-            <div class="success-card">
-                <h4>Entry Reminder</h4>
-                <p>Please keep your ticket QR ready at venue entry. If the ticket is not visible immediately, refresh once in the "My Tickets" screen.</p>
+    <div class="success-panel">
+        <div class="success-panel-shine" aria-hidden="true"></div>
+        <div class="success-panel-inner">
+            <div class="success-hero">
+                <div class="success-icon-stage">
+                    <span class="success-ring success-ring--a" aria-hidden="true"></span>
+                    <span class="success-ring success-ring--b" aria-hidden="true"></span>
+                    <div class="success-dot" role="img" aria-label="Success"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
+                </div>
+                <span class="success-chip"><i class="fa-solid fa-shield-check" aria-hidden="true"></i> Transaction verified</span>
             </div>
-            <div class="success-card">
-                <h4>Need Help?</h4>
-                <p>If your booking details seem delayed, revisit after a few seconds from the tickets screen.</p>
-            </div>
-        </div>
+            <p class="success-kicker">All set</p>
+            <h1 class="success-headline">Payment successful</h1>
+            <p class="success-text">Your ticket is confirmed. Open <strong>My Tickets</strong> anytime to show your <strong>QR pass</strong> at the door.</p>
 
-        <div class="success-actions">
-            <a href="/my-tickets" class="success-btn primary"><i class="fa-solid fa-ticket"></i> View My Tickets</a>
-            <a href="/" class="success-btn ghost"><i class="fa-solid fa-house"></i> Back to Home</a>
+            <div class="success-grid">
+                <article class="success-card">
+                    <div class="success-card-icon success-card-icon--muted" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="success-card-body">
+                        <h4>At the venue</h4>
+                        <p>Have your QR ready at entry. If it does not show immediately, pull to refresh on My Tickets.</p>
+                    </div>
+                </article>
+                <article class="success-card">
+                    <div class="success-card-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></div>
+                    <div class="success-card-body">
+                        <h4>Need help?</h4>
+                        <p>Details can take a moment to sync. Wait a few seconds and open My Tickets again — your booking is saved.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="success-actions">
+                <a href="/my-tickets" class="success-btn primary btn-evorra"><i class="fa-solid fa-ticket" aria-hidden="true"></i> View my tickets</a>
+                <a href="/" class="success-btn ghost"><i class="fa-solid fa-house" aria-hidden="true"></i> Back to home</a>
+            </div>
         </div>
     </div>
 </div>

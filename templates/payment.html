@@ -4,127 +4,297 @@
 
 {% block head %}
 <style>
-    .payment-bg { background: transparent; min-height: 100vh; }
-    .payment-shell { width: min(1200px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 120px; }
+    /* Payment checkout — Showmates premium (aligned with booking.html) */
+    .payment-bg {
+        background: var(--sm-bg);
+        min-height: 100vh;
+    }
+    .payment-shell {
+        width: min(1200px, calc(100% - 30px));
+        margin: 0 auto;
+        padding: 28px 0 130px;
+    }
     .payment-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 12px;
+        margin-bottom: 18px;
     }
     .payment-back {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.15);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        text-decoration: none;
-        background: rgba(8, 14, 26, 0.75);
-    }
-    .payment-badge {
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(145, 166, 255, 0.32);
-        background: rgba(105, 120, 255, 0.16);
-        font-size: .72rem;
-        letter-spacing: .5px;
-        color: #dce5ff;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-    .payment-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
-    .payment-main { display: grid; gap: 16px; }
-    .payment-card {
-        border-radius: 22px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
-        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
-        backdrop-filter: blur(10px);
-    }
-    .payment-hero {
-        padding: 0;
-        overflow: hidden;
-        min-height: 156px;
-        display: grid;
-        grid-template-columns: 170px 1fr;
-    }
-    .payment-hero-img { width: 100%; height: 100%; object-fit: cover; }
-    .payment-hero-body { padding: 18px; }
-    .payment-title { font-size: clamp(1.2rem, 2vw, 1.5rem); font-weight: 900; margin-bottom: 6px; color: #fff; }
-    .payment-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 10px; }
-    .payment-time { color: var(--secondary); font-size: .82rem; font-weight: 800; }
-    .payment-block { padding: 16px; }
-    .section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
-    .payment-method-card {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-        padding: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .payment-method-icon {
         width: 44px;
         height: 44px;
-        border-radius: 12px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(255,255,255,0.06);
-        color: #fff;
+        color: var(--sm-text);
+        text-decoration: none;
+        background: var(--sm-surface);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .summary-box {
+    .payment-back:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+    .payment-badge {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--sm-primary);
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+    .payment-layout { display: grid; gap: 18px; grid-template-columns: 1fr; }
+    .payment-main { display: grid; gap: 18px; }
+    .payment-card {
+        border-radius: 24px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+            0 18px 44px rgba(15, 23, 42, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .payment-card {
+            animation: pm-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .payment-main > .payment-card:nth-child(1) { animation-delay: 0.02s; }
+        .payment-main > .payment-card:nth-child(2) { animation-delay: 0.08s; }
+        .payment-main > .payment-card:nth-child(3) { animation-delay: 0.12s; }
+        .payment-side > .payment-card { animation-delay: 0.1s; }
+        .payment-side > .quick-note {
+            animation: pm-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: 0.14s;
+        }
+    }
+    @keyframes pm-card-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .payment-card,
+        .payment-side > .quick-note { animation: none !important; }
+    }
+
+    .payment-hero {
+        padding: 0;
+        display: grid;
+        grid-template-columns: minmax(140px, 170px) 1fr;
+        min-height: 160px;
+    }
+    .payment-hero-img {
+        width: 100%;
+        height: 100%;
+        min-height: 160px;
+        object-fit: cover;
+        display: block;
+    }
+    .payment-hero-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .payment-title {
+        font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+        font-weight: 900;
+        margin: 0 0 8px;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+    .payment-sub {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        margin: 0 0 10px;
+        line-height: 1.45;
+    }
+    .payment-time {
+        color: var(--sm-primary);
+        font-size: 0.86rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .payment-block { padding: 20px; }
+    .section-title {
+        margin: 0 0 14px;
+        font-size: 1.06rem;
+        font-weight: 900;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+    }
+
+    .payment-method-card {
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .payment-method-card:hover {
+        border-color: #e2e8f0;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+    .payment-method-icon {
+        width: 46px;
+        height: 46px;
         border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        background: linear-gradient(145deg, rgba(220, 38, 38, 0.1), rgba(249, 115, 22, 0.06));
+        color: var(--sm-primary);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .payment-method-body { flex: 1; min-width: 0; }
+    .payment-method-title {
+        margin: 0;
+        color: var(--sm-text);
+        font-weight: 900;
+        font-size: 1.02rem;
+    }
+    .payment-method-desc {
+        margin: 5px 0 0;
+        color: var(--sm-muted);
+        font-size: 0.8rem;
+        line-height: 1.45;
+        font-weight: 600;
+    }
+    .payment-method-check {
+        color: var(--sm-primary);
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .summary-box {
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 16px;
     }
     .summary-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
+        margin-bottom: 12px;
+        gap: 12px;
+        font-size: 0.9rem;
     }
-    .summary-highlight { color: var(--secondary); font-size: 1.2rem; font-weight: 900; }
+    .summary-row--last { margin-bottom: 0; }
+    .sum-label { color: var(--sm-muted); font-weight: 700; }
+    .sum-val { font-weight: 800; color: var(--sm-text); }
+    .sum-val--accent { color: var(--sm-primary); font-weight: 800; }
+    .sum-divider {
+        border: none;
+        border-top: 1px solid var(--sm-border);
+        margin: 14px 0;
+    }
+    .summary-highlight {
+        color: var(--sm-primary);
+        font-size: 1.22rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+    .summary-row--grand .sum-label {
+        font-weight: 800;
+        color: var(--sm-text);
+    }
+
+    .cod-dock {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--sm-border);
+    }
+    .cod-dock-label {
+        margin: 0;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+    }
+    .cod-dock-total {
+        margin: 6px 0 0;
+        color: var(--sm-primary);
+        font-size: 1.42rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+    }
+
     .terms-box {
-        margin-top: 16px; display: flex; gap: 12px; align-items: flex-start;
-        background: rgba(255,255,255,0.04); padding: 15px; border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.08);
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: var(--sm-bg);
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
     }
-    .payment-side { display: grid; gap: 12px; align-self: start; }
+    .terms-box input[type="checkbox"] {
+        margin-top: 4px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sm-primary);
+        flex-shrink: 0;
+    }
+    .terms-box label {
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        line-height: 1.5;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .payment-side { display: grid; gap: 14px; align-self: start; }
     .pay-btn {
         width: 100%;
-        margin: 12px 0 0;
-        padding: 13px 18px;
-        border-radius: 12px;
-        font-size: .92rem;
-        font-weight: 800;
+        margin: 14px 0 0;
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        font-weight: 900;
+        font-family: inherit;
+    }
+    .pay-btn:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
     }
     .quick-note {
-        font-size: .8rem;
-        color: rgba(220,232,255,0.7);
-        line-height: 1.45;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: rgba(255,255,255,0.03);
-        border-radius: 14px;
-        padding: 12px;
+        font-size: 0.82rem;
+        color: var(--sm-muted);
+        line-height: 1.5;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, #fff 0%, var(--sm-bg) 100%);
+        border-radius: 16px;
+        padding: 14px 16px;
+        font-weight: 600;
     }
+
     @media (min-width: 860px) {
-        .payment-layout { grid-template-columns: minmax(0, 1fr) 360px; }
+        .payment-layout { grid-template-columns: minmax(0, 1fr) 380px; }
     }
     @media (max-width: 640px) {
-        .payment-shell { width: calc(100% - 20px); padding-top: 14px; }
-        .payment-hero { grid-template-columns: 108px 1fr; min-height: 120px; }
-        .payment-hero-body { padding: 12px; }
-        .payment-block { padding: 12px; }
-        .pay-btn { padding: 11px 12px; font-size: .82rem; }
+        .payment-shell { width: calc(100% - 20px); padding-top: 16px; }
+        .payment-hero { grid-template-columns: 112px 1fr; min-height: 128px; }
+        .payment-hero-img { min-height: 128px; }
+        .payment-hero-body { padding: 14px; }
+        .payment-block { padding: 16px; }
+        .pay-btn { padding: 13px 14px; font-size: 0.88rem; }
     }
 </style>
 {% endblock %}
@@ -151,11 +321,11 @@
                     <h2 class="section-title">Payment Method</h2>
                     <div class="payment-method-card animate-evorra">
                         <div class="payment-method-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
-                        <div style="flex: 1;">
-                            <h4 style="color: white; font-weight: 800;">Cash On Delivery</h4>
-                            <p style="color: #CFCBFF; font-size: 0.75rem; line-height: 1.4; margin-top: 2px;">Pay when you arrive at the venue. 100% Secure.</p>
+                        <div class="payment-method-body">
+                            <h4 class="payment-method-title">Cash On Delivery</h4>
+                            <p class="payment-method-desc">Pay when you arrive at the venue. Secure checkout.</p>
                         </div>
-                        <i class="fa-solid fa-circle-check" style="color: var(--secondary); font-size: 1.2rem;"></i>
+                        <i class="fa-solid fa-circle-check payment-method-check" aria-hidden="true"></i>
                     </div>
                 </div>
 
@@ -163,16 +333,16 @@
                     <h2 class="section-title">Ticket Details</h2>
                     <div class="summary-box">
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Ticket</span>
-                            <span id="ticket-name" style="font-weight: 800;">Loading...</span>
+                            <span class="sum-label">Ticket</span>
+                            <span id="ticket-name" class="sum-val">Loading...</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Quantity</span>
-                            <span id="ticket-qty" style="font-weight: 800;">1</span>
+                            <span class="sum-label">Quantity</span>
+                            <span id="ticket-qty" class="sum-val">1</span>
                         </div>
-                        <div class="summary-row" style="margin-bottom:0;">
-                            <span style="color: rgba(255,255,255,0.6);">Unit Price</span>
-                            <span id="ticket-unit" style="font-weight: 800;">₹0</span>
+                        <div class="summary-row summary-row--last">
+                            <span class="sum-label">Unit Price</span>
+                            <span id="ticket-unit" class="sum-val">₹0</span>
                         </div>
                     </div>
                 </div>
@@ -182,30 +352,32 @@
                     <h2 class="section-title">Order Summary</h2>
                     <div class="summary-box">
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Subtotal</span>
-                            <span id="sum-subtotal" style="font-weight: 800;">₹0</span>
+                            <span class="sum-label">Subtotal</span>
+                            <span id="sum-subtotal" class="sum-val">₹0</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Discount</span>
-                            <span id="sum-discount" style="color: var(--secondary); font-weight: 800;">- ₹0</span>
+                            <span class="sum-label">Discount</span>
+                            <span id="sum-discount" class="sum-val sum-val--accent">- ₹0</span>
                         </div>
                         <div class="summary-row">
-                            <span style="color: rgba(255,255,255,0.6);">Platform Fee</span>
-                            <span id="sum-fee" style="font-weight: 800;">₹0</span>
+                            <span class="sum-label">Platform Fee</span>
+                            <span id="sum-fee" class="sum-val">₹0</span>
                         </div>
-                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
-                        <div class="summary-row" style="margin-bottom: 0;">
-                            <span style="font-weight: 700;">Total Amount</span>
+                        <hr class="sum-divider">
+                        <div class="summary-row summary-row--grand">
+                            <span class="sum-label">Total Amount</span>
                             <span id="sum-total" class="summary-highlight">₹0</span>
                         </div>
                     </div>
 
-                    <p style="margin-top:10px; color: rgba(255,255,255,0.5); font-size: 0.74rem; font-weight: 700;">COD Total</p>
-                    <p id="dock-total" style="color: var(--secondary); font-size: 1.4rem; font-weight: 900; margin: 2px 0 0;">₹0</p>
+                    <div class="cod-dock">
+                        <p class="cod-dock-label">COD Total</p>
+                        <p id="dock-total" class="cod-dock-total">₹0</p>
+                    </div>
 
                     <div class="terms-box">
-                        <input type="checkbox" id="confirm-check" checked style="margin-top: 4px;">
-                        <label for="confirm-check" style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.4;">I confirm this order and agree to the District COD terms.</label>
+                        <input type="checkbox" id="confirm-check" checked>
+                        <label for="confirm-check">I confirm this order and agree to the District COD terms.</label>
                     </div>
                     <button id="place-order-btn" onclick="placeOrder()" class="btn-evorra pay-btn">Place Order</button>
                 </div>

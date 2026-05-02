@@ -24,7 +24,18 @@
     .profile-name { color: white; font-size: 1.45rem; font-weight: 900; margin-top: 10px; line-height: 1.1; }
     .profile-email { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px; }
     .profile-city { color: var(--secondary); font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
-    .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; }
+    .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; color: #fff; }
+    .interest-chip {
+        padding: 8px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.06);
+        color: rgba(234,243,255,0.9);
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+    }
     .spotlight-link { text-decoration: none; margin-top: 16px; display: block; }
     .spotlight-card {
         border-radius: 20px; padding: 16px;
@@ -57,7 +68,26 @@
         border-radius: 16px; border: 1px solid rgba(255,165,186,0.32);
         background: linear-gradient(145deg, rgba(255,165,186,0.1), rgba(255,165,186,0.03));
         display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
     }
+    .logout-card:hover {
+        border-color: rgba(220, 38, 38, 0.35);
+        background: rgba(254, 226, 226, 0.35);
+    }
+    .actions-card-pad { padding: 10px; }
+    .action-tile-text { flex: 1; min-width: 0; }
+    .action-icon-brand { background: rgba(142, 125, 255, 0.14); color: #8E7DFF; }
+    .action-icon-mint { background: rgba(140, 240, 198, 0.14); color: #0d9488; }
+    .action-icon-sky { background: rgba(14, 165, 233, 0.12); color: #0284c7; }
+    .logout-icon { color: #e11d48; font-size: 1.2rem; flex-shrink: 0; }
+    .logout-chevron { color: #e11d48; font-size: 0.8rem; opacity: 0.85; }
+    .logout-label { color: #be123c; }
+    .logout-card-spaced { margin-top: 24px; }
+    .action-row-title { font-weight: 800; font-size: 0.95rem; margin: 0; color: #fff; line-height: 1.25; }
+    .action-row-desc { font-size: 0.75rem; margin: 2px 0 0; color: rgba(255,255,255,0.55); line-height: 1.35; }
+    .action-row-chevron { font-size: 0.8rem; opacity: 0.45; flex-shrink: 0; }
+    .action-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
+    .logout-label { font-weight: 800; font-size: 0.95rem; margin: 0; }
     @media (max-width: 640px) {
         .profile-shell { width: calc(100% - 20px); padding-top: 14px; }
         .profile-hero { grid-template-columns: 78px 1fr; padding: 16px; }
@@ -124,62 +154,62 @@
         </div>
 
         <h2 class="profile-section-title">Quick Actions</h2>
-        <div class="actions-card" style="padding: 10px;">
+        <div class="actions-card actions-card-pad">
             <div class="action-tile" onclick="location.href='/profile/edit'">
-                <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-solid fa-user-pen"></i></div>
-                <div style="flex: 1;">
-                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Edit Profile</p>
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Update your personal details</p>
+                <div class="action-icon action-icon-brand"><i class="fa-solid fa-user-pen"></i></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">Edit Profile</p>
+                    <p class="action-row-desc">Update your personal details</p>
                 </div>
-                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                <i class="fa-solid fa-chevron-right action-row-chevron"></i>
             </div>
-            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+            <hr class="action-divider">
             <div class="action-tile" onclick="location.href='/my-tickets'">
-                <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-ticket-simple"></i></div>
-                <div style="flex: 1;">
-                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">My Tickets</p>
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Manage your active passes</p>
+                <div class="action-icon action-icon-mint"><i class="fa-solid fa-ticket-simple"></i></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">My Tickets</p>
+                    <p class="action-row-desc">Manage your active passes</p>
                 </div>
-                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                <i class="fa-solid fa-chevron-right action-row-chevron"></i>
             </div>
             <div id="organizer-actions" class="hide animate-evorra">
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+                <hr class="action-divider">
                 <div class="action-tile" onclick="location.href='/organizer/manage'">
-                    <div class="action-icon" style="background: rgba(142, 125, 255, 0.14); color: #8E7DFF;"><i class="fa-solid fa-chart-line"></i></div>
-                    <div style="flex: 1;">
-                        <p style="color: white; font-weight: 800; font-size: 0.95rem;">Event Dashboard</p>
-                        <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Sales, attendees and revenue</p>
+                    <div class="action-icon action-icon-brand"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="action-tile-text">
+                        <p class="action-row-title">Event Dashboard</p>
+                        <p class="action-row-desc">Sales, attendees and revenue</p>
                     </div>
-                    <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                    <i class="fa-solid fa-chevron-right action-row-chevron"></i>
                 </div>
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
+                <hr class="action-divider">
                 <div class="action-tile" onclick="location.href='/my-events'">
-                    <div class="action-icon" style="background: rgba(140, 240, 198, 0.14); color: #8CF0C6;"><i class="fa-solid fa-calendar-days"></i></div>
-                    <div style="flex: 1;">
-                        <p style="color: white; font-weight: 800; font-size: 0.95rem;">My Events</p>
-                        <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Manage your published events</p>
+                    <div class="action-icon action-icon-mint"><i class="fa-solid fa-calendar-days"></i></div>
+                    <div class="action-tile-text">
+                        <p class="action-row-title">My Events</p>
+                        <p class="action-row-desc">Manage your published events</p>
                     </div>
-                    <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                    <i class="fa-solid fa-chevron-right action-row-chevron"></i>
                 </div>
             </div>
-            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 5px 0;">
-            <div class="action-tile" onclick="location.href='/support'">
-                <div class="action-icon" style="background: rgba(119, 215, 255, 0.14); color: #77D7FF;"><i class="fa-solid fa-headset"></i></div>
-                <div style="flex: 1;">
-                    <p style="color: white; font-weight: 800; font-size: 0.95rem;">Help & Support</p>
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Get in touch with us</p>
+            <hr class="action-divider">
+            <div class="action-tile action-tile-support" onclick="location.href='/support'">
+                <div class="action-icon action-icon-sky"><i class="fa-solid fa-headset"></i></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">Help &amp; Support</p>
+                    <p class="action-row-desc">Get in touch with us</p>
                 </div>
-                <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.3); font-size: 0.8rem;"></i>
+                <i class="fa-solid fa-chevron-right action-row-chevron"></i>
             </div>
         </div>
 
         <!-- Logout -->
-        <div class="logout-card animate-evorra" style="margin-top: 24px;" onclick="handleLogout()">
-            <i class="fa-solid fa-right-from-bracket" style="color: #FFA5BA; font-size: 1.2rem;"></i>
-            <div style="flex: 1;">
-                <p style="color: #FFD4DE; font-weight: 800; font-size: 0.95rem;">Logout</p>
+        <div class="logout-card animate-evorra logout-card-spaced" onclick="handleLogout()">
+            <i class="fa-solid fa-right-from-bracket logout-icon"></i>
+            <div class="action-tile-text">
+                <p class="logout-label">Logout</p>
             </div>
-            <i class="fa-solid fa-chevron-right" style="color: #FFA5BA; font-size: 0.8rem;"></i>
+            <i class="fa-solid fa-chevron-right logout-chevron"></i>
         </div>
     </div>
 </div>
@@ -243,8 +273,7 @@
                         wrap.innerHTML = '';
                         data.interests.forEach(interest => {
                             const chip = document.createElement('div');
-                            chip.className = 'tab-chip active'; // Reusing tab-chip style
-                            chip.style.fontSize = '0.75rem';
+                            chip.className = 'interest-chip';
                             chip.textContent = interest;
                             wrap.appendChild(chip);
                         });

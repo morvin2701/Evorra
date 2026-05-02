@@ -1,0 +1,1411 @@
+/**
+ * Evorra — app pages (non-home) light theme
+ * Pairs with body.theme-showmates + showmates-theme.css
+ */
+
+/* ── Global: buttons & shared surfaces ── */
+body.theme-showmates .btn-evorra {
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25);
+}
+
+body.theme-showmates .btn-evorra:hover:not(:disabled) {
+    box-shadow: 0 10px 28px rgba(220, 38, 38, 0.32);
+}
+
+body.theme-showmates .home-bg {
+    background: transparent !important;
+    min-height: 100vh;
+}
+
+/* Back / icon buttons (explore, tickets, support, etc.) */
+body.theme-showmates .explore-back,
+body.theme-showmates .tickets-back,
+body.theme-showmates .support-back,
+body.theme-showmates .booking-back,
+body.theme-showmates .payment-back,
+body.theme-showmates .ticket-back,
+body.theme-showmates .shared-back,
+body.theme-showmates .dashboard-back,
+body.theme-showmates .edit-back {
+    color: var(--sm-text) !important;
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+body.theme-showmates .explore-back:hover,
+body.theme-showmates .tickets-back:hover,
+body.theme-showmates .support-back:hover,
+body.theme-showmates .booking-back:hover,
+body.theme-showmates .payment-back:hover,
+body.theme-showmates .ticket-back:hover,
+body.theme-showmates .shared-back:hover,
+body.theme-showmates .dashboard-back:hover,
+body.theme-showmates .edit-back:hover {
+    border-color: rgba(220, 38, 38, 0.28) !important;
+    color: var(--sm-primary) !important;
+}
+
+/* ── Explore ── */
+body.theme-showmates .explore-heading,
+body.theme-showmates .explore-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .search-field-container {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+}
+
+body.theme-showmates .search-field-container i {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .search-field-container input {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .search-field-container input::placeholder {
+    color: #94a3b8 !important;
+}
+
+body.theme-showmates .quick-filter-chip {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .quick-filter-chip.active {
+    color: var(--sm-text) !important;
+    border-color: var(--sm-primary) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+    box-shadow: none;
+}
+
+body.theme-showmates #results-count {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates #clear-all-filters {
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .search-result-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-showmates .search-result-card:hover {
+    border-color: rgba(220, 38, 38, 0.25) !important;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+}
+
+body.theme-showmates .result-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .result-meta {
+    color: #475569 !important;
+    opacity: 1 !important;
+}
+
+body.theme-showmates .metric-pill {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .metric-pill .label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .metric-pill .value {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .metric-pill.price {
+    background: rgba(220, 38, 38, 0.06) !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .metric-pill.type {
+    background: rgba(234, 88, 12, 0.08) !important;
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .explore-toast {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+/* ── Event details ── */
+body.theme-showmates .detail-shell .floating-back {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+body.theme-showmates .detail-shell .floating-back:hover {
+    border-color: rgba(220, 38, 38, 0.35) !important;
+}
+
+body.theme-showmates .detail-shell .hero-carousel {
+    border-color: var(--sm-border) !important;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+}
+
+body.theme-showmates .detail-head {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+body.theme-showmates .detail-pill {
+    color: var(--sm-accent) !important;
+    border-color: rgba(234, 88, 12, 0.35) !important;
+    background: rgba(234, 88, 12, 0.08) !important;
+}
+
+body.theme-showmates .detail-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .rating-row {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .detail-card {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .detail-shell .section-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .desc-text {
+    color: #475569 !important;
+}
+
+body.theme-showmates .info-tile {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .info-tile-icon {
+    color: var(--sm-primary) !important;
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .ticket-type-row,
+body.theme-showmates .agenda-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .agenda-icon {
+    color: var(--sm-primary) !important;
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .review-box {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .share-action-btn {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .share-action-btn:hover {
+    border-color: rgba(220, 38, 38, 0.3) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+body.theme-showmates .verified-strip {
+    border-color: rgba(220, 38, 38, 0.25) !important;
+    background: rgba(220, 38, 38, 0.06) !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .booking-inline {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08) !important;
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .booking-inline::before {
+    display: none;
+}
+
+body.theme-showmates .dock-icon {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(234, 88, 12, 0.1)) !important;
+    box-shadow: none !important;
+}
+
+body.theme-showmates .dock-meta {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .dock-price {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .dock-cta {
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+}
+
+body.theme-showmates .teaser-card,
+body.theme-showmates .teaser-thumb {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(145deg, rgba(220, 38, 38, 0.06), rgba(234, 88, 12, 0.04)) !important;
+}
+
+body.theme-showmates .teaser-thumb::after {
+    background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.06)) !important;
+}
+
+body.theme-showmates .gallery-thumb {
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .media-counter {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+/* ── Profile & edit profile ── */
+body.theme-showmates .profile-heading,
+body.theme-showmates .edit-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .profile-hero {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-showmates .branding-card {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(234, 88, 12, 0.08)) !important;
+}
+
+body.theme-showmates .branding-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .branding-sub {
+    color: #475569 !important;
+}
+
+body.theme-showmates .field-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .profile-input-wrapper {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .profile-input-wrapper i {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .profile-input-wrapper input {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .role-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .role-card.active {
+    border-color: var(--sm-primary) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+}
+
+body.theme-showmates .profile-avatar {
+    border-color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .profile-name,
+body.theme-showmates .profile-section-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .profile-email {
+    color: #475569 !important;
+}
+
+body.theme-showmates .profile-city {
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .profile-role-badge {
+    background: rgba(13, 148, 136, 0.1) !important;
+    color: #0f766e !important;
+    border-color: rgba(13, 148, 136, 0.25) !important;
+}
+
+body.theme-showmates .spotlight-card {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(234, 88, 12, 0.75)) !important;
+    color: #fff !important;
+}
+
+body.theme-showmates .details-card,
+body.theme-showmates .actions-card,
+body.theme-showmates .edit-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .summary-row span:first-child {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .summary-row span:last-child {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .action-tile:hover {
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .logout-card {
+    border-color: rgba(220, 38, 38, 0.25) !important;
+    background: rgba(254, 242, 242, 0.85) !important;
+}
+
+body.theme-showmates .logout-label,
+body.theme-showmates .logout-icon,
+body.theme-showmates .logout-chevron {
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .action-row-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .action-row-desc {
+    color: #64748b !important;
+}
+
+body.theme-showmates .action-row-chevron {
+    color: var(--sm-muted) !important;
+    opacity: 1 !important;
+}
+
+body.theme-showmates .action-divider {
+    border-top-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .action-icon-brand {
+    background: rgba(220, 38, 38, 0.1) !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .action-icon-mint {
+    background: rgba(13, 148, 136, 0.12) !important;
+    color: #0f766e !important;
+}
+
+body.theme-showmates .action-icon-sky {
+    background: rgba(2, 132, 199, 0.1) !important;
+    color: #0369a1 !important;
+}
+
+body.theme-showmates .action-tile-support {
+    background: rgba(241, 245, 249, 0.9) !important;
+    border-radius: 12px;
+}
+
+body.theme-showmates .interest-chip {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .role-card-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .role-card-desc {
+    color: #64748b !important;
+}
+
+body.theme-showmates .role-card i {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .status-banner.success {
+    color: #047857 !important;
+    background: #ecfdf5 !important;
+    border-color: #6ee7b7 !important;
+}
+
+body.theme-showmates .status-banner.error {
+    color: #b91c1c !important;
+    background: #fef2f2 !important;
+    border-color: #fecaca !important;
+}
+
+/* ── Auth ── */
+body.theme-showmates .auth-shell::before {
+    opacity: 0.35;
+    background: radial-gradient(circle at 20% 18%, rgba(220, 38, 38, 0.12), transparent 40%),
+        radial-gradient(circle at 82% 85%, rgba(234, 88, 12, 0.1), transparent 35%) !important;
+}
+
+body.theme-showmates .auth-switch {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .switch-btn {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .switch-btn.active {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.28);
+}
+
+body.theme-showmates .auth-panel {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 20px 56px rgba(15, 23, 42, 0.1);
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .auth-headline {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .auth-subline,
+body.theme-showmates .auth-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .auth-input {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .auth-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* ── My tickets ── */
+body.theme-showmates .tickets-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .shared-link {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .tickets-search input {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .tickets-search input::placeholder {
+    color: #94a3b8 !important;
+}
+
+body.theme-showmates .tickets-search i {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .tab-chip {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .tab-chip.active {
+    border-color: var(--sm-primary) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+}
+
+body.theme-showmates .ticket-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-showmates .ticket-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .ticket-sub {
+    color: #475569 !important;
+}
+
+body.theme-showmates .ticket-time {
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .mini-info-box {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .mini-info-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .mini-info-value {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .ticket-card-foot {
+    background: var(--sm-bg) !important;
+    border-top-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .ticket-foot-left {
+    color: #475569 !important;
+}
+
+body.theme-showmates #loading-state,
+body.theme-showmates #empty-state,
+body.theme-showmates .login-state {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    color: var(--sm-muted) !important;
+}
+
+/* ── Notifications page ── */
+body.theme-showmates .notif-shell {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 5% 120px;
+}
+
+body.theme-showmates .notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    padding: 16px 18px;
+    border-radius: 22px;
+    background: var(--sm-surface) !important;
+    border: 1px solid var(--sm-border) !important;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-showmates .notif-header-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+}
+
+body.theme-showmates .notif-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .notif-count-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin: 4px 0 0;
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .notif-menu-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+body.theme-showmates .notif-dropdown {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    border-radius: 14px;
+    width: 200px;
+    z-index: 100;
+    overflow: hidden;
+}
+
+body.theme-showmates .notif-filter-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+}
+
+body.theme-showmates .notif-filter-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+body.theme-showmates .notif-back {
+    background: var(--sm-bg) !important;
+    border: 1px solid var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .notif-menu-btn {
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+    border: none !important;
+}
+
+body.theme-showmates #notif-menu,
+body.theme-showmates .notif-dropdown {
+    background: var(--sm-surface) !important;
+    border: 1px solid var(--sm-border) !important;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+}
+
+body.theme-showmates .notif-menu-item {
+    padding: 14px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--sm-text) !important;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+body.theme-showmates .notif-menu-item:hover {
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .notif-menu-item.danger {
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .notification-section-title {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .notification-tile {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+body.theme-showmates .notification-tile.unread {
+    background: rgba(220, 38, 38, 0.04) !important;
+    border-color: rgba(220, 38, 38, 0.22) !important;
+}
+
+body.theme-showmates .notification-tile:hover {
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .notif-item-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .notif-item-time {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .notif-item-body {
+    color: #475569 !important;
+}
+
+body.theme-showmates .notif-mark-btn {
+    background: var(--sm-bg) !important;
+    border: 1px solid var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .skeleton-notif {
+    background: linear-gradient(
+            90deg,
+            rgba(148, 163, 184, 0.12) 25%,
+            rgba(148, 163, 184, 0.2) 50%,
+            rgba(148, 163, 184, 0.12) 75%
+        )
+        !important;
+    border: 1px solid var(--sm-border);
+}
+
+body.theme-showmates .notif-empty {
+    text-align: center;
+    padding: 60px 20px;
+    margin-top: 20px;
+}
+
+body.theme-showmates .notif-empty-icon {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--sm-primary);
+    font-size: 2rem;
+}
+
+body.theme-showmates .notif-empty h3 {
+    color: var(--sm-text);
+    font-weight: 900;
+    font-size: 1.4rem;
+}
+
+body.theme-showmates .notif-empty p {
+    color: var(--sm-muted);
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+/* ── Support ── */
+body.theme-showmates .support-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .support-hero {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.08), rgba(234, 88, 12, 0.06)) !important;
+}
+
+body.theme-showmates .support-hero-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .support-hero-sub {
+    color: #475569 !important;
+}
+
+body.theme-showmates .support-section-title,
+body.theme-showmates .profile-section-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .mini-help-card,
+body.theme-showmates .summary-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .faq-question {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .faq-answer {
+    color: #475569 !important;
+}
+
+body.theme-showmates .support-help-title,
+body.theme-showmates .support-channel-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .support-help-desc,
+body.theme-showmates .support-channel-desc {
+    color: #64748b !important;
+}
+
+body.theme-showmates .instruction-text {
+    color: #475569 !important;
+}
+
+body.theme-showmates .support-divider {
+    border-top-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .support-icon-mint,
+body.theme-showmates .support-icon-phone {
+    background: rgba(13, 148, 136, 0.12) !important;
+    color: #0f766e !important;
+}
+
+body.theme-showmates .support-icon-brand,
+body.theme-showmates .support-icon-mail {
+    background: rgba(220, 38, 38, 0.1) !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .support-icon-chat {
+    background: rgba(234, 88, 12, 0.12) !important;
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .support-bg .action-tile-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Booking & payment (shared patterns) ── */
+body.theme-showmates .booking-badge,
+body.theme-showmates .payment-badge,
+body.theme-showmates .ticket-badge {
+    border-color: rgba(220, 38, 38, 0.25) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .booking-card,
+body.theme-showmates .payment-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .booking-title,
+body.theme-showmates .payment-title,
+body.theme-showmates .booking-section-title,
+body.theme-showmates .payment-block .section-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .booking-sub,
+body.theme-showmates .payment-sub {
+    color: #475569 !important;
+}
+
+body.theme-showmates .booking-time,
+body.theme-showmates .payment-time {
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .ticket-select-card,
+body.theme-showmates .qty-selector,
+body.theme-showmates .promo-input-group input,
+body.theme-showmates .payment-method-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .ticket-select-card.active {
+    border-color: var(--sm-primary) !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1) inset !important;
+}
+
+body.theme-showmates .qty-btn {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .summary-box,
+body.theme-showmates .summary-row {
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text);
+}
+
+/* ── Ticket details ── */
+body.theme-showmates .ticket-shell .ticket-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .hero-title,
+body.theme-showmates .ticket-shell .section-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .hero-sub {
+    color: #475569 !important;
+}
+
+body.theme-showmates .pass-header {
+    border-bottom-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .pass-info-block {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .mini-info-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .mini-info-value {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .qr-container {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+/* ── Success ── */
+body.theme-showmates .success-panel {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .success-headline {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .success-text {
+    color: #475569 !important;
+}
+
+body.theme-showmates .success-chip {
+    color: var(--sm-primary) !important;
+}
+
+/* ── Shared tickets ── */
+body.theme-showmates .shared-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .shared-sub {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .shared-filter-btn {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .shared-filter-btn.active {
+    border-color: var(--sm-primary) !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+}
+
+body.theme-showmates .shared-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+body.theme-showmates .shared-card:hover {
+    border-color: rgba(220, 38, 38, 0.22) !important;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+}
+
+body.theme-showmates .shared-name {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .shared-meta,
+body.theme-showmates .shared-foot-note {
+    color: #475569 !important;
+}
+
+body.theme-showmates .shared-mini-box {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .shared-mini-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .shared-mini-value {
+    color: var(--sm-text) !important;
+}
+
+/* ── Organizer dashboards ── */
+body.theme-showmates .dashboard-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .hero-overview {
+    border-color: var(--sm-border) !important;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(234, 88, 12, 0.08)) !important;
+}
+
+body.theme-showmates #hero-event-count,
+body.theme-showmates .events-title,
+body.theme-showmates .chart-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .hero-label,
+body.theme-showmates .chart-sub,
+body.theme-showmates .bar-label,
+body.theme-showmates .bar-value {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates #hero-summary {
+    color: #475569 !important;
+}
+
+body.theme-showmates .stat-card,
+body.theme-showmates .chart-card,
+body.theme-showmates .dashboard-event-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+body.theme-showmates .stat-card > p:first-of-type {
+    color: #64748b !important;
+    font-weight: 700 !important;
+}
+
+body.theme-showmates .stat-card h3 {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .stat-card > p:last-of-type {
+    color: #94a3b8 !important;
+}
+
+body.theme-showmates .legend-row {
+    color: #475569 !important;
+}
+
+body.theme-showmates .bar-value,
+body.theme-showmates .bar-label {
+    color: #64748b !important;
+}
+
+body.theme-showmates .donut-total-sub {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .dash-card-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .dash-card-meta {
+    color: #64748b !important;
+}
+
+body.theme-showmates .dash-progress-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .dash-progress-pct {
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .dash-progress-track {
+    background: var(--sm-bg) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .dash-mini-sold,
+body.theme-showmates .dash-mini-left,
+body.theme-showmates .dash-mini-rev {
+    background: var(--sm-bg) !important;
+    border: 1px solid var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .dash-mini-sold .value {
+    color: #0f766e !important;
+}
+
+body.theme-showmates .dash-mini-left .value {
+    color: #0369a1 !important;
+}
+
+body.theme-showmates .dash-mini-rev .value {
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .dash-foot-grid {
+    background: var(--sm-bg) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .dash-foot-label {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .dash-foot-val {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .donut::after {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .donut-total {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .events-heading {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .events-topbar {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    backdrop-filter: none !important;
+}
+
+body.theme-showmates .events-back {
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .kpi-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .kpi-val {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .events-scan-btn {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .my-event-card {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .my-event-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .my-event-sub {
+    color: #64748b !important;
+}
+
+body.theme-showmates .my-event-time {
+    color: var(--sm-accent) !important;
+}
+
+body.theme-showmates .my-event-metric-val {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .my-event-metric-label {
+    color: #94a3b8 !important;
+}
+
+body.theme-showmates .my-event-chevron {
+    color: var(--sm-muted) !important;
+    opacity: 1 !important;
+}
+
+body.theme-showmates .page-empty-state {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-surface) !important;
+}
+
+body.theme-showmates .page-empty-icon {
+    opacity: 0.35 !important;
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .page-empty-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .page-empty-text {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .kpi-card .kpi-label {
+    color: #64748b !important;
+}
+
+body.theme-showmates .notif-error {
+    color: var(--sm-muted) !important;
+    text-align: center;
+    margin-top: 40px;
+}
+
+body.theme-showmates .notif-tile-top .notif-item-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+body.theme-showmates .notif-type-pill {
+    border: 1px solid transparent;
+}
+
+body.theme-showmates .unread-pulse {
+    background: var(--sm-primary) !important;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.45) !important;
+}
+
+/* Structural helpers (layout works regardless of theme) */
+.notif-back {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.notif-menu-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+/* ── Add Event / Studio (light shell while keeping focus layout) ── */
+body.theme-showmates:has(.studio-layout) {
+    overflow: auto !important;
+}
+
+body.theme-showmates .studio-layout {
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .studio-sidebar {
+    background: var(--sm-surface) !important;
+    border-right-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .sidebar-logo {
+    color: var(--sm-primary) !important;
+}
+
+body.theme-showmates .nav-step {
+    border-color: transparent !important;
+}
+
+body.theme-showmates .nav-step.active {
+    background: rgba(220, 38, 38, 0.08) !important;
+    border-color: rgba(220, 38, 38, 0.2) !important;
+}
+
+body.theme-showmates .nav-step:hover:not(.active) {
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .nav-info span {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .studio-content {
+    background: linear-gradient(180deg, #ffffff 0%, var(--sm-bg) 100%) !important;
+    border-left-color: var(--sm-border) !important;
+    border-right-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .step-intro h2 {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .step-intro p {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .premium-card {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08) !important;
+}
+
+body.theme-showmates .input-group-premium label {
+    color: #64748b !important;
+}
+
+body.theme-showmates .premium-input {
+    background: var(--sm-bg) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .premium-input:focus {
+    border-color: rgba(220, 38, 38, 0.45) !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12) !important;
+}
+
+body.theme-showmates .btn-next-studio {
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+    box-shadow: 0 10px 28px rgba(220, 38, 38, 0.28) !important;
+}
+
+body.theme-showmates .media-drop-zone {
+    border-color: var(--sm-border) !important;
+    background: var(--sm-bg) !important;
+}
+
+body.theme-showmates .studio-preview-sidebar {
+    background: var(--sm-surface) !important;
+    border-left-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .event-preview-card {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .preview-body h3 {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .preview-tag {
+    background: var(--sm-primary) !important;
+}
+
+body.theme-showmates .btn-back-studio {
+    background: var(--sm-bg) !important;
+    color: var(--sm-text) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .studio-ticket-card {
+    background: var(--sm-bg) !important;
+    border-color: var(--sm-border) !important;
+}
+
+body.theme-showmates .studio-nav-info p {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .studio-muted {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates .studio-preview-title {
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates .studio-preview-meta {
+    color: var(--sm-muted) !important;
+}

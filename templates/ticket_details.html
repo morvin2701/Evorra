@@ -4,112 +4,231 @@
 
 {% block head %}
 <style>
-    .ticket-bg { background: transparent; min-height: 100vh; }
-    .ticket-shell { width: min(1180px, calc(100% - 30px)); margin: 0 auto; padding: 24px 0 110px; }
+    /* Ticket details — Showmates (inherits body.theme-showmates tokens) */
+    .ticket-bg {
+        background: var(--sm-bg);
+        min-height: 100vh;
+    }
+    .ticket-shell {
+        width: min(1180px, calc(100% - 30px));
+        margin: 0 auto;
+        padding: 28px 0 120px;
+    }
     .ticket-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
     .ticket-back {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.15);
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
+        color: var(--sm-text);
         text-decoration: none;
-        background: rgba(8, 14, 26, 0.75);
+        background: var(--sm-surface);
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ticket-back:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
     }
     .ticket-badge {
-        padding: 6px 10px;
+        padding: 8px 14px;
         border-radius: 999px;
-        border: 1px solid rgba(145, 166, 255, 0.32);
-        background: rgba(105, 120, 255, 0.16);
-        font-size: .72rem;
-        letter-spacing: .5px;
-        color: #dce5ff;
-        font-weight: 800;
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        color: var(--sm-primary);
+        font-weight: 900;
         text-transform: uppercase;
     }
-    .ticket-layout { display: grid; gap: 16px; grid-template-columns: 1fr; }
-    .ticket-main { display: grid; gap: 16px; }
-    .ticket-side { display: grid; gap: 16px; align-self: start; }
+    .ticket-layout { display: grid; gap: 18px; grid-template-columns: 1fr; }
+    .ticket-main { display: grid; gap: 18px; }
+    .ticket-side { display: grid; gap: 18px; align-self: start; }
     .ticket-card {
-        border-radius: 22px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: linear-gradient(145deg, rgba(13, 22, 39, 0.88), rgba(9, 17, 30, 0.82));
-        box-shadow: 0 16px 40px rgba(0,0,0,0.34);
-        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+            0 20px 48px rgba(15, 23, 42, 0.07);
         overflow: hidden;
+        position: relative;
     }
-    .ticket-block { padding: 16px; }
-    .hero-cover { width: 100%; height: 220px; object-fit: cover; display: block; }
-    .hero-title { font-size: clamp(1.45rem, 2.8vw, 2rem); font-weight: 900; margin: 10px 0 8px; line-height: 1.1; color: #fff; }
-    .hero-sub { color: rgba(225,236,255,0.68); font-size: .85rem; margin-bottom: 8px; }
-    .hero-time { color: var(--secondary); font-size: .86rem; font-weight: 800; margin: 0; }
-    .section-title { margin: 0 0 12px; font-size: 1.02rem; font-weight: 900; color: #fff; letter-spacing: -.2px; }
+    .ticket-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 55%;
+        height: 120px;
+        background: radial-gradient(ellipse at 100% 0%, rgba(220, 38, 38, 0.06), transparent 65%);
+        pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .ticket-card {
+            animation: td-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .ticket-layout .ticket-main > .ticket-card:nth-child(1) { animation-delay: 0.02s; }
+        .ticket-layout .ticket-main > .ticket-card:nth-child(2) { animation-delay: 0.08s; }
+        .ticket-side .ticket-card:nth-child(1) { animation-delay: 0.1s; }
+        .ticket-side .ticket-card:nth-child(2) { animation-delay: 0.14s; }
+        .ticket-side .ticket-card:nth-child(3) { animation-delay: 0.18s; }
+        .ticket-side .ticket-card:nth-child(4) { animation-delay: 0.22s; }
+    }
+    @keyframes td-card-in {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .ticket-block { padding: 18px; position: relative; z-index: 1; }
+    .hero-cover {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+    .hero-title {
+        font-size: clamp(1.5rem, 2.8vw, 2rem);
+        font-weight: 900;
+        margin: 12px 0 8px;
+        line-height: 1.12;
+        color: var(--sm-text);
+        letter-spacing: -0.04em;
+    }
+    .hero-sub { color: var(--sm-muted); font-size: 0.88rem; margin-bottom: 8px; line-height: 1.45; }
+    .hero-time {
+        color: var(--sm-primary);
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin: 0;
+    }
+    .section-title {
+        margin: 0 0 14px;
+        font-size: 1.05rem;
+        font-weight: 900;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+    }
+    /* Status chips on light surface */
+    .ticket-bg .status-chip {
+        border: 1px solid var(--sm-border);
+    }
+    .ticket-bg .status-confirmed {
+        background: #ecfdf5;
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.35);
+    }
+    .ticket-bg .status-used {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: rgba(59, 130, 246, 0.35);
+    }
+    .ticket-bg .status-cancelled {
+        background: #fef2f2;
+        color: #b91c1c;
+        border-color: rgba(220, 38, 38, 0.3);
+    }
+    .ticket-bg .status-shared_pending {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: rgba(245, 158, 11, 0.4);
+    }
+
     .pass-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 10px;
-        padding: 12px 16px;
-        border-bottom: 1px dashed rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.03);
+        padding: 14px 18px;
+        border-bottom: 1px dashed var(--sm-border);
+        background: linear-gradient(90deg, rgba(220, 38, 38, 0.06) 0%, rgba(249, 115, 22, 0.04) 100%);
     }
-    .pass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .pass-header-label {
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        color: var(--sm-text);
+    }
+    .pass-header-status {
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        color: var(--sm-primary);
+    }
+    .pass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .pass-info-block {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 10px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 12px 12px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .mini-info-label { margin: 0 0 4px; color: rgba(225,236,255,0.5); font-size: .7rem; font-weight: 700; }
-    .mini-info-value { margin: 0; color: #fff; font-weight: 800; line-height: 1.3; word-break: break-word; }
+    .pass-info-block:hover {
+        border-color: #e2e8f0;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+    }
+    .mini-info-label {
+        margin: 0 0 5px;
+        color: var(--sm-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+    }
+    .mini-info-value {
+        margin: 0;
+        color: var(--sm-text);
+        font-weight: 800;
+        font-size: 0.88rem;
+        line-height: 1.35;
+        word-break: break-word;
+    }
     .qr-container {
-        margin-top: 8px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background:
-            radial-gradient(circle at 80% 18%, rgba(94, 232, 186, 0.16), transparent 40%),
-            linear-gradient(150deg, rgba(8, 16, 30, 0.9), rgba(10, 19, 36, 0.86));
+        margin-top: 10px;
+        border-radius: 20px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, #ffffff 0%, var(--sm-bg) 100%);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 12px;
+        padding: 16px;
+        box-shadow: 0 8px 28px rgba(15, 23, 42, 0.05);
+    }
+    .qr-caption {
+        margin-bottom: 10px;
+        color: var(--sm-muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        font-weight: 900;
+        text-transform: uppercase;
     }
     .qr-stage {
         width: 100%;
         max-width: 270px;
-        border-radius: 14px;
+        border-radius: 16px;
         background: #fff;
-        border: 1px solid rgba(5, 16, 34, 0.12);
-        box-shadow: 0 14px 28px rgba(0,0,0,0.25);
+        border: 1px solid var(--sm-border);
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 8px;
-    }
-    .qr-caption {
-        margin-top: 10px;
-        color: rgba(216, 230, 255, 0.66);
-        font-size: .72rem;
-        letter-spacing: .35px;
-        font-weight: 700;
-        text-transform: uppercase;
+        padding: 10px;
     }
     #qr-img {
         width: 100%;
         max-width: 240px;
         height: auto !important;
         aspect-ratio: 1 / 1;
-        border-radius: 8px;
+        border-radius: 10px;
         object-fit: contain;
         display: none;
     }
@@ -121,187 +240,270 @@
         align-items: center;
         justify-content: center;
     }
+    .ticket-spinner {
+        width: 44px;
+        height: 44px;
+        border: 3px solid var(--sm-border);
+        border-top-color: var(--sm-primary);
+        border-radius: 50%;
+        animation: td-spin 0.85s linear infinite;
+    }
+    @keyframes td-spin {
+        to { transform: rotate(360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .ticket-spinner { animation: none; }
+        .ticket-card { animation: none !important; }
+    }
     #qr-code-text {
-        color: #e8f0ff !important;
-        font-size: .78rem !important;
-        font-weight: 800 !important;
-        margin-top: 8px !important;
+        color: var(--sm-muted) !important;
+        font-size: 0.76rem !important;
+        font-weight: 700 !important;
+        margin-top: 10px !important;
         text-align: center;
-        letter-spacing: .25px;
+        letter-spacing: 0.02em;
         word-break: break-all;
+        line-height: 1.4;
+        max-width: 100%;
     }
     .summary-box {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 16px;
     }
     .summary-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
+        margin-bottom: 12px;
+        gap: 12px;
+        font-size: 0.88rem;
+    }
+    .summary-row:last-child,
+    .summary-row--last { margin-bottom: 0; }
+    .summary-row > span:first-child {
+        color: var(--sm-muted);
+        font-weight: 700;
+    }
+    .summary-row > span:last-child {
+        color: var(--sm-text);
+        font-weight: 800;
+        text-align: right;
+    }
+    #sum-status {
+        color: var(--sm-primary) !important;
     }
     .detail-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
+        gap: 14px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
         margin-bottom: 10px;
+        transition: box-shadow 0.2s ease;
+    }
+    .detail-item:hover {
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
     .detail-item:last-child { margin-bottom: 0; }
+    .detail-stack { flex: 1; min-width: 0; }
+    .detail-label {
+        margin: 0;
+        color: var(--sm-muted);
+        font-size: 0.74rem;
+        font-weight: 800;
+    }
+    .detail-value {
+        margin: 5px 0 0;
+        color: var(--sm-text);
+        font-size: 0.92rem;
+        font-weight: 800;
+        line-height: 1.35;
+    }
     .payment-method-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(255,255,255,0.06);
-        color: #fff;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        background: linear-gradient(145deg, rgba(220, 38, 38, 0.1), rgba(249, 115, 22, 0.06));
+        color: var(--sm-primary);
         flex-shrink: 0;
+        font-size: 1.05rem;
     }
     .instruction-row {
         display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 12px;
         align-items: flex-start;
     }
     .instruction-row:last-child { margin-bottom: 0; }
     .instruction-dot {
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         border-radius: 999px;
-        background: rgba(123, 241, 206, 0.18);
-        border: 1px solid rgba(123, 241, 206, 0.45);
-        color: #a2ffe1;
+        background: rgba(220, 38, 38, 0.1);
+        border: 1px solid rgba(220, 38, 38, 0.25);
+        color: var(--sm-primary);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: .65rem;
-        margin-top: 2px;
+        font-size: 0.65rem;
+        margin-top: 3px;
         flex-shrink: 0;
     }
+    .instruction-text {
+        margin: 0;
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
     .share-box {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 14px;
     }
     .share-input {
         width: 100%;
-        border-radius: 11px;
-        border: 1px solid rgba(255,255,255,0.16);
-        background: rgba(8,14,26,0.74);
-        color: #fff;
-        font-size: 0.85rem;
-        font-weight: 700;
-        padding: 10px 12px;
+        box-sizing: border-box;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
+        font-size: 0.88rem;
+        font-weight: 600;
+        padding: 12px 14px;
         outline: none;
+        font-family: inherit;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .share-input::placeholder { color: rgba(219,233,255,0.48); }
-    .share-input:focus { border-color: rgba(123, 241, 206, 0.5); }
+    .share-input::placeholder { color: #94a3b8; }
+    .share-input:focus {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
     .share-row {
         display: grid;
         grid-template-columns: 1fr 120px;
-        gap: 8px;
-        margin-top: 8px;
+        gap: 10px;
+        margin-top: 10px;
     }
     .share-note {
-        margin: 8px 0 0;
-        color: rgba(218,236,255,0.62);
-        font-size: 0.74rem;
-        line-height: 1.45;
+        margin: 10px 0 0;
+        color: var(--sm-muted);
+        font-size: 0.78rem;
+        line-height: 1.5;
     }
     .share-metrics {
-        margin-top: 10px;
+        margin-top: 12px;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: 10px;
     }
     .share-metric {
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.03);
-        padding: 8px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        padding: 10px 12px;
     }
     .share-metric-label {
-        margin: 0 0 3px;
-        color: rgba(218,236,255,0.54);
-        font-size: .68rem;
+        margin: 0 0 4px;
+        color: var(--sm-muted);
+        font-size: 0.66rem;
         text-transform: uppercase;
-        letter-spacing: .07em;
-        font-weight: 800;
+        letter-spacing: 0.08em;
+        font-weight: 900;
     }
     .share-metric-value {
         margin: 0;
-        color: #fff;
-        font-size: .95rem;
+        color: var(--sm-text);
+        font-size: 0.98rem;
         font-weight: 900;
+        font-variant-numeric: tabular-nums;
     }
     .share-btn {
         margin-top: 10px;
         width: 100%;
-        padding: 11px 12px;
-        border-radius: 11px;
-        border: 1px solid rgba(148, 255, 226, 0.45);
-        background: linear-gradient(135deg, rgba(123, 241, 206, 0.92), rgba(105, 210, 255, 0.9));
-        color: #072032;
-        font-size: 0.85rem;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover));
+        color: #fff !important;
+        font-size: 0.88rem;
         font-weight: 900;
+        font-family: inherit;
         cursor: pointer;
+        box-shadow: 0 10px 26px rgba(220, 38, 38, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .share-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(220, 38, 38, 0.34);
+    }
+    .share-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .share-row .share-btn {
+        margin-top: 0;
+        min-height: 44px;
+        align-self: stretch;
     }
     .transfer-history {
-        margin-top: 10px;
-        border-top: 1px solid rgba(255,255,255,0.12);
-        padding-top: 10px;
+        margin-top: 12px;
+        border-top: 1px solid var(--sm-border);
+        padding-top: 12px;
         max-height: 220px;
         overflow: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--sm-border) transparent;
     }
     .transfer-history-title {
         margin: 0 0 8px;
-        color: rgba(229,240,255,0.78);
-        font-size: .76rem;
-        letter-spacing: .08em;
+        color: var(--sm-muted);
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         font-weight: 900;
     }
     .transfer-row {
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.11);
-        background: rgba(255,255,255,0.03);
-        padding: 8px 9px;
-        margin-bottom: 7px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        padding: 10px 11px;
+        margin-bottom: 8px;
     }
     .transfer-row-main {
         margin: 0;
-        color: #fff;
-        font-size: .8rem;
+        color: var(--sm-text);
+        font-size: 0.82rem;
         font-weight: 800;
         word-break: break-word;
     }
     .transfer-row-sub {
-        margin: 2px 0 0;
-        color: rgba(214,232,255,0.63);
-        font-size: .72rem;
+        margin: 4px 0 0;
+        color: var(--sm-muted);
+        font-size: 0.74rem;
     }
     .transfer-empty {
         margin: 0;
-        color: rgba(214,232,255,0.62);
-        font-size: .76rem;
+        color: var(--sm-muted);
+        font-size: 0.78rem;
     }
     @media (min-width: 980px) {
-        .ticket-layout { grid-template-columns: minmax(0, 1fr) 380px; }
+        .ticket-layout { grid-template-columns: minmax(0, 1fr) 400px; }
     }
     @media (max-width: 640px) {
-        .ticket-shell { width: calc(100% - 20px); padding-top: 14px; }
+        .ticket-shell { width: calc(100% - 20px); padding-top: 16px; }
         .hero-cover { height: 180px; }
-        .ticket-block { padding: 12px; }
+        .ticket-block { padding: 14px; }
         .pass-grid { grid-template-columns: 1fr; }
         .share-row { grid-template-columns: 1fr; }
         .share-metrics { grid-template-columns: 1fr; }
@@ -320,37 +522,37 @@
         <div class="ticket-layout">
             <div class="ticket-main">
                 <div class="ticket-card">
-                    <img id="hero-img" src="" class="hero-cover">
+                    <img id="hero-img" src="" class="hero-cover" alt="">
                     <div class="ticket-block">
-                <span id="hero-status" class="status-chip status-confirmed">Confirmed</span>
+                        <span id="hero-status" class="status-chip status-confirmed">Confirmed</span>
                         <h1 id="hero-title" class="hero-title">Loading...</h1>
                         <p id="hero-location" class="hero-sub">Venue • City</p>
                         <p id="hero-time" class="hero-time">Date TBA</p>
                     </div>
                 </div>
 
-                <div class="ticket-card animate-evorra">
+                <div class="ticket-card">
                     <div class="pass-header">
-                        <span style="color: white; font-size: 0.8rem; font-weight: 900; letter-spacing: 1px;">EVORRA EVENT PASS</span>
-                        <span id="pass-status-text" style="color: white; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.9px;">CONFIRMED</span>
+                        <span class="pass-header-label">Evorra Event Pass</span>
+                        <span id="pass-status-text" class="pass-header-status">CONFIRMED</span>
                     </div>
                     <div class="ticket-block">
                         <div class="pass-grid">
                             <div class="pass-info-block">
                                 <p class="mini-info-label">Event</p>
-                                <p id="pass-event" class="mini-info-value" style="font-size: 0.85rem;">-</p>
+                                <p id="pass-event" class="mini-info-value">-</p>
                             </div>
                             <div class="pass-info-block">
                                 <p class="mini-info-label">Ticket</p>
-                                <p id="pass-type" class="mini-info-value" style="font-size: 0.85rem;">-</p>
+                                <p id="pass-type" class="mini-info-value">-</p>
                             </div>
                             <div class="pass-info-block">
                                 <p class="mini-info-label">Quantity</p>
-                                <p id="pass-qty" class="mini-info-value" style="font-size: 0.85rem;">0</p>
+                                <p id="pass-qty" class="mini-info-value">0</p>
                             </div>
                             <div class="pass-info-block">
                                 <p class="mini-info-label">Amount</p>
-                                <p id="pass-amount" class="mini-info-value" style="font-size: 0.85rem;">₹0</p>
+                                <p id="pass-amount" class="mini-info-value">₹0</p>
                             </div>
                         </div>
 
@@ -359,7 +561,7 @@
                             <div class="qr-stage">
                                 <img id="qr-img" src="">
                                 <div id="qr-loader">
-                                    <div class="spinner" style="border-color: #11192B; border-top-color: transparent;"></div>
+                                    <div class="ticket-spinner" aria-hidden="true"></div>
                                 </div>
                             </div>
                             <p id="qr-code-text">GENERATING...</p>
@@ -373,16 +575,16 @@
                     <h2 class="section-title">Event Details</h2>
                     <div class="detail-item">
                         <div class="payment-method-icon"><i class="fa-solid fa-calendar-day"></i></div>
-                        <div style="flex: 1;">
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 700; margin:0;">Date & Time</p>
-                            <p id="detail-time" style="color: white; font-size: 0.9rem; font-weight: 800; margin-top: 4px;">-</p>
+                        <div class="detail-stack">
+                            <p class="detail-label">Date &amp; Time</p>
+                            <p id="detail-time" class="detail-value">-</p>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="payment-method-icon"><i class="fa-solid fa-location-dot"></i></div>
-                        <div style="flex: 1;">
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 700; margin:0;">Venue</p>
-                            <p id="detail-venue" style="color: white; font-size: 0.9rem; font-weight: 800; margin-top: 4px;">-</p>
+                        <div class="detail-stack">
+                            <p class="detail-label">Venue</p>
+                            <p id="detail-venue" class="detail-value">-</p>
                         </div>
                     </div>
                 </div>
@@ -393,10 +595,10 @@
                         <div class="summary-row"><span>Ticket ID</span><span id="sum-id">-</span></div>
                         <div class="summary-row"><span>Ticket Type</span><span id="sum-type">-</span></div>
                         <div class="summary-row"><span>Quantity</span><span id="sum-qty">-</span></div>
-                        <div class="summary-row"><span>Status</span><span id="sum-status" style="color: var(--secondary);">-</span></div>
+                        <div class="summary-row"><span>Status</span><span id="sum-status">-</span></div>
                         <div class="summary-row"><span>Amount</span><span id="sum-amount">-</span></div>
                         <div class="summary-row"><span>Payment ID</span><span id="sum-payment">-</span></div>
-                        <div class="summary-row" style="margin-bottom: 0;"><span>Purchased At</span><span id="sum-date">-</span></div>
+                        <div class="summary-row summary-row--last"><span>Purchased At</span><span id="sum-date">-</span></div>
                     </div>
                 </div>
 
@@ -431,19 +633,19 @@
                     <div class="summary-box">
                         <div class="instruction-row">
                             <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Show this QR code at the venue entry point.</p>
+                            <p class="instruction-text">Show this QR code at the venue entry point.</p>
                         </div>
                         <div class="instruction-row">
                             <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Keep phone brightness high for fast scanning.</p>
+                            <p class="instruction-text">Keep phone brightness high for fast scanning.</p>
                         </div>
                         <div class="instruction-row">
                             <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Each ticket QR can only be scanned once.</p>
+                            <p class="instruction-text">Each ticket QR can only be scanned once.</p>
                         </div>
                         <div class="instruction-row">
                             <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; line-height: 1.5; margin:0;">Reach the venue at least 15 minutes early.</p>
+                            <p class="instruction-text">Reach the venue at least 15 minutes early.</p>
                         </div>
                     </div>
                 </div>

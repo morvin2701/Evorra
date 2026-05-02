@@ -16,16 +16,18 @@
         gap: 12px;
     }
     .m-panel {
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(11, 19, 37, 0.9), rgba(9, 22, 41, 0.84));
-        padding: 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.09);
+        background: #1a1a1a;
+        padding: 16px;
+        box-shadow: 0 16px 44px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .m-header {
-        padding: 16px;
+        padding: 18px 16px;
         border-radius: 20px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(135deg, rgba(17, 28, 50, 0.96), rgba(10, 23, 45, 0.9));
+        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(160deg, #1f1f1f 0%, #101010 100%);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
     }
     .m-welcome { color: rgba(215, 233, 255, 0.64); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
     .m-row { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -57,7 +59,7 @@
     }
     .m-dot {
         width: 8px; height: 8px; border-radius: 999px;
-        background: #68ffc8; box-shadow: 0 0 0 4px rgba(104,255,200,0.14);
+        background: #ff3d00; box-shadow: 0 0 0 4px rgba(255,61,0,0.22);
     }
     .m-kpis {
         display: grid;
@@ -65,15 +67,16 @@
         gap: 8px;
     }
     .m-kpi {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.11);
-        background: rgba(255,255,255,0.03);
-        padding: 10px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-left: 3px solid #ff3d00;
+        background: rgba(0,0,0,0.35);
+        padding: 12px 11px;
     }
     .m-kpi-label { color: rgba(208,226,255,0.64); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.11em; font-weight: 800; }
     .m-kpi-value { color: #fff; font-size: 1.14rem; margin-top: 4px; font-weight: 900; line-height: 1; }
-    .m-head { margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .m-head h2 { margin: 0; color: #fff; font-size: 1.24rem; font-weight: 900; letter-spacing: -0.02em; }
+    .m-head { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .m-head h2 { margin: 0; color: #fff; font-size: 1.22rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.2; }
     .m-subtitle { color: rgba(217,233,255,0.62); font-size: 0.78rem; margin-top: 3px; }
     .m-link { color: rgba(219,236,255,0.78); text-decoration: none; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
     .m-scroll {
@@ -95,18 +98,19 @@
         flex-shrink: 0;
         cursor: pointer;
     }
-    .category-chip.active { border-color: rgba(84,229,255,0.6); background: linear-gradient(145deg, rgba(35,198,243,0.3), rgba(127,95,255,0.28)); color: #fff; }
+    .category-chip.active { border-color: rgba(255,61,0,0.55); background: linear-gradient(145deg, rgba(255,61,0,0.26), rgba(255,215,0,0.1)); color: #fff; box-shadow: 0 6px 18px rgba(255,61,0,0.12); }
     .category-badge {
         min-width: 21px; height: 21px; border-radius: 999px; font-size: 0.65rem; font-weight: 800;
         display: inline-flex; align-items: center; justify-content: center;
         background: rgba(255,255,255,0.16); padding: 0 6px;
     }
     .m-featured-card, .m-upcoming-card, .m-pop-card {
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #141414;
         cursor: pointer;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.35);
     }
     .m-featured-list {
         display: grid;
@@ -115,11 +119,11 @@
     }
     .m-featured-card { width: 100%; max-width: 100%; flex-shrink: 1; }
     .m-featured-img, .m-upcoming-img, .m-pop-img { width: 100%; height: 158px; object-fit: cover; display: block; }
-    .m-card-body { padding: 11px 12px 12px; }
+    .m-card-body { padding: 12px 14px 14px; border-top: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,#1c1c1c,#141414); }
     .m-card-title { margin: 0 0 5px; color: #fff; font-size: 1rem; line-height: 1.24; }
     .m-card-meta { margin: 0; color: rgba(218,236,255,0.62); font-size: 0.75rem; }
     .m-card-bottom { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; }
-    .m-price { color: #7cf2c0; font-weight: 800; font-size: 0.92rem; }
+    .m-price { color: #ffb59a; font-weight: 900; font-size: 0.95rem; letter-spacing: -0.02em; }
     .m-rating { color: #ffd47a; font-size: 0.78rem; }
     .m-upcoming-grid {
         display: grid;
@@ -141,13 +145,14 @@
         min-height: 94px;
     }
     .m-promo {
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.2);
-        background: linear-gradient(128deg, rgba(95,80,255,0.62), rgba(0,171,230,0.48));
-        padding: 13px;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(125deg, #e63900 0%, #ff3d00 45%, #ff8c42 100%);
+        padding: 15px 14px;
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
+        box-shadow: 0 16px 40px rgba(255,61,0,0.22);
     }
     .m-promo-icon {
         width: 42px; height: 42px; border-radius: 12px;
@@ -245,10 +250,11 @@
     .m-disc-card {
         flex: 0 0 min(260px, 82vw);
         scroll-snap-align: start;
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(165deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.1);
+        background: #161616;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
     }
     .m-disc-img { width: 100%; height: 132px; object-fit: cover; display: block; }
     .m-disc-body { padding: 10px 11px 12px; }
@@ -260,10 +266,11 @@
         color: #ffc857;
     }
 </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home-premium.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="home-m-bg">
+<div class="home-m-bg home-m-premium">
     <div class="home-m-shell">
         <div class="m-header">
             <p class="m-welcome">Welcome back</p>
@@ -279,6 +286,11 @@
                 <span class="m-dot"></span>
                 <span>Live discovery mode enabled</span>
             </div>
+        </div>
+
+        <div class="m-quick-bar" role="navigation" aria-label="Quick actions">
+            <a href="/explore" class="m-quick-btn m-quick-primary"><i class="fa-solid fa-compass"></i> Explore</a>
+            <a href="/my-tickets" class="m-quick-btn"><i class="fa-solid fa-ticket"></i> My tickets</a>
         </div>
 
         <div class="m-panel">

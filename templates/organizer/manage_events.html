@@ -102,6 +102,24 @@
     .mini-metric { border-radius: 10px; padding: 8px; }
     .mini-metric .label { font-size: 0.62rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.06em; }
     .mini-metric .value { margin-top: 2px; font-size: 0.8rem; font-weight: 800; }
+    .dash-card-cover { height: 180px; width: 100%; background: #182338; position: relative; }
+    .dash-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .dash-card-badge-pos { position: absolute; top: 15px; right: 15px; }
+    .dash-card-body { padding: 20px; }
+    .dash-card-title { color: #fff; font-weight: 900; font-size: 1.1rem; line-height: 1.2; margin: 0 0 12px; }
+    .dash-card-meta { display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.75rem; color: rgba(255,255,255,0.72); flex-wrap: wrap; }
+    .dash-card-meta i { margin-right: 5px; opacity: 0.85; }
+    .dash-progress-label { font-size: 0.68rem; font-weight: 800; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.06em; }
+    .dash-progress-pct { font-size: 0.72rem; font-weight: 900; color: #8CF0C6; }
+    .dash-progress-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .dash-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#8cf0c6,#58d4ff); transition: width .45s ease; }
+    .dash-mini-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .dash-mini-sold { background: rgba(140, 240, 198, 0.1); color: #8CF0C6; }
+    .dash-mini-left { background: rgba(119, 215, 255, 0.1); color: #77D7FF; }
+    .dash-mini-rev { background: rgba(255, 200, 87, 0.1); color: #FFC857; }
+    .dash-foot-grid { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; display: flex; justify-content: space-around; text-align: center; }
+    .dash-foot-label { color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px; }
+    .dash-foot-val { color: #fff; font-weight: 800; font-size: 0.85rem; margin: 0; }
     @media (max-width: 900px) {
         .charts-grid { grid-template-columns: 1fr; }
         #dashboard-events-list { grid-template-columns: 1fr; }
@@ -395,61 +413,53 @@
         const dateText = startDate ? startDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'}) : 'TBA';
         const cardHtml = `
             <div class="dashboard-event-card animate-evorra" onclick="location.href='/event/${event.id}'" style="cursor: pointer;">
-                <div style="height: 180px; width: 100%; background: #182338; position: relative;">
-                    <img src="${event.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div style="position: absolute; top: 15px; right: 15px;">
-                        <span class="status-pill ${lifecycle}">
-                            ${lifecycleLabel}
-                        </span>
+                <div class="dash-card-cover">
+                    <img src="${event.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" alt="">
+                    <div class="dash-card-badge-pos">
+                        <span class="status-pill ${lifecycle}">${lifecycleLabel}</span>
                     </div>
                 </div>
-                <div style="padding: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                        <h3 style="color: white; font-weight: 900; font-size: 1.1rem; line-height: 1.2;">${event.title}</h3>
+                <div class="dash-card-body">
+                    <h3 class="dash-card-title">${event.title}</h3>
+                    <div class="dash-card-meta">
+                        <span><i class="fa-regular fa-calendar"></i> ${dateText}</span>
+                        <span><i class="fa-solid fa-location-dot"></i> ${event.venue || 'Venue'} • ${event.city || 'City'}</span>
                     </div>
-                    
-                    <div style="display: flex; gap: 15px; margin-bottom: 20px; opacity: 0.7; font-size: 0.75rem; color: white;">
-                        <span><i class="fa-regular fa-calendar" style="margin-right: 5px;"></i> ${dateText}</span>
-                        <span><i class="fa-solid fa-location-dot" style="margin-right: 5px;"></i> ${event.venue || 'Venue'} • ${event.city || 'City'}</span>
-                    </div>
-
                     <div style="margin-bottom: 10px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                            <span style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;">Tickets sold vs capacity</span>
-                            <span style="font-size:0.72rem;font-weight:900;color:#8CF0C6;">${fillPct}%</span>
+                            <span class="dash-progress-label">Tickets sold vs capacity</span>
+                            <span class="dash-progress-pct">${fillPct}%</span>
                         </div>
-                        <div style="height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
-                            <div style="height:100%;width:${fillPct}%;background:linear-gradient(90deg,#8cf0c6,#58d4ff);border-radius:999px;transition:width .45s ease;"></div>
+                        <div class="dash-progress-track">
+                            <div class="dash-progress-fill" style="width:${fillPct}%;"></div>
                         </div>
                     </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
-                        <div class="mini-metric" style="background: rgba(140, 240, 198, 0.1); color: #8CF0C6;">
+                    <div class="dash-mini-grid">
+                        <div class="mini-metric dash-mini-sold">
                             <p class="label">Sold</p>
                             <p class="value">${ticketsSold}</p>
                         </div>
-                        <div class="mini-metric" style="background: rgba(119, 215, 255, 0.1); color: #77D7FF;">
+                        <div class="mini-metric dash-mini-left">
                             <p class="label">Left</p>
                             <p class="value">${left}</p>
                         </div>
-                        <div class="mini-metric" style="background: rgba(255, 200, 87, 0.1); color: #FFC857;">
+                        <div class="mini-metric dash-mini-rev">
                             <p class="label">Revenue</p>
                             <p class="value">Rs. ${revenue.toLocaleString()}</p>
                         </div>
                     </div>
-
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 12px; display: flex; justify-content: space-around; text-align: center;">
+                    <div class="dash-foot-grid">
                         <div>
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Inventory</p>
-                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${inventory}</p>
+                            <p class="dash-foot-label">Inventory</p>
+                            <p class="dash-foot-val">${inventory}</p>
                         </div>
                         <div>
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Rating</p>
-                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${rating.toFixed(1)}</p>
+                            <p class="dash-foot-label">Rating</p>
+                            <p class="dash-foot-val">${rating.toFixed(1)}</p>
                         </div>
                         <div>
-                            <p style="color: rgba(255,255,255,0.5); font-size: 0.65rem; font-weight: 700; margin-bottom: 4px;">Conversion</p>
-                            <p style="color: white; font-weight: 800; font-size: 0.85rem;">${inventory > 0 ? ((ticketsSold/inventory)*100).toFixed(0) : 0}%</p>
+                            <p class="dash-foot-label">Conversion</p>
+                            <p class="dash-foot-val">${inventory > 0 ? ((ticketsSold/inventory)*100).toFixed(0) : 0}%</p>
                         </div>
                     </div>
                 </div>
