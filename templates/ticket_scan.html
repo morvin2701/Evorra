@@ -252,6 +252,223 @@
         .scan-title { font-size: 1.75rem; }
         .scan-sub { font-size: .9rem; }
     }
+
+    /* —— Success modal (scanner flow) —— */
+    .scan-success-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(4, 10, 22, 0.72);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.38s;
+    }
+    .scan-success-overlay.is-visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    .scan-success-overlay.is-visible .scan-success-card {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    .scan-success-card {
+        position: relative;
+        width: min(420px, 100%);
+        border-radius: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: linear-gradient(155deg, rgba(12, 28, 52, 0.98), rgba(6, 14, 30, 0.96));
+        box-shadow:
+            0 0 0 1px rgba(120, 255, 210, 0.12),
+            0 28px 80px rgba(0, 0, 0, 0.55),
+            0 0 120px rgba(56, 200, 255, 0.08);
+        padding: 28px 26px 22px;
+        transform: translateY(18px) scale(0.94);
+        opacity: 0;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+        overflow: hidden;
+    }
+    .scan-success-card::before {
+        content: "";
+        position: absolute;
+        inset: -40% -20% auto;
+        height: 70%;
+        background: radial-gradient(ellipse at 50% 0%, rgba(94, 244, 255, 0.22), transparent 65%);
+        pointer-events: none;
+    }
+    .scan-success-card::after {
+        content: "";
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 120%;
+        height: 50%;
+        background: radial-gradient(ellipse, rgba(122, 108, 255, 0.15), transparent 70%);
+        pointer-events: none;
+    }
+    .scan-success-inner { position: relative; z-index: 1; }
+    .scan-success-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(190, 255, 233, 0.95);
+        margin-bottom: 18px;
+        animation: scan-badge-in 0.55s ease 0.1s both;
+    }
+    @keyframes scan-badge-in {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .scan-success-icon-wrap {
+        width: 88px;
+        height: 88px;
+        margin: 0 auto 20px;
+        position: relative;
+    }
+    .scan-success-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(116, 255, 202, 0.35);
+        animation: scan-ring-pulse 2s ease-out infinite;
+    }
+    @keyframes scan-ring-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.08); opacity: 0.45; }
+    }
+    .scan-success-check {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgba(116, 255, 202, 0.25), rgba(90, 210, 255, 0.12));
+        border: 1px solid rgba(150, 255, 220, 0.45);
+        font-size: 2.1rem;
+        color: #b8ffe8;
+        animation: scan-check-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+    }
+    @keyframes scan-check-pop {
+        from { transform: scale(0.3); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .scan-success-title {
+        margin: 0 0 6px;
+        text-align: center;
+        font-size: clamp(1.35rem, 4vw, 1.55rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: #fff;
+        animation: scan-line-in 0.5s ease 0.2s both;
+    }
+    .scan-success-sub {
+        margin: 0 0 22px;
+        text-align: center;
+        font-size: 0.84rem;
+        color: rgba(210, 224, 255, 0.72);
+        line-height: 1.45;
+        animation: scan-line-in 0.5s ease 0.28s both;
+    }
+    @keyframes scan-line-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .scan-success-details {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+    .scan-success-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        animation: scan-row-in 0.45s ease both;
+    }
+    .scan-success-row:nth-child(1) { animation-delay: 0.32s; }
+    .scan-success-row:nth-child(2) { animation-delay: 0.4s; }
+    .scan-success-row:nth-child(3) { animation-delay: 0.48s; }
+    @keyframes scan-row-in {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .scan-success-row-label {
+        margin: 0;
+        font-size: 0.66rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(180, 202, 255, 0.55);
+        flex-shrink: 0;
+    }
+    .scan-success-row-value {
+        margin: 0;
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #f0f5ff;
+        text-align: right;
+        word-break: break-word;
+    }
+    .scan-success-id {
+        margin: 0 0 18px;
+        text-align: center;
+        font-size: 0.72rem;
+        font-family: ui-monospace, monospace;
+        color: rgba(180, 200, 240, 0.55);
+        animation: scan-line-in 0.5s ease 0.52s both;
+    }
+    .scan-success-done {
+        width: 100%;
+        border: none;
+        border-radius: 16px;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        cursor: pointer;
+        color: #041018;
+        background: linear-gradient(135deg, #8af5d4, #5ad4ff);
+        box-shadow: 0 12px 32px rgba(90, 212, 255, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        animation: scan-line-in 0.5s ease 0.56s both;
+    }
+    .scan-success-done:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px rgba(90, 212, 255, 0.38);
+    }
+    .scan-success-done:active { transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+        .scan-success-badge,
+        .scan-success-title,
+        .scan-success-sub,
+        .scan-success-row,
+        .scan-success-id,
+        .scan-success-done,
+        .scan-success-check,
+        .scan-success-ring {
+            animation: none !important;
+        }
+        .scan-success-card {
+            transform: none;
+            opacity: 1;
+        }
+        .scan-success-overlay { transition: none; }
+    }
 </style>
 {% endblock %}
 
@@ -338,6 +555,38 @@
         </div>
     </div>
 </div>
+
+<div id="scan-success-overlay" class="scan-success-overlay" role="dialog" aria-modal="true" aria-labelledby="scan-success-title-el" aria-hidden="true">
+    <div class="scan-success-card">
+        <div class="scan-success-inner">
+            <div class="scan-success-badge">
+                <i class="fa-solid fa-circle-check"></i> Entry verified
+            </div>
+            <div class="scan-success-icon-wrap" aria-hidden="true">
+                <div class="scan-success-ring"></div>
+                <div class="scan-success-check"><i class="fa-solid fa-check"></i></div>
+            </div>
+            <h2 id="scan-success-title-el" class="scan-success-title">Ticket scanned successfully</h2>
+            <p class="scan-success-sub">Guest has been checked in. Details below.</p>
+            <div class="scan-success-details">
+                <div class="scan-success-row">
+                    <p class="scan-success-row-label">Event</p>
+                    <p id="scan-success-event" class="scan-success-row-value">—</p>
+                </div>
+                <div class="scan-success-row">
+                    <p class="scan-success-row-label">Ticket type</p>
+                    <p id="scan-success-type" class="scan-success-row-value">—</p>
+                </div>
+                <div class="scan-success-row">
+                    <p class="scan-success-row-label">Guests</p>
+                    <p id="scan-success-qty" class="scan-success-row-value">—</p>
+                </div>
+            </div>
+            <p id="scan-success-ticket-ref" class="scan-success-id"></p>
+            <button type="button" id="scan-success-done-btn" class="scan-success-done">Done</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -406,6 +655,57 @@
             (ticketData && (ticketData.ticket_type_name || ticketData.ticket_type || '-')) || '-';
         document.getElementById('scan-qty').textContent =
             (ticketData && Number(ticketData.quantity || 1)) || 1;
+    }
+
+    async function pauseLiveScanner() {
+        if (!html5QrScanner) return;
+        try {
+            await html5QrScanner.stop();
+        } catch (e) {}
+    }
+
+    function openScanSuccessModal(payload) {
+        const overlay = document.getElementById('scan-success-overlay');
+        if (!overlay) return;
+        const eventName = payload.eventName || '—';
+        const ticketType = payload.ticketType || '—';
+        const qty = Number(payload.quantity || 1);
+        const tid = payload.ticketId || '';
+
+        document.getElementById('scan-success-event').textContent = eventName;
+        document.getElementById('scan-success-type').textContent = ticketType;
+        document.getElementById('scan-success-qty').textContent =
+            qty === 1 ? '1 person' : `${qty} people`;
+
+        const refEl = document.getElementById('scan-success-ticket-ref');
+        if (refEl) {
+            refEl.textContent = tid ? `Pass ID · ${tid}` : '';
+        }
+
+        overlay.classList.add('is-visible');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const done = document.getElementById('scan-success-done-btn');
+        if (done) done.focus();
+    }
+
+    function closeScanSuccessModal() {
+        const overlay = document.getElementById('scan-success-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('is-visible');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    async function onScanSuccessModalDone() {
+        closeScanSuccessModal();
+        if (scannerMode) {
+            try {
+                await startScanner();
+            } catch (e) {
+                addScanLog('err', 'Could not restart camera. Tap Start Camera Scanner.');
+            }
+        }
     }
 
     async function fetchLatestEntries() {
@@ -636,6 +936,18 @@
             if (scannerMode) {
                 addScanLog('ok', `Ticket ${targetTicketId} checked in successfully.`);
                 fetchLatestEntries();
+                const eventName =
+                    (preTicket.event_title || preEvent?.title || '').trim() || 'Event';
+                const ticketType =
+                    (preTicket.ticket_type_name || preTicket.ticket_type || 'Standard').trim();
+                const quantity = Number(preTicket.quantity || 1);
+                await pauseLiveScanner();
+                openScanSuccessModal({
+                    eventName,
+                    ticketType,
+                    quantity,
+                    ticketId: targetTicketId
+                });
             } else if (btn) {
                 btn.textContent = 'Checked In';
             }
@@ -706,6 +1018,24 @@
         }
         setStatus('', '<i class="fa-solid fa-camera"></i> Scanner stopped');
     }
+
+    document.getElementById('scan-success-done-btn')?.addEventListener('click', () => {
+        onScanSuccessModalDone();
+    });
+
+    document.getElementById('scan-success-overlay')?.addEventListener('click', (ev) => {
+        if (ev.target === ev.currentTarget) {
+            onScanSuccessModalDone();
+        }
+    });
+
+    document.addEventListener('keydown', (ev) => {
+        const overlay = document.getElementById('scan-success-overlay');
+        if (ev.key === 'Escape' && overlay?.classList.contains('is-visible')) {
+            ev.preventDefault();
+            onScanSuccessModalDone();
+        }
+    });
 
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
