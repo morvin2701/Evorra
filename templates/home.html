@@ -443,6 +443,228 @@
         0%, 100% { transform: scale(1); opacity: 1; }
         50% { transform: scale(0.8); opacity: 0.72; }
     }
+
+    /* —— Smart discovery + premium rows —— */
+    .home-skeleton-wrap {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 4px;
+    }
+    .home-skeleton-wrap.hide { display: none; }
+    .skel-block {
+        border-radius: 22px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 100%);
+        background-size: 200% 100%;
+        animation: skelShine 1.2s ease-in-out infinite;
+        min-height: 120px;
+    }
+    .skel-block.tall { min-height: 220px; }
+    @keyframes skelShine {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .hero-spotlight {
+        position: relative;
+        border-radius: 28px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: #080f1f;
+        min-height: min(320px, 52vw);
+        box-shadow: 0 28px 60px rgba(0,0,0,0.45);
+    }
+    .hero-spotlight-track {
+        display: flex;
+        transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hero-spotlight-slide {
+        position: relative;
+        min-width: 100%;
+        flex-shrink: 0;
+        cursor: pointer;
+        min-height: min(320px, 52vw);
+    }
+    .hero-spotlight-slide .hs-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.02);
+        transition: transform 8s ease-out;
+    }
+    .hero-spotlight-slide:hover .hs-bg { transform: scale(1.06); }
+    .hero-spotlight-slide .hs-grad {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(4,10,22,0.5) 0%, rgba(6,14,28,0.75) 45%, rgba(5,8,18,0.92) 100%);
+    }
+    .hero-spotlight-slide .hs-body {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        padding: 22px 24px 26px;
+        z-index: 2;
+    }
+    .hs-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.22);
+        background: rgba(8,14,28,0.55);
+        backdrop-filter: blur(10px);
+        color: #c9fff0;
+    }
+    .hs-title { margin: 12px 0 6px; font-size: clamp(1.35rem, 3.5vw, 1.85rem); font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; }
+    .hs-meta { margin: 0; color: rgba(220,236,255,0.72); font-size: 0.84rem; }
+    .hs-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 7px;
+        z-index: 3;
+    }
+    .hs-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.28);
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .hs-dot.active {
+        background: linear-gradient(135deg, #8cf0c6, #58d4ff);
+        transform: scale(1.25);
+    }
+    .netflix-row-scroll {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 6px 4px 14px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+    }
+    .netflix-row-scroll::-webkit-scrollbar { height: 6px; }
+    .netflix-row-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.18);
+        border-radius: 999px;
+    }
+    .discovery-card-premium {
+        position: relative;
+        flex: 0 0 min(280px, 78vw);
+        scroll-snap-align: start;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        min-height: 260px;
+        cursor: pointer;
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+        background: #0c1528;
+    }
+    .discovery-card-premium:hover {
+        transform: translateY(-8px) scale(1.01);
+        border-color: rgba(100, 230, 255, 0.42);
+        box-shadow: 0 22px 50px rgba(0,0,0,0.38);
+    }
+    .dcp-blur-bg {
+        position: absolute;
+        inset: -20px;
+        background-size: cover;
+        background-position: center;
+        filter: blur(28px) saturate(1.15);
+        opacity: 0.55;
+        transform: scale(1.1);
+    }
+    .dcp-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 58%;
+        object-fit: cover;
+        mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+        -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+    }
+    .dcp-body {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 14px 14px 16px;
+        background: linear-gradient(180deg, transparent, rgba(6,10,22,0.92));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .dcp-cat {
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8cf0c6;
+    }
+    .dcp-title {
+        margin: 6px 0 4px;
+        font-size: 1.02rem;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.25;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .dcp-meta {
+        margin: 0;
+        font-size: 0.76rem;
+        color: rgba(218,236,255,0.62);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .dcp-foot {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+    .dcp-price { font-weight: 900; color: #9cf8d8; font-size: 0.95rem; }
+    .dcp-trend {
+        font-size: 0.65rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255,214,122,0.95);
+        padding: 4px 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,214,122,0.28);
+        background: rgba(255,200,80,0.08);
+    }
+    .section-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(180, 210, 255, 0.55);
+        margin-bottom: 6px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .skel-block { animation: none; opacity: 0.55; }
+        .hero-spotlight-slide .hs-bg { transition: none; }
+    }
+
     @media (max-width: 980px) {
         .home-shell { width: calc(100% - 28px); }
         .hero-grid { grid-template-columns: 1fr; }
@@ -669,6 +891,54 @@
             </div>
         </div>
 
+        <div id="home-skeleton-wrap" class="home-skeleton-wrap">
+            <div class="skel-block tall"></div>
+            <div class="skel-block"></div>
+            <div class="skel-block"></div>
+        </div>
+
+        <div id="hero-spotlight" class="hero-spotlight hide" aria-roledescription="carousel">
+            <div id="hero-spotlight-track" class="hero-spotlight-track"></div>
+            <div id="hero-spotlight-dots" class="hs-dots"></div>
+        </div>
+
+        <div class="section-panel hide" id="section-trending-wrap">
+            <div class="section-head">
+                <div>
+                    <p class="section-eyebrow"><i class="fa-solid fa-fire-flame-curved"></i> Trending now</p>
+                    <h2 class="section-title">Trending Events</h2>
+                    <p class="section-subtitle">Most booked &amp; talked-about experiences right now</p>
+                </div>
+                <a href="/explore" class="see-all">See all</a>
+            </div>
+            <div id="trending-row" class="netflix-row-scroll"></div>
+        </div>
+
+        <div class="section-panel hide" id="section-near-wrap">
+            <div class="section-head">
+                <div>
+                    <p class="section-eyebrow"><i class="fa-solid fa-location-crosshairs"></i> Near Ahmedabad</p>
+                    <h2 class="section-title">Happening around Ahmedabad</h2>
+                    <p class="section-subtitle">Geo-ranked picks within ~55 km or Ahmedabad city</p>
+                </div>
+                <a href="/explore" class="see-all">Explore</a>
+            </div>
+            <div id="near-row" class="netflix-row-scroll"></div>
+        </div>
+
+        <div class="section-panel hide" id="section-foryou-wrap">
+            <div class="section-head">
+                <div>
+                    <p class="section-eyebrow"><i class="fa-solid fa-sparkles"></i> Personalised</p>
+                    <h2 class="section-title">Because you booked before</h2>
+                    <p class="section-subtitle">Matches categories from your past tickets</p>
+                </div>
+                <a href="/explore" class="see-all">See all</a>
+            </div>
+            <div id="foryou-row" class="netflix-row-scroll"></div>
+            <p id="foryou-hint" class="section-subtitle hide" style="margin-top:10px;">Book or save events to sharpen these picks.</p>
+        </div>
+
         <!-- Categories Section -->
         <div class="section-panel">
             <div class="section-head">
@@ -746,6 +1016,206 @@
     let selectedCatId = '';
     let allEventsCache = [];
     let userGeo = null;
+    const AHMEDABAD_CENTER = { lat: 23.0225, lng: 72.5714 };
+    let preferredCategoryIds = new Set();
+    let heroCarouselSlides = [];
+    let heroCarouselIndex = 0;
+    let heroCarouselTimer = null;
+
+    function escapeHtml(s) {
+        return String(s ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;');
+    }
+    function recordEventInterest(eventId) {
+        try {
+            const raw = localStorage.getItem('evorra_event_views');
+            const o = raw ? JSON.parse(raw) : {};
+            o[eventId] = (o[eventId] || 0) + 1;
+            localStorage.setItem('evorra_event_views', JSON.stringify(o));
+        } catch (_) {}
+    }
+    function localViewBoost(eventId) {
+        try {
+            const raw = localStorage.getItem('evorra_event_views');
+            const o = raw ? JSON.parse(raw) : {};
+            return Math.min(60, Number(o[eventId] || 0) * 8);
+        } catch (_) {
+            return 0;
+        }
+    }
+    function trendingScore(e) {
+        const sold = Number(e.tickets_sold || 0);
+        const rating = Number(e.rating_average || 0);
+        const feat = e.is_featured ? 35 : 0;
+        return sold * 2.5 + rating * 12 + feat + localViewBoost(e.id);
+    }
+    function isNearAhmedabad(e) {
+        const city = String(e.city || '').toLowerCase();
+        if (city.includes('ahmedabad')) return true;
+        const p = parseEventCoords(e);
+        if (p) return distanceKm(AHMEDABAD_CENTER, p) <= 55;
+        return false;
+    }
+    function rankNearAhmedabad(events) {
+        const pool = events.filter(e =>
+            e.is_published !== false
+            && !isEventClosed(e)
+            && matchesSelectedCategory(e)
+            && isNearAhmedabad(e)
+        );
+        return pool.sort((a, b) => {
+            const da = Number(a.__distanceKm);
+            const db = Number(b.__distanceKm);
+            const ad = Number.isFinite(da) && da !== Number.POSITIVE_INFINITY ? da : 9999;
+            const bd = Number.isFinite(db) && db !== Number.POSITIVE_INFINITY ? db : 9999;
+            if (Math.abs(ad - bd) > 3) return ad - bd;
+            return trendingScore(b) - trendingScore(a);
+        });
+    }
+    async function refreshPreferredCategoriesFromTickets() {
+        preferredCategoryIds = new Set();
+        const user = auth.currentUser;
+        if (!user || !allEventsCache.length) return;
+        try {
+            const snap = await db.collection('tickets').where('user_id', '==', user.uid).limit(50).get();
+            snap.forEach((doc) => {
+                const tid = doc.data()?.event_id;
+                if (!tid) return;
+                const ev = allEventsCache.find((x) => x.id === tid);
+                if (ev && ev.category_id) preferredCategoryIds.add(String(ev.category_id));
+            });
+        } catch (_) {}
+    }
+    function scoreForYou(e) {
+        let score = trendingScore(e) * 0.55;
+        if (preferredCategoryIds.has(String(e.category_id || ''))) score += 95;
+        return score;
+    }
+    function buildForYouList(events) {
+        const pool = events.filter((e) =>
+            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e)
+        );
+        const ranked = pool.map((e) => ({ e, s: scoreForYou(e) }));
+        ranked.sort((a, b) => b.s - a.s);
+        return ranked.slice(0, 14).map((x) => x.e);
+    }
+    function renderPremiumCard(e) {
+        const closed = isEventClosed(e);
+        const img = escapeHtml(e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
+        const title = escapeHtml(e.title || 'Event');
+        const cat = escapeHtml(e.category_name || 'Event');
+        const meta = `${escapeHtml(e.city || 'City')} • ${escapeHtml(e.venue_name || e.venue || 'Venue')}${formatDistance(e) ? ` • ${escapeHtml(formatDistance(e))}` : ''}`;
+        const trendLabel = trendingScore(e) > 120 ? 'Hot' : (Number(e.tickets_sold || 0) > 8 ? 'Selling fast' : '');
+        return `
+            <article class="discovery-card-premium animate-evorra ${closed ? 'event-card-closed' : ''}" role="button" tabindex="0"
+                onclick="handleEventCardTap('${e.id}', ${closed})">
+                <div class="dcp-blur-bg" style="background-image:url('${img}')" aria-hidden="true"></div>
+                <img class="dcp-img" src="${img}" alt="">
+                <div class="dcp-body">
+                    <span class="dcp-cat">${cat}</span>
+                    <h3 class="dcp-title">${title}</h3>
+                    <p class="dcp-meta">${meta}</p>
+                    <div class="dcp-foot">
+                        <span class="dcp-price">₹${Number(e.price_start || 0)}</span>
+                        ${trendLabel ? `<span class="dcp-trend">${escapeHtml(trendLabel)}</span>` : '<span></span>'}
+                    </div>
+                </div>
+            </article>`;
+    }
+    function renderDiscoveryRow(containerId, list) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        if (!list.length) {
+            el.innerHTML = '<p style="color:rgba(220,236,255,0.55);font-size:0.84rem;padding:8px;">Nothing here yet — try another category or explore all events.</p>';
+            return;
+        }
+        list.forEach((e) => {
+            el.innerHTML += renderPremiumCard(e);
+        });
+    }
+    function toggleDiscoveryVisibility(hasTrending, hasNear, hasForYou) {
+        const sk = document.getElementById('home-skeleton-wrap');
+        if (sk) sk.classList.add('hide');
+        document.getElementById('section-trending-wrap')?.classList.toggle('hide', !hasTrending);
+        document.getElementById('section-near-wrap')?.classList.toggle('hide', !hasNear);
+        const fyWrap = document.getElementById('section-foryou-wrap');
+        const fyHint = document.getElementById('foryou-hint');
+        if (fyWrap) fyWrap.classList.toggle('hide', !hasForYou);
+        if (fyHint) {
+            const logged = !!(typeof auth !== 'undefined' && auth.currentUser);
+            fyHint.classList.toggle('hide', !logged || preferredCategoryIds.size > 0 || !hasForYou);
+        }
+    }
+    function mountHeroCarousel(sourceEvents) {
+        const wrap = document.getElementById('hero-spotlight');
+        const track = document.getElementById('hero-spotlight-track');
+        const dots = document.getElementById('hero-spotlight-dots');
+        if (!wrap || !track || !dots) return;
+        heroCarouselSlides = sourceEvents
+            .filter((e) => e.is_published !== false && !isEventClosed(e))
+            .sort((a, b) => trendingScore(b) - trendingScore(a))
+            .slice(0, 5);
+        if (!heroCarouselSlides.length) {
+            wrap.classList.add('hide');
+            if (heroCarouselTimer) clearInterval(heroCarouselTimer);
+            return;
+        }
+        wrap.classList.remove('hide');
+        track.innerHTML = heroCarouselSlides.map((e, i) => {
+            const img = escapeHtml(e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2');
+            const title = escapeHtml(e.title || 'Featured');
+            const meta = `${escapeHtml(e.city || '')} • ${escapeHtml(e.category_name || 'Live')}`;
+            const closed = isEventClosed(e);
+            return `
+                <div class="hero-spotlight-slide" data-i="${i}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                    <div class="hs-bg" style="background-image:url('${img}')"></div>
+                    <div class="hs-grad"></div>
+                    <div class="hs-body">
+                        <span class="hs-badge"><i class="fa-solid fa-bolt"></i> Spotlight pick</span>
+                        <h2 class="hs-title">${title}</h2>
+                        <p class="hs-meta">${meta}${formatDistance(e) ? ` • ${escapeHtml(formatDistance(e))}` : ''}</p>
+                    </div>
+                </div>`;
+        }).join('');
+        dots.innerHTML = heroCarouselSlides.map((_, i) =>
+            `<button type="button" class="hs-dot ${i === 0 ? 'active' : ''}" aria-label="Slide ${i + 1}" onclick="goHeroSlide(${i})"></button>`
+        ).join('');
+        heroCarouselIndex = 0;
+        applyHeroSlideTransform();
+        if (heroCarouselTimer) clearInterval(heroCarouselTimer);
+        heroCarouselTimer = setInterval(() => {
+            if (heroCarouselSlides.length < 2) return;
+            heroCarouselIndex = (heroCarouselIndex + 1) % heroCarouselSlides.length;
+            applyHeroSlideTransform();
+        }, 6500);
+    }
+    function goHeroSlide(idx) {
+        if (!heroCarouselSlides.length) return;
+        heroCarouselIndex = ((idx % heroCarouselSlides.length) + heroCarouselSlides.length) % heroCarouselSlides.length;
+        applyHeroSlideTransform();
+    }
+    function applyHeroSlideTransform() {
+        const track = document.getElementById('hero-spotlight-track');
+        if (track) track.style.transform = `translateX(-${heroCarouselIndex * 100}%)`;
+        document.querySelectorAll('#hero-spotlight-dots .hs-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === heroCarouselIndex);
+        });
+    }
+    function renderSmartDiscovery(events) {
+        const trendingPool = [...events].filter((e) => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e))
+            .sort((a, b) => trendingScore(b) - trendingScore(a))
+            .slice(0, 14);
+        renderDiscoveryRow('trending-row', trendingPool);
+        const nearList = rankNearAhmedabad(events).slice(0, 14);
+        renderDiscoveryRow('near-row', nearList);
+        const forYou = buildForYouList(events);
+        renderDiscoveryRow('foryou-row', forYou);
+        mountHeroCarousel(trendingPool.length ? trendingPool : events.filter((e) => e.is_published !== false && !isEventClosed(e)));
+        toggleDiscoveryVisibility(trendingPool.length > 0, nearList.length > 0, forYou.length > 0);
+    }
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
         if (eventItem.is_closed === true) return true;
@@ -861,6 +1331,7 @@
             showToast('This event is closed and no longer accessible.');
             return;
         }
+        recordEventInterest(eventId);
         location.href = `/event/${eventId}`;
     }
 
@@ -901,15 +1372,17 @@
                 }
                 const label = await reverseGeocodeLabel(userGeo.lat, userGeo.lng);
                 if (cityEl && label) cityEl.textContent = label;
-                rerenderHomeLists();
+                await rerenderHomeLists();
             },
             () => {},
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 }
         );
     }
-    function rerenderHomeLists() {
+    async function rerenderHomeLists() {
         if (!allEventsCache.length) return;
         renderCategories(allEventsCache);
+        await refreshPreferredCategoriesFromTickets();
+        renderSmartDiscovery(allEventsCache);
         renderFeatured(allEventsCache);
         renderPopular(allEventsCache);
         renderUpcoming(allEventsCache);
@@ -930,10 +1403,13 @@
             const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
             document.getElementById('kpi-events').textContent = liveEvents.length;
 
-            rerenderHomeLists();
+            await rerenderHomeLists();
             renderPromo();
 
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('home-skeleton-wrap')?.classList.add('hide');
+        }
     }
 
     function renderCategories(events) {
@@ -1118,11 +1594,11 @@
         }
     }
 
-    function filterByCat(id, el) {
+    async function filterByCat(id, el) {
         selectedCatId = id;
         document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
-        rerenderHomeLists();
+        await rerenderHomeLists();
     }
 
     auth.onAuthStateChanged(user => {

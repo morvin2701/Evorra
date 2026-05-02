@@ -234,6 +234,52 @@
         padding: 14px;
         margin-bottom: 10px;
     }
+    .social-share-strip {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    .share-action-btn {
+        flex: 1;
+        min-width: min(160px, 100%);
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        color: #eaf2ff;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 11px 14px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .share-action-btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(110, 230, 255, 0.42);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
+    .share-action-btn.wa {
+        border-color: rgba(37, 211, 102, 0.45);
+        background: linear-gradient(145deg, rgba(37,211,102,0.22), rgba(18,140,126,0.12));
+    }
+    .verified-strip {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(110, 230, 255, 0.35);
+        background: rgba(110, 230, 255, 0.08);
+        font-size: 0.74rem;
+        font-weight: 800;
+        color: #b8ecff;
+    }
     .booking-inline {
         position: relative;
         display: flex;
@@ -404,6 +450,21 @@
                 </div>
                 <a id="book-btn" href="#" class="btn-evorra dock-cta">Book Now</a>
             </div>
+            <div id="verified-organizer-row" class="verified-strip hide">
+                <i class="fa-solid fa-circle-check" style="color:#5cf0c8;"></i>
+                Verified organizer on Evorra
+            </div>
+            <div class="social-share-strip">
+                <button type="button" class="share-action-btn wa" onclick="shareEventWhatsApp()" aria-label="Share on WhatsApp">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> WhatsApp
+                </button>
+                <button type="button" class="share-action-btn" onclick="copyEventLink()" aria-label="Copy link">
+                    <i class="fa-regular fa-copy"></i> Copy link
+                </button>
+                <button type="button" class="share-action-btn" onclick="shareEventNative()" aria-label="Share">
+                    <i class="fa-solid fa-share-nodes"></i> Invite friends
+                </button>
+            </div>
         </div>
 
         <div class="detail-main">
@@ -517,6 +578,12 @@
             document.getElementById('dock-price').textContent = `₹${data.price_start || 0}`;
             document.getElementById('book-btn').href = `/book/${eventId}`;
             document.getElementById('rating-text').textContent = `${data.rating_average || '0.0'} (${data.review_count || 0} reviews)`;
+
+            const verRow = document.getElementById('verified-organizer-row');
+            if (verRow) {
+                if (data.organizer_verified === true || data.verified_organizer === true) verRow.classList.remove('hide');
+                else verRow.classList.add('hide');
+            }
 
             // Images
             const carousel = document.getElementById('carousel-imgs');
@@ -689,6 +756,41 @@
 
     function openTeaser() {
         if (teaserUrl) window.open(teaserUrl, '_blank');
+    }
+
+    function getEventShareUrl() {
+        const base = (typeof window.APP_PUBLIC_URL === 'string' && window.APP_PUBLIC_URL)
+            ? window.APP_PUBLIC_URL.replace(/\/$/, '')
+            : window.location.origin;
+        return `${base}/event/${eventId}`;
+    }
+
+    function shareEventWhatsApp() {
+        const title = document.getElementById('event-title')?.textContent || 'Event';
+        const url = getEventShareUrl();
+        const text = encodeURIComponent(`${title} — ${url}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    function copyEventLink() {
+        const url = getEventShareUrl();
+        if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(url).then(() => alert('Link copied')).catch(() => prompt('Copy:', url));
+        } else {
+            prompt('Copy link:', url);
+        }
+    }
+
+    async function shareEventNative() {
+        const url = getEventShareUrl();
+        const title = document.getElementById('event-title')?.textContent || 'Event';
+        if (navigator.share) {
+            try {
+                await navigator.share({ title, text: `Join me at ${title}`, url });
+            } catch (_) {}
+        } else {
+            copyEventLink();
+        }
     }
 
     loadEventDetail();

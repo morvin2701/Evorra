@@ -347,6 +347,7 @@
                         totalAttendees += attendees;
 
                         event.display_revenue = eventRevenue;
+                        event.display_sold_qty = eventConfirmedQty;
                         chartEvents.push(event);
                         renderEventCard(event, listContainer);
                     }
@@ -381,11 +382,12 @@
     }
 
     function renderEventCard(event, container) {
-        const ticketsSold = event.tickets_sold || 0;
-        const inventory = event.ticket_inventory || 0;
+        const ticketsSold = Number(event.display_sold_qty ?? event.tickets_sold ?? 0);
+        const inventory = Number(event.ticket_inventory || 0);
         const left = Math.max(0, inventory - ticketsSold);
         const revenue = event.display_revenue || 0;
         const rating = event.rating_average || 0;
+        const fillPct = inventory > 0 ? Math.min(100, Math.round((ticketsSold / inventory) * 100)) : (ticketsSold > 0 ? 100 : 0);
         
         const startDate = safeDate(event.start_time);
         const lifecycle = getEventLifecycleStatus(event);
@@ -409,6 +411,16 @@
                     <div style="display: flex; gap: 15px; margin-bottom: 20px; opacity: 0.7; font-size: 0.75rem; color: white;">
                         <span><i class="fa-regular fa-calendar" style="margin-right: 5px;"></i> ${dateText}</span>
                         <span><i class="fa-solid fa-location-dot" style="margin-right: 5px;"></i> ${event.venue || 'Venue'} • ${event.city || 'City'}</span>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                            <span style="font-size:0.68rem;font-weight:800;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.06em;">Tickets sold vs capacity</span>
+                            <span style="font-size:0.72rem;font-weight:900;color:#8CF0C6;">${fillPct}%</span>
+                        </div>
+                        <div style="height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+                            <div style="height:100%;width:${fillPct}%;background:linear-gradient(90deg,#8cf0c6,#58d4ff);border-radius:999px;transition:width .45s ease;"></div>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">

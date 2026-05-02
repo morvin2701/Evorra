@@ -226,6 +226,39 @@
         transition: opacity .2s ease, transform .2s ease;
     }
     .toast-msg.show { opacity: 1; transform: translate(-50%, 0); }
+    @keyframes skelPulse {
+        0%, 100% { opacity: 0.45; }
+        50% { opacity: 0.85; }
+    }
+    .m-skel-panel {
+        border-radius: 18px;
+        min-height: 140px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 100%);
+        background-size: 200% 100%;
+        animation: skelShine 1.15s ease-in-out infinite;
+    }
+    @keyframes skelShine {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .m-disc-card {
+        flex: 0 0 min(260px, 82vw);
+        scroll-snap-align: start;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(165deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+    }
+    .m-disc-img { width: 100%; height: 132px; object-fit: cover; display: block; }
+    .m-disc-body { padding: 10px 11px 12px; }
+    .m-disc-badge {
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #ffc857;
+    }
 </style>
 {% endblock %}
 
@@ -263,6 +296,19 @@
                     <p class="m-kpi-value" id="kpi-featured">0</p>
                 </div>
             </div>
+        </div>
+
+        <div id="m-discovery-skel" class="m-panel m-skel-panel"></div>
+
+        <div id="m-discovery-wrap" class="m-panel hide">
+            <div class="m-head">
+                <div>
+                    <h2>🔥 Trending · Ahmedabad · For you</h2>
+                    <p class="m-subtitle">Smart-ranked picks from bookings, buzz &amp; distance</p>
+                </div>
+                <a href="/explore" class="m-link">All</a>
+            </div>
+            <div class="m-scroll" id="m-discovery-scroll" style="scroll-snap-type:x mandatory;"></div>
         </div>
 
         <div class="m-panel">
@@ -320,6 +366,98 @@
     let selectedCatId = '';
     let allEventsCache = [];
     let userGeo = null;
+    const AHM_CENTER = { lat: 23.0225, lng: 72.5714 };
+    let preferredCategoryIds = new Set();
+
+    function esc(s) {
+        return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    function recordEventInterest(id) {
+        try {
+            const o = JSON.parse(localStorage.getItem('evorra_event_views') || '{}');
+            o[id] = (o[id] || 0) + 1;
+            localStorage.setItem('evorra_event_views', JSON.stringify(o));
+        } catch (_) {}
+    }
+    function viewBoost(id) {
+        try {
+            const o = JSON.parse(localStorage.getItem('evorra_event_views') || '{}');
+            return Math.min(50, Number(o[id] || 0) * 6);
+        } catch (_) { return 0; }
+    }
+    function trendingScore(e) {
+        return Number(e.tickets_sold || 0) * 2.5 + Number(e.rating_average || 0) * 12 + (e.is_featured ? 35 : 0) + viewBoost(e.id);
+    }
+    async function refreshPreferredCategories() {
+        preferredCategoryIds = new Set();
+        const u = auth.currentUser;
+        if (!u || !allEventsCache.length) return;
+        try {
+            const snap = await db.collection('tickets').where('user_id', '==', u.uid).limit(40).get();
+            snap.forEach((d) => {
+                const evId = d.data()?.event_id;
+                const ev = allEventsCache.find((x) => x.id === evId);
+                if (ev?.category_id) preferredCategoryIds.add(String(ev.category_id));
+            });
+        } catch (_) {}
+    }
+    function nearAhmedabad(e) {
+        if (String(e.city || '').toLowerCase().includes('ahmedabad')) return true;
+        const la = Number(e.latitude ?? e.lat ?? e.location?.lat);
+        const lo = Number(e.longitude ?? e.lng ?? e.location?.lng);
+        if (!Number.isFinite(la) || !Number.isFinite(lo)) return false;
+        const R = 6371;
+        const dLat = (la - AH_CENTER.lat) * Math.PI / 180;
+        const dLng = (lo - AH_CENTER.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(AH_CENTER.lat * Math.PI/180) * Math.cos(la * Math.PI/180) * Math.sin(dLng/2)**2;
+        return 2 * R * Math.asin(Math.sqrt(a)) <= 55;
+    }
+    function scoreYou(e) {
+        let s = trendingScore(e) * 0.55;
+        if (preferredCategoryIds.has(String(e.category_id || ''))) s += 90;
+        return s;
+    }
+    function buildMobileDiscoveryList(events) {
+        const open = events.filter(e => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e));
+        const trending = [...open].sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 8);
+        const taken = new Set(trending.map((x) => x.id));
+        const near = [...open].filter(e => nearAhmedabad(e) && !taken.has(e.id))
+            .sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 5);
+        near.forEach((e) => taken.add(e.id));
+        const forMore = [...open].filter(e => !taken.has(e.id))
+            .sort((a, b) => scoreYou(b) - scoreYou(a)).slice(0, 6);
+        return [...trending, ...near, ...forMore].slice(0, 14);
+    }
+    function renderMobileDiscovery(events) {
+        const wrap = document.getElementById('m-discovery-wrap');
+        const row = document.getElementById('m-discovery-scroll');
+        const sk = document.getElementById('m-discovery-skel');
+        if (sk) sk.classList.add('hide');
+        const list = buildMobileDiscoveryList(events);
+        if (!wrap || !row) return;
+        if (!list.length) {
+            wrap.classList.add('hide');
+            return;
+        }
+        wrap.classList.remove('hide');
+        row.innerHTML = '';
+        list.forEach((e) => {
+            const closed = isEventClosed(e);
+            const img = esc(e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30');
+            let tag = 'For you';
+            if (nearAhmedabad(e)) tag = 'Near Ahmedabad';
+            else if (trendingScore(e) >= 85) tag = 'Trending';
+            row.innerHTML += `
+                <div class="m-disc-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                    <img class="m-disc-img" src="${img}" alt="">
+                    <div class="m-disc-body">
+                        <span class="m-disc-badge">${esc(tag)}</span>
+                        <h3 class="m-card-title" style="margin-top:6px;">${esc(e.title || 'Event')}</h3>
+                        <p class="m-card-meta">${esc(e.city || '')} · ₹${Number(e.price_start || 0)}</p>
+                    </div>
+                </div>`;
+        });
+    }
 
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
@@ -435,6 +573,7 @@
             showToast('This event is closed and no longer accessible.');
             return;
         }
+        recordEventInterest(eventId);
         location.href = `/event/${eventId}`;
     }
 
@@ -474,15 +613,17 @@
                 }
                 const label = await reverseGeocodeLabel(userGeo.lat, userGeo.lng);
                 if (cityEl && label) cityEl.textContent = label;
-                rerenderHomeLists();
+                await rerenderHomeLists();
             },
             () => {},
             { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 }
         );
     }
-    function rerenderHomeLists() {
+    async function rerenderHomeLists() {
         if (!allEventsCache.length) return;
         renderCategories(allEventsCache);
+        await refreshPreferredCategories();
+        renderMobileDiscovery(allEventsCache);
         renderFeatured(allEventsCache);
         renderPopular(allEventsCache);
         renderUpcoming(allEventsCache);
@@ -503,10 +644,11 @@
             const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
             document.getElementById('kpi-events').textContent = liveEvents.length;
 
-            rerenderHomeLists();
+            await rerenderHomeLists();
             renderPromo();
         } catch (e) {
             console.error(e);
+            document.getElementById('m-discovery-skel')?.classList.add('hide');
         }
     }
 
@@ -640,11 +782,11 @@
         }
     }
 
-    function filterByCat(id, el) {
+    async function filterByCat(id, el) {
         selectedCatId = id;
         document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
-        rerenderHomeLists();
+        await rerenderHomeLists();
     }
 
     auth.onAuthStateChanged(() => initializeHome());
