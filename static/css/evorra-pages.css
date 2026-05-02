@@ -1410,3 +1410,44 @@ body.theme-showmates .studio-preview-title {
 body.theme-showmates .studio-preview-meta {
     color: var(--sm-muted) !important;
 }
+
+/* ── Event imagery: portrait poster (listing cards) vs landscape (gallery) ── */
+.ev-poster-frame {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #0f172a;
+    position: relative;
+}
+
+.ev-poster-frame > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.ev-poster-frame--thumb {
+    width: 84px;
+    border-radius: 12px;
+}
+
+.ev-poster-frame--m-pop {
+    width: 90px;
+    border-radius: 12px;
+}
+
+.ev-gallery-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.ev-gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}

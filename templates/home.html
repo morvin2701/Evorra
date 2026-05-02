@@ -216,7 +216,7 @@
     .featured-card {
         position: relative;
         width: min(306px, 84vw);
-        min-height: 300px;
+        min-height: 0;
         border-radius: 20px;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,0.1);
@@ -236,12 +236,10 @@
     .featured-card:hover .featured-card-img {
         transform: scale(1.06);
     }
+    .featured-card .ev-poster-frame {
+        border-radius: 20px 20px 0 0;
+    }
     .featured-card-img {
-        width: 100%;
-        height: 176px;
-        object-fit: cover;
-        display: block;
-        flex-shrink: 0;
         transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
         will-change: transform;
     }
@@ -324,11 +322,10 @@
         border-color: rgba(255,61,0,0.35);
         box-shadow: 0 18px 36px rgba(0,0,0,0.38);
     }
+    .marquee-card .ev-poster-frame {
+        border-radius: 18px 18px 0 0;
+    }
     .marquee-card-img {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-        display: block;
         transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .marquee-card:hover .marquee-card-img {
@@ -392,11 +389,10 @@
         box-shadow: 0 8px 28px rgba(0,0,0,0.25);
     }
     .list-card:hover { transform: translateY(-4px); border-color: rgba(255,61,0,0.3); box-shadow: 0 16px 36px rgba(0,0,0,0.35); }
+    .list-card .ev-poster-frame--thumb {
+        align-self: start;
+    }
     .list-card-img {
-        width: 84px;
-        height: 84px;
-        object-fit: cover;
-        border-radius: 12px;
         transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .list-card:hover .list-card-img {
@@ -441,11 +437,10 @@
         border-color: rgba(255,61,0,0.32);
         box-shadow: 0 22px 44px rgba(0,0,0,0.35);
     }
+    .upcoming-card .ev-poster-frame {
+        border-radius: 18px 18px 0 0;
+    }
     .upcoming-card-img {
-        width: 100%;
-        height: 170px;
-        object-fit: cover;
-        display: block;
         transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .upcoming-card:hover .upcoming-card-img {
@@ -571,24 +566,39 @@
         cursor: pointer;
         min-height: min(320px, 52vw);
     }
-    .hero-spotlight-slide .hs-bg {
+    .hero-spotlight-slide .hs-media {
         position: absolute;
         inset: 0;
-        background-size: cover;
-        background-position: center;
+        overflow: hidden;
+        background: linear-gradient(155deg, #1e293b 0%, #0f172a 55%, #020617 100%);
+    }
+    .hero-spotlight-slide .hs-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        display: block;
         transform: scale(1.02);
         transition: transform 8s ease-out;
     }
-    .hero-spotlight-slide:hover .hs-bg { transform: scale(1.06); }
+    .hero-spotlight-slide:hover .hs-img { transform: scale(1.06); }
     .hero-spotlight-slide .hs-grad {
         position: absolute;
         inset: 0;
-        background: linear-gradient(120deg, rgba(4,10,22,0.5) 0%, rgba(6,14,28,0.75) 45%, rgba(5,8,18,0.92) 100%);
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(
+            120deg,
+            rgba(4, 10, 22, 0.45) 0%,
+            rgba(6, 14, 28, 0.55) 38%,
+            rgba(5, 8, 18, 0.75) 68%,
+            rgba(2, 6, 15, 0.88) 100%
+        );
     }
     .hero-spotlight-slide .hs-body {
         position: absolute;
         left: 0; right: 0; bottom: 0;
-        padding: 22px 24px 26px;
+        padding: 22px 24px 52px;
         z-index: 2;
     }
     .hs-badge {
@@ -606,8 +616,18 @@
         backdrop-filter: blur(10px);
         color: #fff;
     }
-    .hs-title { margin: 12px 0 6px; font-size: clamp(1.35rem, 3.5vw, 1.85rem); font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; }
-    .hs-meta { margin: 0; color: rgba(220,236,255,0.72); font-size: 0.84rem; }
+    .hs-title { margin: 12px 0 6px; font-size: clamp(1.35rem, 3.5vw, 1.85rem); font-weight: 900; color: #fff; letter-spacing: -0.02em; line-height: 1.15; max-width: min(36ch, 92%); }
+    .hs-meta {
+        margin: 0;
+        color: rgba(220,236,255,0.85);
+        font-size: 0.84rem;
+        line-height: 1.45;
+        max-width: min(42ch, 94%);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
     .hs-dots {
         position: absolute;
         bottom: 14px;
@@ -648,12 +668,14 @@
     }
     .discovery-card-premium {
         position: relative;
+        display: flex;
+        flex-direction: column;
         flex: 0 0 min(280px, 78vw);
         scroll-snap-align: start;
         border-radius: 20px;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,0.1);
-        min-height: 268px;
+        min-height: 0;
         cursor: pointer;
         transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
         background: #161616;
@@ -665,37 +687,24 @@
         box-shadow: 0 26px 56px rgba(0,0,0,0.5), 0 0 40px rgba(255,61,0,0.1);
     }
     .discovery-card-premium:hover .dcp-img {
-        transform: scale(1.07);
+        transform: scale(1.05);
     }
-    .dcp-blur-bg {
-        position: absolute;
-        inset: -20px;
-        background-size: cover;
-        background-position: center;
-        filter: blur(28px) saturate(1.15);
-        opacity: 0.55;
-        transform: scale(1.1);
+    .discovery-card-premium .ev-poster-frame {
+        border-radius: 20px 20px 0 0;
+        flex-shrink: 0;
     }
     .dcp-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 58%;
-        object-fit: cover;
-        mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
-        -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
         transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
         will-change: transform;
     }
     .dcp-body {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 16px 16px 18px;
-        background: linear-gradient(180deg, transparent 0%, rgba(10,10,10,0.75) 35%, rgba(8,8,8,0.97) 100%);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        position: relative;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 14px 16px 16px;
+        background: linear-gradient(180deg, rgba(18,18,18,0.98) 0%, #141414 100%);
         border-top: 1px solid rgba(255,255,255,0.07);
     }
     .dcp-cat {
@@ -720,20 +729,23 @@
         margin: 0;
         font-size: 0.76rem;
         color: rgba(190, 200, 218, 0.82);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
         line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
     }
     .dcp-foot {
         margin-top: 10px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 8px;
     }
     .dcp-price { font-weight: 900; color: #ffb59a; font-size: 1rem; letter-spacing: -0.02em; }
     .dcp-trend {
+        flex-shrink: 0;
         font-size: 0.62rem;
         font-weight: 900;
         letter-spacing: 0.1em;
@@ -766,7 +778,8 @@
     }
     @media (prefers-reduced-motion: reduce) {
         .skel-block { animation: none; opacity: 0.55; }
-        .hero-spotlight-slide .hs-bg { transition: none; }
+        .hero-spotlight-slide .hs-img { transition: none; }
+        .hero-spotlight-slide:hover .hs-img { transform: none; }
         .see-all::after { transition: none; }
         .featured-card:hover .featured-card-img,
         .upcoming-card:hover .upcoming-card-img,
@@ -832,12 +845,9 @@
         }
         .section-panel { padding: 15px; }
         .marquee-card { width: min(250px, 78vw); }
-        .marquee-card-img { height: 144px; }
-        .featured-card { width: min(266px, 80vw); min-height: 300px; }
-        .featured-card-img { height: 176px; }
+        .featured-card { width: min(266px, 80vw); }
         .list-card { grid-template-columns: 72px 1fr auto; gap: 10px; }
-        .list-card-img { width: 72px; height: 72px; }
-        .upcoming-card-img { height: 172px; }
+        .list-card .ev-poster-frame--thumb { width: 72px; }
         .upcoming-grid {
             grid-template-columns: 1fr;
             gap: 11px;
@@ -881,9 +891,9 @@
             grid-template-columns: 1fr;
             gap: 9px;
         }
-        .list-card-img {
+        .list-card .ev-poster-frame--thumb {
             width: 100%;
-            height: 156px;
+            max-width: 100%;
             border-radius: 11px;
         }
         .heart-wrap {
@@ -920,9 +930,6 @@
         .featured-card {
             width: 100% !important;
             min-height: 0 !important;
-        }
-        .featured-card-img {
-            height: 180px !important;
         }
         .marquee-shell {
             overflow: visible !important;
@@ -1228,8 +1235,9 @@
         return `
             <article class="discovery-card-premium animate-evorra ${closed ? 'event-card-closed' : ''}" role="button" tabindex="0"
                 onclick="handleEventCardTap('${e.id}', ${closed})">
-                <div class="dcp-blur-bg" style="background-image:url('${img}')" aria-hidden="true"></div>
+                <div class="ev-poster-frame">
                 <img class="dcp-img" src="${img}" alt="">
+                </div>
                 <div class="dcp-body">
                     <span class="dcp-cat">${cat}</span>
                     <h3 class="dcp-title">${title}</h3>
@@ -1288,7 +1296,9 @@
             const closed = isEventClosed(e);
             return `
                 <div class="hero-spotlight-slide" data-i="${i}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <div class="hs-bg" style="background-image:url('${img}')"></div>
+                    <div class="hs-media">
+                        <img class="hs-img" src="${img}" alt="" loading="${i === 0 ? 'eager' : 'lazy'}">
+                    </div>
                     <div class="hs-grad"></div>
                     <div class="hs-body">
                         <span class="hs-badge"><i class="fa-solid fa-bolt"></i> Spotlight pick</span>
@@ -1569,7 +1579,9 @@
             const closed = isEventClosed(e);
             const card = `
                 <div class="featured-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="featured-card-img">
+                    <div class="ev-poster-frame">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="featured-card-img" alt="">
+                    </div>
                     <span class="featured-tag">${e.category_name || 'Featured'}</span>
                     ${closed ? '<span class="closed-tag">Closed</span>' : ''}
                     <div class="featured-card-body">
@@ -1624,7 +1636,9 @@
         const closed = isEventClosed(e);
         return `
             <div class="marquee-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="marquee-card-img">
+                <div class="ev-poster-frame">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="marquee-card-img" alt="">
+                </div>
                 <div class="marquee-card-body">
                     <span class="marquee-card-category">${e.category_name || 'Event'}</span>
                     <h3 class="marquee-card-title">${e.title || 'Untitled Experience'}</h3>
@@ -1659,7 +1673,9 @@
         const closed = isEventClosed(e);
         return `
             <div class="upcoming-card animate-evorra ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="upcoming-card-img">
+                <div class="ev-poster-frame">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="upcoming-card-img" alt="">
+                </div>
                 <div class="upcoming-card-body">
                     <span class="upcoming-chip">${e.category_name || 'Event'}</span>
                     <h3 class="upcoming-title">${e.title || 'Untitled Experience'}</h3>
@@ -1676,7 +1692,9 @@
     function createListCard(e) {
         return `
             <div class="list-card animate-evorra" onclick="location.href='/event/${e.id}'">
-                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="list-card-img">
+                <div class="ev-poster-frame ev-poster-frame--thumb">
+                <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="list-card-img" alt="">
+                </div>
                 <div class="list-content">
                     <span class="list-category">${e.category_name || 'Event'}</span>
                     <h3 class="list-title">${e.title || 'Untitled Experience'}</h3>

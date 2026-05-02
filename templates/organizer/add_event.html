@@ -208,7 +208,9 @@
         box-shadow: 0 24px 56px rgba(15, 23, 42, 0.1);
     }
     .preview-cover-placeholder {
-        height: 200px;
+        aspect-ratio: 3 / 4;
+        max-height: 320px;
+        width: 100%;
         background: linear-gradient(145deg, #e8ecf1 0%, #f1f5f9 100%);
         display: flex;
         align-items: center;
@@ -502,13 +504,20 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 8px;
     }
+    .studio-gallery-help {
+        margin: 12px 0 0;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--studio-muted);
+        line-height: 1.45;
+    }
     .gallery-preview-item {
         position: relative;
         border-radius: 10px;
         overflow: hidden;
         border: 1px solid var(--studio-border);
         background: var(--studio-bg);
-        height: 70px;
+        aspect-ratio: 16 / 9;
     }
     .gallery-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .media-remove-btn {
@@ -776,14 +785,14 @@
             <div class="form-step" id="step-2">
                 <div class="step-intro">
                     <h2>Visual Narrative</h2>
-                    <p>High-quality media makes your event stand out.</p>
+                    <p>Upload a <strong>portrait poster</strong> (3:4) for home / explore cards. The <strong>event page top banner</strong> is <strong>landscape (16:9)</strong> — your poster is cropped to fit there. Add optional <strong>landscape</strong> photos for the gallery.</p>
                 </div>
                 <div class="premium-card">
                     <div class="media-drop-zone" onclick="document.getElementById('cover-input').click()">
                         <div id="cover-wrap" class="media-drop-inner">
                             <i class="fa-solid fa-cloud-arrow-up media-drop-icon" aria-hidden="true"></i>
-                            <h4 class="media-drop-title">Main Cover Image</h4>
-                            <p class="media-drop-hint">Click to upload (Recommended 16:9)</p>
+                            <h4 class="media-drop-title">Event poster (cover)</h4>
+                            <p class="media-drop-hint">Portrait <strong>3:4</strong> (e.g. 900×1200) for listing cards. Event page uses a <strong>wide 16:9 crop</strong> from this image — keep important art near the center.</p>
                         </div>
                         <input type="file" id="cover-input" class="hide" accept="image/*" onchange="previewStudioMedia(this)">
                     </div>
@@ -793,7 +802,7 @@
                             <i class="fa-solid fa-images" aria-hidden="true"></i>
                             <div>
                                 <p class="studio-media-eyebrow">GALLERY</p>
-                                <span id="gallery-info" class="studio-media-label">Add Photos</span>
+                                <span id="gallery-info" class="studio-media-label">Landscape photos</span>
                             </div>
                             <input type="file" id="gallery-input" class="hide" multiple accept="image/*" onchange="updateGalleryStatus()">
                         </div>
@@ -807,6 +816,7 @@
                         </div>
                     </div>
                     <div id="gallery-preview" class="gallery-preview-grid"></div>
+                    <p class="studio-gallery-help">Shown as a <strong>landscape</strong> strip on the event page (not used as the listing poster).</p>
                     <div id="video-preview" class="mini-media-preview hide"></div>
                 </div>
                 <div class="studio-step-actions">
@@ -1000,7 +1010,7 @@
         const coverInput = document.getElementById('cover-input');
         coverInput.value = '';
         document.getElementById('preview-cover-box').innerHTML = '<i class="fa-solid fa-image"></i>';
-        document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-cloud-arrow-up media-drop-icon" aria-hidden="true"></i><h4 class="media-drop-title">Main Cover Image</h4><p class="media-drop-hint">Click to upload (Recommended 16:9)</p>`;
+        document.getElementById('cover-wrap').innerHTML = `<i class="fa-solid fa-cloud-arrow-up media-drop-icon" aria-hidden="true"></i><h4 class="media-drop-title">Event poster (cover)</h4><p class="media-drop-hint">Portrait <strong>3:4</strong> for cards; event page shows a <strong>16:9</strong> crop — keep key art near the center.</p>`;
     };
 
     window.removeGalleryImage = function(index) {
@@ -1019,7 +1029,7 @@
         preview.innerHTML = '';
         if (input.files.length > 0) {
             document.getElementById('gallery-info').textContent = `${input.files.length} Added`;
-            Array.from(input.files).slice(0, 8).forEach(file => {
+            Array.from(input.files).slice(0, 8).forEach((file, i) => {
                 if (!file.type.startsWith('image/')) return;
                 const item = document.createElement('div');
                 item.className = 'gallery-preview-item';
@@ -1038,7 +1048,7 @@
                 preview.appendChild(item);
             });
         } else {
-            document.getElementById('gallery-info').textContent = 'Add Photos';
+            document.getElementById('gallery-info').textContent = 'Landscape photos';
         }
     };
 

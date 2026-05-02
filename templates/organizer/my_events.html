@@ -49,7 +49,14 @@
         cursor: pointer; transition: transform .22s ease, border-color .22s ease;
     }
     .my-event-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.35); }
-    .my-event-img-wrap { height: 164px; width: 100%; background: #182338; position: relative; }
+    .my-event-img-wrap {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        max-height: 260px;
+        background: #182338;
+        position: relative;
+        overflow: hidden;
+    }
     .my-event-img { width: 100%; height: 100%; object-fit: cover; }
     .my-event-body { padding: 14px; }
     .my-event-title { color: white; font-weight: 900; font-size: 1.1rem; margin-bottom: 4px; line-height: 1.22; }

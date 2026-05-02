@@ -16,10 +16,18 @@
         position: relative;
     }
 
+    /* Event detail hero — full-width landscape (16:9). Card listings use portrait poster; this strip is wide. */
+    .hero-carousel-wrap {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+    }
     .hero-carousel {
         position: relative;
-        height: min(56vh, 520px);
         width: 100%;
+        aspect-ratio: 16 / 9;
+        max-height: min(56vh, 520px);
+        min-height: 200px;
         overflow: hidden;
         border-radius: 0 0 32px 32px;
         border: 1px solid var(--sm-border);
@@ -29,6 +37,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center center;
         position: absolute;
         inset: 0;
         transition: opacity 0.55s ease;
@@ -84,7 +93,7 @@
     }
 
     .detail-head {
-        margin-top: -86px;
+        margin-top: -56px;
         position: relative;
         z-index: 11;
         background: var(--sm-surface);
@@ -313,15 +322,15 @@
 
     .gallery-strip {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 10px;
     }
     .gallery-thumb {
-        height: 92px;
         border-radius: 14px;
         border: 1px solid var(--sm-border);
         overflow: hidden;
         cursor: pointer;
+        aspect-ratio: 16 / 9;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .gallery-thumb:hover {
@@ -329,6 +338,15 @@
         box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
     }
     .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .section-title-hint {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        color: var(--sm-muted);
+    }
 
     .ticket-type-row,
     .agenda-card {
@@ -590,8 +608,13 @@
         .detail-main { grid-template-columns: 1.3fr 0.72fr; }
     }
     @media (max-width: 768px) {
-        .hero-carousel { height: 300px; border-radius: 0 0 22px 22px; }
-        .detail-head { margin-top: -44px; padding: 20px 16px; border-radius: 22px; }
+        .hero-carousel-wrap { max-width: 100%; }
+        .hero-carousel {
+            max-height: min(48vh, 320px);
+            min-height: 180px;
+            border-radius: 0 0 22px 22px;
+        }
+        .detail-head { margin-top: -40px; padding: 20px 16px; border-radius: 22px; }
         .detail-card { padding: 18px; border-radius: 20px; }
         .booking-inline {
             border-radius: 18px;
@@ -618,13 +641,15 @@
 {% block content %}
 <div class="home-bg">
     <div class="detail-shell">
-        <div class="hero-carousel">
-            <a href="javascript:history.back()" class="floating-back"><i class="fa-solid fa-chevron-left"></i></a>
-            <div id="carousel-imgs">
-                <!-- Dynamic Images -->
+        <div class="hero-carousel-wrap">
+            <div class="hero-carousel">
+                <a href="javascript:history.back()" class="floating-back"><i class="fa-solid fa-chevron-left"></i></a>
+                <div id="carousel-imgs">
+                    <!-- Dynamic Images -->
+                </div>
+                <div class="hero-overlay"></div>
+                <div id="media-counter" class="media-counter">1/1</div>
             </div>
-            <div class="hero-overlay"></div>
-            <div id="media-counter" class="media-counter">1/1</div>
         </div>
 
         <div class="detail-head">
@@ -698,7 +723,7 @@
                 </div>
 
                 <div id="gallery-section" class="hide detail-section-spaced">
-                    <h2 class="section-title">Gallery</h2>
+                    <h2 class="section-title">Gallery <span class="section-title-hint">Landscape shots — 16:9 looks best on this strip</span></h2>
                     <div id="gallery-strip" class="gallery-strip">
                         <!-- Gallery Thumbnails -->
                     </div>
@@ -795,11 +820,15 @@
                 else verRow.classList.add('hide');
             }
 
-            // Images
+            // Images: cover = portrait poster; carousel can include gallery slides; gallery strip = landscape extras only
             const carousel = document.getElementById('carousel-imgs');
             carousel.innerHTML = '';
-            const images = [data.cover_image, ...(Array.isArray(data.gallery_images) ? data.gallery_images : [])]
-                .filter(Boolean);
+            const coverImg = data.cover_image || '';
+            const galleryOnly = Array.isArray(data.gallery_images) ? data.gallery_images.filter(Boolean) : [];
+            const hasCover = Boolean(coverImg);
+            const images = hasCover
+                ? [coverImg, ...galleryOnly].filter(Boolean)
+                : (galleryOnly.length ? [...galleryOnly] : []);
             if (!images.length) {
                 images.push('https://images.unsplash.com/photo-1514525253361-bee8718a74a2');
             }
@@ -838,24 +867,27 @@
                 }
             }
 
-            // Gallery Thumbnails
-            if (images.length > 1) {
+            // Gallery thumbnails: landscape extras only (not the poster cover)
+            if (galleryOnly.length > 0) {
                 document.getElementById('gallery-section').classList.remove('hide');
                 const strip = document.getElementById('gallery-strip');
                 strip.innerHTML = '';
-                images.forEach((img, idx) => {
+                galleryOnly.forEach((img, idx) => {
                     const thumb = document.createElement('div');
                     thumb.className = 'gallery-thumb';
-                    thumb.innerHTML = `<img src="${img}" alt="Event media ${idx + 1}">`;
+                    thumb.innerHTML = `<img src="${img}" alt="Gallery photo ${idx + 1}">`;
                     thumb.onclick = () => {
                         const allSlides = carousel.querySelectorAll('.hero-img');
-                        allSlides.forEach((slide, slideIndex) => {
-                            slide.style.opacity = slideIndex === idx ? '1' : '0';
+                        const slideIndex = hasCover ? idx + 1 : idx;
+                        allSlides.forEach((slide, slideIndex2) => {
+                            slide.style.opacity = slideIndex2 === slideIndex ? '1' : '0';
                         });
-                        document.getElementById('media-counter').textContent = `${idx + 1}/${allSlides.length}`;
+                        document.getElementById('media-counter').textContent = `${slideIndex + 1}/${allSlides.length}`;
                     };
                     strip.appendChild(thumb);
                 });
+            } else {
+                document.getElementById('gallery-section').classList.add('hide');
             }
 
             // Sub-collections

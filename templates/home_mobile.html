@@ -118,7 +118,14 @@
         gap: 10px;
     }
     .m-featured-card { width: 100%; max-width: 100%; flex-shrink: 1; }
-    .m-featured-img, .m-upcoming-img, .m-pop-img { width: 100%; height: 158px; object-fit: cover; display: block; }
+    .m-featured-card .ev-poster-frame,
+    .m-upcoming-card .ev-poster-frame { border-radius: 18px 18px 0 0; }
+    .m-featured-img, .m-upcoming-img, .m-pop-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
     .m-card-body { padding: 12px 14px 14px; border-top: 1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg,#1c1c1c,#141414); }
     .m-card-title { margin: 0 0 5px; color: #fff; font-size: 1rem; line-height: 1.24; }
     .m-card-meta { margin: 0; color: rgba(218,236,255,0.62); font-size: 0.75rem; }
@@ -140,9 +147,8 @@
         gap: 10px;
         align-items: stretch;
     }
-    .m-pop-img {
-        height: 100%;
-        min-height: 94px;
+    .m-pop-card .ev-poster-frame--m-pop {
+        align-self: start;
     }
     .m-promo {
         border-radius: 18px;
@@ -193,8 +199,10 @@
             grid-template-columns: 1fr;
             gap: 0;
         }
-        .m-pop-img {
-            min-height: 150px;
+        .m-pop-card .ev-poster-frame--m-pop {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 18px 18px 0 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .m-card-title {
@@ -256,7 +264,8 @@
         background: #161616;
         box-shadow: 0 10px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
     }
-    .m-disc-img { width: 100%; height: 132px; object-fit: cover; display: block; }
+    .m-disc-card .ev-poster-frame { border-radius: 18px 18px 0 0; }
+    .m-disc-img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .m-disc-body { padding: 10px 11px 12px; }
     .m-disc-badge {
         font-size: 0.58rem;
@@ -461,7 +470,9 @@
             else if (trendingScore(e) >= 85) tag = 'Trending';
             row.innerHTML += `
                 <div class="m-disc-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
+                    <div class="ev-poster-frame">
                     <img class="m-disc-img" src="${img}" alt="">
+                    </div>
                     <div class="m-disc-body">
                         <span class="m-disc-badge">${esc(tag)}</span>
                         <h3 class="m-card-title" style="margin-top:6px;">${esc(e.title || 'Event')}</h3>
@@ -703,7 +714,9 @@
             const closed = isEventClosed(e);
             scroll.innerHTML += `
                 <div class="m-featured-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="m-featured-img">
+                    <div class="ev-poster-frame">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="m-featured-img" alt="">
+                    </div>
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled'}</h3>
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
@@ -732,7 +745,9 @@
             const closed = isEventClosed(e);
             list.innerHTML += `
                 <div class="m-pop-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-pop-img">
+                    <div class="ev-poster-frame ev-poster-frame--m-pop">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-pop-img" alt="">
+                    </div>
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled Experience'}</h3>
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
@@ -761,7 +776,9 @@
             const closed = isEventClosed(e);
             list.innerHTML += `
                 <div class="m-upcoming-card ${closed ? 'event-card-closed' : ''}" onclick="handleEventCardTap('${e.id}', ${closed})">
-                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-upcoming-img">
+                    <div class="ev-poster-frame">
+                    <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-upcoming-img" alt="">
+                    </div>
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled Experience'}</h3>
                         <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
