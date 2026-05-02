@@ -132,6 +132,13 @@
         color: #1d4ed8;
         border-color: rgba(59, 130, 246, 0.35);
     }
+    .ticket-bg .status-checked-in {
+        background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.45);
+        font-weight: 900;
+        box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.08) inset;
+    }
     .ticket-bg .status-cancelled {
         background: #fef2f2;
         color: #b91c1c;
@@ -163,6 +170,9 @@
         font-weight: 900;
         letter-spacing: 0.1em;
         color: var(--sm-primary);
+    }
+    .pass-header-status--checked {
+        color: #059669 !important;
     }
     .pass-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .pass-info-block {
@@ -266,6 +276,125 @@
         line-height: 1.4;
         max-width: 100%;
     }
+    /* Checked-in replaces QR — premium success state */
+    .qr-checked-state.hide { display: none !important; }
+    .qr-active-state.hide { display: none !important; }
+    .qr-checked-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+        padding: 8px 4px 4px;
+    }
+    .td-checked-ring {
+        width: clamp(172px, 52vw, 220px);
+        height: clamp(172px, 52vw, 220px);
+        border-radius: 28px;
+        background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 42%, #a7f3d0 100%);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.65) inset,
+            0 18px 40px rgba(16, 185, 129, 0.15),
+            0 8px 24px rgba(15, 23, 42, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .td-checked-ring::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), transparent 45%);
+        pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .td-checked-ring.td-checked-ring--pulse {
+            animation: td-checked-glow 2.8s ease-in-out infinite;
+        }
+        .td-check-icon {
+            animation: td-check-pop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+    }
+    @keyframes td-checked-glow {
+        0%, 100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.65) inset, 0 18px 40px rgba(16,185,129,0.14), 0 8px 24px rgba(15,23,42,0.06); }
+        50% { box-shadow: 0 0 0 1px rgba(255,255,255,0.72) inset, 0 22px 52px rgba(16,185,129,0.22), 0 10px 28px rgba(15,23,42,0.07); }
+    }
+    @keyframes td-check-pop {
+        from { transform: scale(0.35); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .td-check-icon {
+        position: relative;
+        z-index: 1;
+        width: clamp(76px, 22vw, 96px);
+        height: clamp(76px, 22vw, 96px);
+        border-radius: 999px;
+        background: linear-gradient(145deg, #10b981, #059669);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(2.1rem, 6vw, 2.65rem);
+        box-shadow:
+            0 4px 0 rgba(6, 95, 70, 0.25),
+            0 14px 28px rgba(5, 150, 105, 0.35);
+    }
+    .qr-checked-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(16, 185, 129, 0.32);
+        color: #065f46;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+    .qr-checked-title {
+        margin: 4px 0 0;
+        font-size: 1.08rem;
+        font-weight: 900;
+        color: var(--sm-text);
+        letter-spacing: -0.03em;
+    }
+    .qr-checked-sub {
+        margin: 0;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--sm-muted);
+        line-height: 1.45;
+        max-width: 280px;
+    }
+    .qr-container.qr-container--checked {
+        background: linear-gradient(180deg, #ecfdf5 0%, #f8fafc 55%, var(--sm-bg) 100%);
+        border-color: rgba(16, 185, 129, 0.25);
+        box-shadow:
+            0 0 0 1px rgba(16, 185, 129, 0.06) inset,
+            0 12px 36px rgba(16, 185, 129, 0.1);
+    }
+    .share-box.share-box--locked {
+        opacity: 0.55;
+        pointer-events: none;
+        position: relative;
+    }
+    .share-lock-note {
+        display: none;
+        margin-top: 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--sm-muted);
+        line-height: 1.35;
+    }
+    .share-box.share-box--locked .share-lock-note {
+        display: block;
+    }
     .summary-box {
         border-radius: 16px;
         border: 1px solid var(--sm-border);
@@ -293,6 +422,9 @@
     }
     #sum-status {
         color: var(--sm-primary) !important;
+    }
+    .ticket-bg #sum-status.sum-status-checked {
+        color: #059669 !important;
     }
     .detail-item {
         display: flex;
@@ -356,6 +488,11 @@
         font-size: 0.65rem;
         margin-top: 3px;
         flex-shrink: 0;
+    }
+    .instruction-dot--success {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border-color: rgba(16, 185, 129, 0.35);
+        color: #059669;
     }
     .instruction-text {
         margin: 0;
@@ -556,15 +693,28 @@
                             </div>
                         </div>
 
-                        <div class="qr-container">
-                            <div class="qr-caption">Scan at Venue Gate</div>
-                            <div class="qr-stage">
-                                <img id="qr-img" src="">
-                                <div id="qr-loader">
-                                    <div class="ticket-spinner" aria-hidden="true"></div>
+                        <div id="qr-pass-zone" class="qr-container">
+                            <div id="qr-active-state" class="qr-active-state">
+                                <div id="qr-caption" class="qr-caption">Scan at Venue Gate</div>
+                                <div class="qr-stage">
+                                    <img id="qr-img" src="" alt="">
+                                    <div id="qr-loader">
+                                        <div class="ticket-spinner" aria-hidden="true"></div>
+                                    </div>
+                                </div>
+                                <p id="qr-code-text">GENERATING...</p>
+                            </div>
+                            <div id="qr-checked-state" class="qr-checked-state hide" aria-live="polite">
+                                <div class="qr-caption">Entry complete</div>
+                                <div class="qr-checked-inner">
+                                    <div id="qr-checked-ring" class="td-checked-ring td-checked-ring--pulse">
+                                        <span class="td-check-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="qr-checked-badge"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Checked In</span>
+                                    <p class="qr-checked-title">Entry confirmed</p>
+                                    <p id="qr-checked-msg" class="qr-checked-sub">This pass has been scanned at the venue gate. Keep this screen as proof if needed.</p>
                                 </div>
                             </div>
-                            <p id="qr-code-text">GENERATING...</p>
                         </div>
                     </div>
                 </div>
@@ -604,7 +754,7 @@
 
                 <div class="ticket-card ticket-block">
                     <h2 class="section-title">Share Tickets</h2>
-                    <div class="share-box">
+                    <div id="share-box-root" class="share-box">
                         <input id="share-email" type="email" class="share-input" placeholder="Recipient account email">
                         <div class="share-row">
                             <input id="share-qty" type="number" min="1" step="1" class="share-input" placeholder="Qty">
@@ -621,6 +771,7 @@
                             </div>
                         </div>
                         <p id="share-note" class="share-note">You can split this ticket quantity and transfer selected tickets to another registered account.</p>
+                        <p id="share-lock-note" class="share-lock-note">Checked-in passes cannot be shared. This ticket has already been used at entry.</p>
                         <div id="transfer-history" class="transfer-history">
                             <p class="transfer-history-title">Transfer History</p>
                             <p class="transfer-empty">No transfers yet.</p>
@@ -631,21 +782,37 @@
                 <div class="ticket-card ticket-block">
                     <h2 class="section-title">Entry Instructions</h2>
                     <div class="summary-box">
-                        <div class="instruction-row">
-                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p class="instruction-text">Show this QR code at the venue entry point.</p>
+                        <div id="instructions-qr-phase">
+                            <div class="instruction-row">
+                                <div class="instruction-dot"><i class="fa-solid fa-qrcode"></i></div>
+                                <p class="instruction-text">Show this QR code at the venue entry point.</p>
+                            </div>
+                            <div class="instruction-row">
+                                <div class="instruction-dot"><i class="fa-solid fa-sun"></i></div>
+                                <p class="instruction-text">Keep phone brightness high for fast scanning.</p>
+                            </div>
+                            <div class="instruction-row">
+                                <div class="instruction-dot"><i class="fa-solid fa-ticket"></i></div>
+                                <p class="instruction-text">Each ticket QR can only be scanned once.</p>
+                            </div>
+                            <div class="instruction-row">
+                                <div class="instruction-dot"><i class="fa-solid fa-clock"></i></div>
+                                <p class="instruction-text">Reach the venue at least 15 minutes early.</p>
+                            </div>
                         </div>
-                        <div class="instruction-row">
-                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p class="instruction-text">Keep phone brightness high for fast scanning.</p>
-                        </div>
-                        <div class="instruction-row">
-                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p class="instruction-text">Each ticket QR can only be scanned once.</p>
-                        </div>
-                        <div class="instruction-row">
-                            <div class="instruction-dot"><i class="fa-solid fa-check"></i></div>
-                            <p class="instruction-text">Reach the venue at least 15 minutes early.</p>
+                        <div id="instructions-checked-phase" class="hide">
+                            <div class="instruction-row">
+                                <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-circle-check"></i></div>
+                                <p class="instruction-text">You&apos;ve checked in. No need to show a QR anymore — venue staff validated this pass.</p>
+                            </div>
+                            <div class="instruction-row">
+                                <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-id-card"></i></div>
+                                <p class="instruction-text">Keep this screen handy if organisers ask for proof of attendance.</p>
+                            </div>
+                            <div class="instruction-row">
+                                <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-camera"></i></div>
+                                <p class="instruction-text">Screenshots optional — your admission is logged on the organizer&apos;s side.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -661,6 +828,10 @@
     const ticketId = "{{ ticket_id }}";
     let activeTicket = null;
     let rootTicketId = ticketId;
+    let ticketDocUnsubscribe = null;
+    let lastQrEncodedPayload = '';
+    let sharedPendingRedirectIssued = false;
+    let unauthorizedRedirectIssued = false;
 
     function getPublicBase() {
         return (window.APP_PUBLIC_URL || window.location.origin || '').replace(/\/$/, '');
@@ -679,81 +850,202 @@
         return ticket.qr_code || `EV-${ticket.id}`;
     }
 
-    async function loadTicketDetails() {
+    function ticketIsCheckedIn(ticket) {
+        if (!ticket) return false;
+        if (ticket.checked_in === true) return true;
+        return String(ticket.status || '').toLowerCase() === 'used';
+    }
+
+    function formatScannedAt(ticket) {
+        const raw = ticket && ticket.scanned_at;
+        if (!raw) return '';
         try {
-            const ticketSnap = await db.collection('tickets').doc(ticketId).get();
-            if (!ticketSnap.exists) return alert("Ticket not found");
-            const ticket = ticketSnap.data();
-            activeTicket = ticket;
-            rootTicketId = ticket.shared_from_ticket_id || ticket.id || ticketId;
+            const d = raw.toDate ? raw.toDate() : new Date(raw);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleString('en-IN', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return '';
+        }
+    }
 
-            // Security check
-            const user = auth.currentUser;
-            if (ticket.user_id !== user.uid) {
-                alert("Unauthorized access");
+    function applyQrAndCheckedInUi(ticket) {
+        const zone = document.getElementById('qr-pass-zone');
+        const activeState = document.getElementById('qr-active-state');
+        const checkedState = document.getElementById('qr-checked-state');
+        const qrImg = document.getElementById('qr-img');
+        const qrLoader = document.getElementById('qr-loader');
+        const qrText = document.getElementById('qr-code-text');
+        const caption = document.getElementById('qr-caption');
+        const ring = document.getElementById('qr-checked-ring');
+        const checkedMsg = document.getElementById('qr-checked-msg');
+        const checkedIn = ticketIsCheckedIn(ticket);
+
+        if (checkedIn) {
+            zone.classList.add('qr-container--checked');
+            activeState.classList.add('hide');
+            checkedState.classList.remove('hide');
+            qrImg.removeAttribute('src');
+            qrImg.style.display = 'none';
+            if (qrLoader) qrLoader.style.display = 'none';
+            caption.textContent = 'Entry complete';
+            const when = formatScannedAt(ticket);
+            checkedMsg.textContent = when
+                ? `Scanned ${when}. You’re verified at the gate — enjoy the event.`
+                : 'This pass was scanned at the venue. You’re verified — enjoy the event.';
+            if (ring) {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    ring.classList.remove('td-checked-ring--pulse');
+                } else {
+                    ring.classList.add('td-checked-ring--pulse');
+                }
+            }
+            return;
+        }
+
+        zone.classList.remove('qr-container--checked');
+        activeState.classList.remove('hide');
+        checkedState.classList.add('hide');
+        caption.textContent = 'Scan at Venue Gate';
+        const qrData = resolveTicketQrData(ticket);
+        if (qrData === lastQrEncodedPayload && qrImg.src) {
+            qrLoader.style.display = 'none';
+            qrImg.style.display = 'block';
+            qrText.textContent = qrData;
+            return;
+        }
+        lastQrEncodedPayload = qrData;
+        qrLoader.style.display = 'flex';
+        qrImg.style.display = 'none';
+        qrText.textContent = 'GENERATING…';
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=0&data=${encodeURIComponent(qrData)}`;
+        qrImg.onload = () => {
+            qrLoader.style.display = 'none';
+            qrImg.style.display = 'block';
+            qrText.textContent = qrData;
+        };
+        qrImg.onerror = () => {
+            qrLoader.style.display = 'none';
+            qrText.textContent = 'QR unavailable — refresh the page.';
+        };
+        qrImg.src = qrUrl;
+    }
+
+    function applyInstructionsPhase(checkedIn) {
+        const pre = document.getElementById('instructions-qr-phase');
+        const post = document.getElementById('instructions-checked-phase');
+        if (!pre || !post) return;
+        if (checkedIn) {
+            pre.classList.add('hide');
+            post.classList.remove('hide');
+        } else {
+            post.classList.add('hide');
+            pre.classList.remove('hide');
+        }
+    }
+
+    function applyShareUiForCheckIn(checkedIn) {
+        const box = document.getElementById('share-box-root');
+        const btn = document.getElementById('share-split-btn');
+        const email = document.getElementById('share-email');
+        const qty = document.getElementById('share-qty');
+        if (!box || !btn) return;
+        if (checkedIn) {
+            box.classList.add('share-box--locked');
+            btn.disabled = true;
+            if (email) email.disabled = true;
+            if (qty) qty.disabled = true;
+        } else {
+            box.classList.remove('share-box--locked');
+            btn.disabled = false;
+            if (email) email.disabled = false;
+            if (qty) qty.disabled = false;
+        }
+    }
+
+    async function applyTicketSnapshot(docSnap, user) {
+        if (!docSnap.exists) {
+            alert('Ticket not found');
+            return;
+        }
+        const ticket = Object.assign({ id: docSnap.id }, docSnap.data());
+        activeTicket = ticket;
+        rootTicketId = ticket.shared_from_ticket_id || ticket.id || ticketId;
+
+        if (ticket.user_id !== user.uid) {
+            if (!unauthorizedRedirectIssued) {
+                unauthorizedRedirectIssued = true;
+                alert('Unauthorized access');
                 location.href = '/my-tickets';
-                return;
             }
-            if (String(ticket.status || '').toLowerCase() === 'shared_pending') {
-                alert("This shared ticket is pending. Accept it first from Shared Tickets.");
+            return;
+        }
+        if (String(ticket.status || '').toLowerCase() === 'shared_pending') {
+            if (!sharedPendingRedirectIssued) {
+                sharedPendingRedirectIssued = true;
+                alert('This shared ticket is pending. Accept it first from Shared Tickets.');
                 location.href = '/shared-tickets';
-                return;
             }
+            return;
+        }
 
-            const eventData = ticket.event_snapshot || {};
-            
-            // Hero
-            document.getElementById('hero-img').src = eventData.cover_image;
-            document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
-            document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
-            document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
-            document.getElementById('hero-status').textContent = ticket.status.toUpperCase();
-            document.getElementById('hero-status').className = `status-chip status-${ticket.status}`;
+        const eventData = ticket.event_snapshot || {};
+        const checkedIn = ticketIsCheckedIn(ticket);
+        const statusUpper = checkedIn ? 'CHECKED IN' : String(ticket.status || 'confirmed').toUpperCase();
 
-            // Pass Card
-            document.getElementById('pass-status-text').textContent = ticket.status.toUpperCase();
-            document.getElementById('pass-event').textContent = ticket.event_title || eventData.title;
-            document.getElementById('pass-type').textContent = ticket.ticket_type_name;
-            document.getElementById('pass-qty').textContent = ticket.quantity;
-            document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
+        document.getElementById('hero-img').src = eventData.cover_image || '';
+        document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
+        document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
+        document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
+        document.getElementById('hero-status').textContent = statusUpper;
+        const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
+        document.getElementById('hero-status').className = checkedIn
+            ? 'status-chip status-checked-in'
+            : `status-chip status-${heroStatusSlug}`;
 
-            // QR Pass Logic
-            const qrData = resolveTicketQrData(ticket);
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=0&data=${encodeURIComponent(qrData)}`;
-            
-            const qrImg = document.getElementById('qr-img');
-            qrImg.src = qrUrl;
-            qrImg.onload = () => {
-                document.getElementById('qr-loader').style.display = 'none';
-                qrImg.style.display = 'block';
-                document.getElementById('qr-code-text').textContent = qrData;
-            };
+        const passStatusEl = document.getElementById('pass-status-text');
+        passStatusEl.textContent = statusUpper;
+        if (checkedIn) passStatusEl.classList.add('pass-header-status--checked');
+        else passStatusEl.classList.remove('pass-header-status--checked');
 
-            // Details
-            document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
-            document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
+        document.getElementById('pass-event').textContent = ticket.event_title || eventData.title;
+        document.getElementById('pass-type').textContent = ticket.ticket_type_name || '-';
+        document.getElementById('pass-qty').textContent = ticket.quantity;
+        document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
 
-            // Summary
-            document.getElementById('sum-id').textContent = ticket.id;
-            document.getElementById('sum-type').textContent = ticket.ticket_type_name;
-            document.getElementById('sum-qty').textContent = ticket.quantity;
-            document.getElementById('sum-status').textContent = ticket.status.toUpperCase();
-            document.getElementById('sum-amount').textContent = `₹${ticket.total_amount}`;
-            document.getElementById('sum-payment').textContent = ticket.payment_id || 'N/A';
-            document.getElementById('sum-date').textContent = formatDate(ticket.created_time);
-            const qty = Number(ticket.quantity || 1);
-            const shareQtyInput = document.getElementById('share-qty');
-            shareQtyInput.max = String(qty);
-            shareQtyInput.value = qty > 1 ? '1' : '1';
-            document.getElementById('remaining-count').textContent = String(qty);
-            document.getElementById('share-note').textContent =
-                qty > 1
-                    ? `Available to split: ${qty} tickets. Share any quantity up to ${qty}.`
-                    : `You have 1 ticket. You can transfer it fully to another registered account.`;
+        applyQrAndCheckedInUi(ticket);
+        applyInstructionsPhase(checkedIn);
+        applyShareUiForCheckIn(checkedIn);
 
-            await loadTransferHistory();
+        document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
+        document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
 
-        } catch (e) { console.error(e); }
+        document.getElementById('sum-id').textContent = ticket.id;
+        document.getElementById('sum-type').textContent = ticket.ticket_type_name || '-';
+        document.getElementById('sum-qty').textContent = ticket.quantity;
+        const sumStatusEl = document.getElementById('sum-status');
+        sumStatusEl.textContent = statusUpper;
+        sumStatusEl.classList.toggle('sum-status-checked', checkedIn);
+        document.getElementById('sum-amount').textContent = `₹${ticket.total_amount}`;
+        document.getElementById('sum-payment').textContent = ticket.payment_id || 'N/A';
+        document.getElementById('sum-date').textContent = formatDate(ticket.created_time);
+
+        const qty = Number(ticket.quantity || 1);
+        const shareQtyInput = document.getElementById('share-qty');
+        shareQtyInput.max = String(qty);
+        shareQtyInput.value = '1';
+        document.getElementById('remaining-count').textContent = String(qty);
+        document.getElementById('share-note').textContent =
+            qty > 1
+                ? `Available to split: ${qty} tickets. Share any quantity up to ${qty}.`
+                : `You have 1 ticket. You can transfer it fully to another registered account.`;
+
+        await loadTransferHistory();
     }
 
     function toIntQty(val) {
@@ -915,7 +1207,6 @@
 
             alert(`Successfully shared ${qty} ticket(s). Recipient must accept or reject from Shared Tickets.`);
             document.getElementById('share-email').value = '';
-            await loadTicketDetails();
         } catch (e) {
             alert(e.message || e.code || "Unable to share ticket right now.");
         } finally {
@@ -985,8 +1276,32 @@
     }
 
     auth.onAuthStateChanged(user => {
-        if (user) loadTicketDetails();
-        else location.href = '/auth';
+        if (!user) {
+            if (ticketDocUnsubscribe) {
+                try {
+                    ticketDocUnsubscribe();
+                } catch (e) {}
+                ticketDocUnsubscribe = null;
+            }
+            location.href = '/auth';
+            return;
+        }
+        if (ticketDocUnsubscribe) {
+            try {
+                ticketDocUnsubscribe();
+            } catch (e) {}
+            ticketDocUnsubscribe = null;
+        }
+        ticketDocUnsubscribe = db.collection('tickets').doc(ticketId).onSnapshot(
+            function (docSnap) {
+                applyTicketSnapshot(docSnap, user).catch(function (err) {
+                    console.error(err);
+                });
+            },
+            function (err) {
+                console.error('Ticket listener:', err);
+            }
+        );
     });
     document.getElementById('share-split-btn').addEventListener('click', splitAndShareTicket);
 </script>
