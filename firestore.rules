@@ -1,0 +1,198 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isEventOrganizer(eventId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/events/$(eventId))
+        && get(/databases/$(database)/documents/events/$(eventId)).data.organizer_id == request.auth.uid;
+    }
+
+    function ticketDoc(ticketId) {
+      return get(/databases/$(database)/documents/tickets/$(ticketId));
+    }
+
+    function sourceTicket(sourceId) {
+      return get(/databases/$(database)/documents/tickets/$(sourceId));
+    }
+
+    function canCreateSharedTicket() {
+      return signedIn()
+        && request.resource.data.shared_by == request.auth.uid
+        && request.resource.data.shared_from_ticket_id is string
+        && sourceTicket(request.resource.data.shared_from_ticket_id).exists()
+        && sourceTicket(request.resource.data.shared_from_ticket_id).data.user_id == request.auth.uid
+        && sourceTicket(request.resource.data.shared_from_ticket_id).data.status == 'confirmed'
+        && sourceTicket(request.resource.data.shared_from_ticket_id).data.checked_in != true
+        && request.resource.data.user_id != request.auth.uid
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity > 0;
+    }
+
+    // Split into separate `allow read` clauses so client queries like
+    // .where('user_id', '==', uid) match the owner rule (Firestore query evaluation).
+    function ticketHasEventId() {
+      return resource.data.keys().hasAny(['event_id']) && resource.data.event_id is string;
+    }
+
+    function canReadSplitDerivedFromOwnedRoot(data) {
+      return data.keys().hasAny(['shared_from_ticket_id'])
+        && data.shared_from_ticket_id is string
+        && ticketDoc(data.shared_from_ticket_id).exists()
+        && ticketDoc(data.shared_from_ticket_id).data.user_id == request.auth.uid;
+    }
+
+    function notifTicketRefOk() {
+      return request.resource.data.ref_ticket_id is string
+        && exists(/databases/$(database)/documents/tickets/$(request.resource.data.ref_ticket_id));
+    }
+
+    function notifTicketData() {
+      return ticketDoc(request.resource.data.ref_ticket_id).data;
+    }
+
+    function canCreateTicketShareNotif() {
+      return request.resource.data.type == 'ticket_share'
+        && request.resource.data.user_id is string
+        && notifTicketRefOk()
+        && notifTicketData().shared_by == request.auth.uid;
+    }
+
+    function canCreateTicketShareUpdateNotif() {
+      return request.resource.data.type == 'ticket_share_update'
+        && request.resource.data.user_id is string
+        && notifTicketRefOk()
+        && request.resource.data.user_id == notifTicketData().shared_by
+        && (
+          notifTicketData().user_id == request.auth.uid
+          || (notifTicketData().keys().hasAny(['shared_recipient_uid'])
+            && notifTicketData().shared_recipient_uid == request.auth.uid)
+        );
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false;
+
+      match /share_rejections/{rejId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.organizer_id == request.auth.uid;
+      allow update, delete: if isEventOrganizer(eventId);
+
+      match /ticketTypes/{ticketTypeId} {
+        allow read: if true;
+        allow create, update, delete: if isEventOrganizer(eventId);
+      }
+
+      match /ticket_types/{ticketTypeId} {
+        allow read: if true;
+        allow create, update, delete: if isEventOrganizer(eventId);
+      }
+
+      match /agenda/{agendaId} {
+        allow read: if true;
+        allow create, update, delete: if isEventOrganizer(eventId);
+      }
+
+      match /scan_logs/{logId} {
+        allow read, create: if isEventOrganizer(eventId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /promo_codes/{code} {
+      allow read: if true;
+      allow write: if false;
+
+      match /redemptions/{redemptionId} {
+        allow read: if signedIn();
+        allow create: if signedIn();
+        allow update, delete: if false;
+      }
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+      allow delete: if signedIn()
+        && resource.data.user_id == request.auth.uid;
+      allow update: if false;
+    }
+
+    match /tickets/{ticketId} {
+      allow read: if signedIn() && resource.data.user_id == request.auth.uid;
+      allow read: if signedIn() && ticketHasEventId() && isEventOrganizer(resource.data.event_id);
+      allow read: if signedIn() && canReadSplitDerivedFromOwnedRoot(resource.data);
+
+      allow create: if signedIn() && (
+        request.resource.data.user_id == request.auth.uid
+        || canCreateSharedTicket()
+      );
+
+      allow update: if signedIn() && (
+        resource.data.user_id == request.auth.uid
+        || isEventOrganizer(resource.data.event_id)
+      );
+
+      allow delete: if false;
+    }
+
+    match /payments/{paymentId} {
+      allow read: if signedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if signedIn()
+        && resource.data.user_id == request.auth.uid;
+    }
+
+    match /notifications/{notifId} {
+      allow read: if signedIn() && resource.data.user_id == request.auth.uid;
+
+      allow create: if signedIn() && (
+        request.resource.data.user_id == request.auth.uid
+        || canCreateTicketShareNotif()
+        || canCreateTicketShareUpdateNotif()
+      );
+
+      allow update: if signedIn()
+        && resource.data.user_id == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /qr_validations/{scanId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+  }
+}

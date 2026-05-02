@@ -318,6 +318,8 @@
 {% block scripts %}
 <script>
     let selectedCatId = '';
+    let allEventsCache = [];
+    let userGeo = null;
 
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
@@ -335,6 +337,88 @@
     function matchesSelectedCategory(eventItem) {
         if (!selectedCatId) return true;
         return String(eventItem.category_id || '') === String(selectedCatId);
+    }
+    function toNum(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    }
+    function parseEventCoords(eventItem) {
+        if (!eventItem) return null;
+        const candidates = [
+            [eventItem.latitude, eventItem.longitude],
+            [eventItem.lat, eventItem.lng],
+            [eventItem.lat, eventItem.lon],
+            [eventItem.location?.lat, eventItem.location?.lng],
+            [eventItem.location?.latitude, eventItem.location?.longitude],
+            [eventItem.geo?.lat, eventItem.geo?.lng]
+        ];
+        for (const [la, lo] of candidates) {
+            const lat = toNum(la);
+            const lng = toNum(lo);
+            if (lat !== null && lng !== null) return { lat, lng };
+        }
+        return null;
+    }
+    function toRad(deg) {
+        return deg * (Math.PI / 180);
+    }
+    function distanceKm(a, b) {
+        const R = 6371;
+        const dLat = toRad(b.lat - a.lat);
+        const dLng = toRad(b.lng - a.lng);
+        const s1 = Math.sin(dLat / 2);
+        const s2 = Math.sin(dLng / 2);
+        const x = s1 * s1 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * s2 * s2;
+        return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    }
+    function enrichEventsWithDistance(events) {
+        if (!userGeo) {
+            return events.map(e => ({ ...e, __distanceKm: Number.POSITIVE_INFINITY }));
+        }
+        return events.map(e => {
+            const p = parseEventCoords(e);
+            if (!p) return { ...e, __distanceKm: Number.POSITIVE_INFINITY };
+            return { ...e, __distanceKm: distanceKm(userGeo, p) };
+        });
+    }
+    function formatDistance(eventItem) {
+        const d = Number(eventItem.__distanceKm);
+        if (!Number.isFinite(d) || d === Number.POSITIVE_INFINITY) return '';
+        if (d < 1) return `${Math.round(d * 1000)} m away`;
+        return `${d.toFixed(1)} km away`;
+    }
+    function compareByProximity(a, b) {
+        const ad = Number(a.__distanceKm);
+        const bd = Number(b.__distanceKm);
+        const af = Number.isFinite(ad) ? ad : Number.POSITIVE_INFINITY;
+        const bf = Number.isFinite(bd) ? bd : Number.POSITIVE_INFINITY;
+        return af - bf;
+    }
+    function compareByClosedThenDistance(a, b) {
+        const closedDiff = Number(isEventClosed(a)) - Number(isEventClosed(b));
+        if (closedDiff !== 0) return closedDiff;
+        return compareByProximity(a, b);
+    }
+    async function reverseGeocodeLabel(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&zoom=16&addressdetails=1`;
+        try {
+            const controller = new AbortController();
+            const t = setTimeout(() => controller.abort(), 4500);
+            const res = await fetch(url, {
+                signal: controller.signal,
+                headers: { 'Accept': 'application/json' }
+            });
+            clearTimeout(t);
+            if (!res.ok) return '';
+            const data = await res.json();
+            const a = data?.address || {};
+            const locality = a.suburb || a.neighbourhood || a.quarter || a.city_district || a.town || a.village || '';
+            const city = a.city || a.town || a.county || a.state_district || a.state || '';
+            if (locality && city && locality.toLowerCase() !== city.toLowerCase()) return `${city} • ${locality}`;
+            return city || locality || '';
+        } catch (_) {
+            return '';
+        }
     }
 
     function showToast(message) {
@@ -373,8 +457,35 @@
                     }
                 });
         }
-
+        resolveUserGeo();
         loadData();
+    }
+    function resolveUserGeo() {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                userGeo = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                };
+                const cityEl = document.getElementById('user-city');
+                if (cityEl && cityEl.textContent) {
+                    cityEl.textContent = `${cityEl.textContent} • Near you`;
+                }
+                const label = await reverseGeocodeLabel(userGeo.lat, userGeo.lng);
+                if (cityEl && label) cityEl.textContent = label;
+                rerenderHomeLists();
+            },
+            () => {},
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 }
+        );
+    }
+    function rerenderHomeLists() {
+        if (!allEventsCache.length) return;
+        renderCategories(allEventsCache);
+        renderFeatured(allEventsCache);
+        renderPopular(allEventsCache);
+        renderUpcoming(allEventsCache);
     }
 
     async function loadData() {
@@ -386,14 +497,13 @@
                 data.id = doc.id;
                 events.push(data);
             });
-            const publishedEvents = events.filter(e => e.is_published !== false);
+            const enriched = enrichEventsWithDistance(events);
+            allEventsCache = enriched;
+            const publishedEvents = enriched.filter(e => e.is_published !== false);
             const liveEvents = publishedEvents.filter(e => !isEventClosed(e));
             document.getElementById('kpi-events').textContent = liveEvents.length;
 
-            renderCategories(events);
-            renderFeatured(events);
-            renderPopular(events);
-            renderUpcoming(events);
+            rerenderHomeLists();
             renderPromo();
         } catch (e) {
             console.error(e);
@@ -429,7 +539,11 @@
         scroll.innerHTML = '';
         const featured = events
             .filter(e => e.is_featured && e.is_published !== false && matchesSelectedCategory(e))
-            .sort((a, b) => Number(isEventClosed(a)) - Number(isEventClosed(b)));
+            .sort((a, b) => {
+                const base = compareByClosedThenDistance(a, b);
+                if (base !== 0) return base;
+                return Number(b.rating_average || 0) - Number(a.rating_average || 0);
+            });
         document.getElementById('kpi-featured').textContent = featured.length;
         featured.forEach(e => {
             const closed = isEventClosed(e);
@@ -438,7 +552,7 @@
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1514525253361-bee8718a74a2'}" class="m-featured-img">
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled'}</h3>
-                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
                             ${closed ? '<span class="closed-label">Closed</span>' : `<span class="m-rating"><i class="fa-solid fa-star"></i> ${e.rating_average || '0.0'}</span>`}
@@ -454,7 +568,11 @@
         list.innerHTML = '';
         const popular = events
             .filter(e => e.is_published !== false && matchesSelectedCategory(e))
-            .sort((a, b) => (b.tickets_sold || 0) - (a.tickets_sold || 0))
+            .sort((a, b) => {
+                const base = compareByClosedThenDistance(a, b);
+                if (base !== 0) return base;
+                return (b.tickets_sold || 0) - (a.tickets_sold || 0);
+            })
             .slice(0, 6);
         popular.forEach(e => {
             const closed = isEventClosed(e);
@@ -463,7 +581,7 @@
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-pop-img">
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled Experience'}</h3>
-                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
                             ${closed ? '<span class="closed-label">Closed</span>' : '<span class="m-rating"><i class="fa-regular fa-heart"></i></span>'}
@@ -479,7 +597,11 @@
         list.innerHTML = '';
         const upcoming = events
             .filter(e => e.is_published !== false && matchesSelectedCategory(e))
-            .sort((a, b) => new Date(a.start_time) - new Date(b.start_time))
+            .sort((a, b) => {
+                const base = compareByClosedThenDistance(a, b);
+                if (base !== 0) return base;
+                return new Date(a.start_time) - new Date(b.start_time);
+            })
             .slice(0, 6);
         upcoming.forEach(e => {
             const closed = isEventClosed(e);
@@ -488,7 +610,7 @@
                     <img src="${e.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="m-upcoming-img">
                     <div class="m-card-body">
                         <h3 class="m-card-title">${e.title || 'Untitled Experience'}</h3>
-                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}</p>
+                        <p class="m-card-meta">${e.city || 'District'} • ${e.venue_name || 'Venue'}${formatDistance(e) ? ` • ${formatDistance(e)}` : ''}</p>
                         <div class="m-card-bottom">
                             <span class="m-price">₹${e.price_start || 0}</span>
                             ${closed ? '<span class="closed-label">Closed</span>' : '<span class="m-rating"><i class="fa-regular fa-heart"></i></span>'}
@@ -522,7 +644,7 @@
         selectedCatId = id;
         document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
-        loadData();
+        rerenderHomeLists();
     }
 
     auth.onAuthStateChanged(() => initializeHome());

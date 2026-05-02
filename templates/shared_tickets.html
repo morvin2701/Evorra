@@ -79,6 +79,11 @@
         color: #88f5cb;
         background: rgba(136,245,203,0.12);
     }
+    .shared-chip.rejected {
+        border: 1px solid rgba(255, 141, 141, 0.45);
+        color: #ffb4b4;
+        background: rgba(255, 100, 120, 0.12);
+    }
     .shared-actions {
         display: inline-flex;
         align-items: center;
@@ -155,6 +160,8 @@
 {% block scripts %}
 <script>
     let allShared = [];
+    let ticketSharedRows = [];
+    let rejectionLogRows = [];
     let activeFilter = 'all';
 
     function formatDate(val) {
@@ -164,11 +171,48 @@
         return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     }
 
+    function rowSortSeconds(row) {
+        const t = row.rejected_at || row.shared_at || row.created_time;
+        if (!t) return 0;
+        if (typeof t.seconds === 'number') return t.seconds;
+        if (typeof t._seconds === 'number') return t._seconds;
+        if (t.toDate) {
+            const d = t.toDate();
+            return Number.isNaN(d.getTime()) ? 0 : Math.floor(d.getTime() / 1000);
+        }
+        return 0;
+    }
+
     function getTicketViewStatus(ticket) {
+        if (ticket.__rowType === 'rejection') return 'rejected';
         const status = String(ticket.status || '').toLowerCase();
         if (status === 'shared_pending') return 'pending';
         if (status === 'rejected' || ticket.rejected_at) return 'rejected';
         return 'accepted';
+    }
+
+    function mergeSharedRows() {
+        const fromTickets = ticketSharedRows.map((t) => ({ ...t, __rowType: 'ticket' }));
+        const fromRejections = rejectionLogRows.map((r) => {
+            const docId = r.__docId || '';
+            return {
+                id: `rej_${docId}`,
+                __rowType: 'rejection',
+                __rejectionDocId: docId,
+                ticket_id: r.ticket_id,
+                shared_by: r.shared_by,
+                event_title: r.event_title,
+                event_snapshot: r.event_snapshot || {},
+                ticket_type_name: r.ticket_type_name,
+                quantity: r.quantity,
+                total_amount: r.total_amount,
+                shared_at: r.shared_at,
+                rejected_at: r.rejected_at,
+                created_time: r.created_time,
+                status: 'share_rejected'
+            };
+        });
+        allShared = [...fromTickets, ...fromRejections];
     }
 
     function matchesFilter(ticket) {
@@ -192,27 +236,32 @@
 
     function renderShared() {
         const container = document.getElementById('shared-container');
-        document.getElementById('shared-loading').classList.add('hide');
+        const loadingEl = document.getElementById('shared-loading');
+        if (loadingEl) loadingEl.classList.add('hide');
         container.querySelectorAll('.shared-card').forEach(el => el.remove());
         updateFilterCounts();
         const filteredShared = allShared.filter(matchesFilter);
         if (!filteredShared.length) {
-            document.getElementById('shared-empty').classList.remove('hide');
             const emptyEl = document.getElementById('shared-empty');
+            if (!emptyEl) return;
+            emptyEl.classList.remove('hide');
             const msg = activeFilter === 'all'
                 ? 'When someone shares tickets with you, they will appear here.'
                 : `No ${activeFilter} shared tickets right now.`;
-            emptyEl.querySelector('p').textContent = msg;
+            const p = emptyEl.querySelector('p');
+            if (p) p.textContent = msg;
             return;
         }
-        document.getElementById('shared-empty').classList.add('hide');
+        document.getElementById('shared-empty')?.classList.add('hide');
 
         filteredShared
-            .sort((a, b) => (b.created_time?.seconds || 0) - (a.created_time?.seconds || 0))
+            .sort((a, b) => rowSortSeconds(b) - rowSortSeconds(a))
             .forEach(t => {
                 const eventData = t.event_snapshot || {};
                 const ticketViewStatus = getTicketViewStatus(t);
                 const isPending = ticketViewStatus === 'pending';
+                const isRejected = ticketViewStatus === 'rejected';
+                const displayId = t.__rowType === 'rejection' ? (t.ticket_id || t.id) : t.id;
                 const el = document.createElement('div');
                 el.className = 'shared-card';
                 el.onclick = () => {
@@ -220,31 +269,39 @@
                         alert('Accept this ticket first from Shared Tickets to open details.');
                         return;
                     }
+                    if (isRejected) {
+                        alert('This share was rejected. The ticket was returned to the sender.');
+                        return;
+                    }
                     location.href = `/ticket/${encodeURIComponent(t.id)}`;
                 };
+                let chipClass = 'confirmed';
+                let chipLabel = 'Accepted shared ticket';
+                if (isPending) { chipClass = 'pending'; chipLabel = 'Pending your action'; }
+                if (isRejected) { chipClass = 'rejected'; chipLabel = 'Rejected — returned to sender'; }
                 el.innerHTML = `
                     <div class="shared-main">
                         <img class="shared-cover" src="${eventData.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}">
                         <div class="shared-body">
-                            <span class="shared-chip ${isPending ? 'pending' : 'confirmed'}">${isPending ? 'Pending your action' : 'Accepted shared ticket'}</span>
+                            <span class="shared-chip ${chipClass}">${chipLabel}</span>
                             <h3 class="shared-name">${t.event_title || eventData.title || 'Untitled Event'}</h3>
                             <p class="shared-meta">${eventData.city || 'District'} • ${eventData.venue || 'Venue'}</p>
                             <div class="shared-mini">
                                 <div class="shared-mini-box"><p class="shared-mini-label">Type</p><p class="shared-mini-value">${t.ticket_type_name || '-'}</p></div>
                                 <div class="shared-mini-box"><p class="shared-mini-label">Qty</p><p class="shared-mini-value">${t.quantity || 1}</p></div>
                                 <div class="shared-mini-box"><p class="shared-mini-label">Amount</p><p class="shared-mini-value">₹${t.total_amount || 0}</p></div>
-                                <div class="shared-mini-box"><p class="shared-mini-label">Shared At</p><p class="shared-mini-value">${formatDate(t.shared_at || t.created_time)}</p></div>
+                                <div class="shared-mini-box"><p class="shared-mini-label">${isRejected ? 'Rejected At' : 'Shared At'}</p><p class="shared-mini-value">${formatDate(isRejected ? (t.rejected_at || t.created_time) : (t.shared_at || t.created_time))}</p></div>
                             </div>
                         </div>
                     </div>
                     <div class="shared-foot">
-                        <span class="shared-foot-note">Ticket ID: ${t.id}</span>
+                        <span class="shared-foot-note">Ticket ID: ${displayId}</span>
                         ${isPending ? `
                             <div class="shared-actions">
                                 <button class="shared-action-btn reject" data-action="reject" data-ticket-id="${t.id}">Reject</button>
                                 <button class="shared-action-btn accept" data-action="accept" data-ticket-id="${t.id}">Accept</button>
                             </div>
-                        ` : `<span class="shared-open">Open Pass</span>`}
+                        ` : isRejected ? `<span class="shared-open" style="opacity:.85">Returned</span>` : `<span class="shared-open">Open Pass</span>`}
                     </div>
                 `;
                 container.appendChild(el);
@@ -292,6 +349,8 @@
             const ticketRef = db.collection('tickets').doc(ticketId);
             let senderUid = '';
             let eventTitle = '';
+            /** Snapshot fields for share_rejections (from ticket at reject time). */
+            let rejectLogFields = null;
             await db.runTransaction(async (txn) => {
                 const snap = await txn.get(ticketRef);
                 if (!snap.exists) throw new Error('Ticket not found.');
@@ -313,6 +372,15 @@
                     return;
                 }
 
+                rejectLogFields = {
+                    event_title: String(ticket.event_title || ticket.event_snapshot?.title || ''),
+                    event_snapshot: ticket.event_snapshot || {},
+                    ticket_type_name: String(ticket.ticket_type_name || ''),
+                    quantity: Number(ticket.quantity || 1),
+                    total_amount: Number(ticket.total_amount || 0),
+                    shared_at: ticket.shared_at || null
+                };
+
                 txn.update(ticketRef, {
                     user_id: senderUid,
                     status: 'confirmed',
@@ -320,6 +388,34 @@
                     updated_time: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
+
+            if (action === 'reject' && rejectLogFields) {
+                const rejRef = db
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('share_rejections')
+                    .doc(ticketId);
+                try {
+                    await rejRef.set({
+                        recipient_user_id: user.uid,
+                        ticket_id: ticketId,
+                        shared_by: senderUid,
+                        event_title: rejectLogFields.event_title,
+                        event_snapshot: rejectLogFields.event_snapshot,
+                        ticket_type_name: rejectLogFields.ticket_type_name,
+                        quantity: rejectLogFields.quantity,
+                        total_amount: rejectLogFields.total_amount,
+                        shared_at: rejectLogFields.shared_at,
+                        rejected_at: firebase.firestore.FieldValue.serverTimestamp(),
+                        created_time: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (logErr) {
+                    console.error('share_rejections write failed:', logErr?.code || logErr?.message || logErr);
+                    alert(
+                        'Ticket was returned to the sender, but your Rejected list could not be saved (Firestore permission). Ask the admin to allow writes to users/{yourUid}/share_rejections in security rules.'
+                    );
+                }
+            }
 
             if (action === 'accept') {
                 await notifyUser(
@@ -345,22 +441,65 @@
         }
     }
 
+    let unsubSharedTickets = null;
+    let unsubShareRejections = null;
+
+    function shareRejectionsCollection(uid) {
+        return db.collection('users').doc(uid).collection('share_rejections');
+    }
+
     auth.onAuthStateChanged((user) => {
+        if (typeof unsubSharedTickets === 'function') {
+            unsubSharedTickets();
+            unsubSharedTickets = null;
+        }
+        if (typeof unsubShareRejections === 'function') {
+            unsubShareRejections();
+            unsubShareRejections = null;
+        }
+
         if (!user) {
-            document.getElementById('shared-container').innerHTML = `<div class="shared-state">Please login to view shared tickets.</div>`;
+            ticketSharedRows = [];
+            rejectionLogRows = [];
+            mergeSharedRows();
+            document.getElementById('shared-container').innerHTML = `
+                <div id="shared-loading" class="shared-state hide"><div class="spinner"></div></div>
+                <div id="shared-empty" class="shared-state">
+                    <h3 style="font-weight: 900; margin-bottom: 8px;">Login required</h3>
+                    <p style="color: rgba(255,255,255,0.62); font-size: 0.84rem;">Please login to view shared tickets.</p>
+                </div>`;
             return;
         }
-        db.collection('tickets')
+
+        unsubSharedTickets = db
+            .collection('tickets')
             .where('user_id', '==', user.uid)
             .onSnapshot((snap) => {
-                allShared = [];
+                ticketSharedRows = [];
                 snap.forEach((doc) => {
                     const data = doc.data() || {};
                     data.id = doc.id;
-                    if (data.shared_by) allShared.push(data);
+                    if (data.shared_by) ticketSharedRows.push(data);
                 });
+                mergeSharedRows();
                 renderShared();
             });
+
+        unsubShareRejections = shareRejectionsCollection(user.uid).onSnapshot(
+            (snap) => {
+                rejectionLogRows = [];
+                snap.forEach((doc) => {
+                    const data = doc.data() || {};
+                    data.__docId = doc.id;
+                    rejectionLogRows.push(data);
+                });
+                mergeSharedRows();
+                renderShared();
+            },
+            (err) => {
+                console.error('share_rejections listener error:', err?.code || err?.message || err);
+            }
+        );
     });
 
     document.querySelectorAll('.shared-filter-btn').forEach((btn) => {
