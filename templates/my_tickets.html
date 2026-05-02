@@ -147,6 +147,41 @@
     let allTickets = [];
     let currentTab = 'all';
 
+    /** Scanned at gate: `checked_in` is set; optional legacy `status === 'used'`. */
+    function isTicketUsed(t) {
+        if (String(t.status || '').toLowerCase() === 'used') return true;
+        return t.checked_in === true;
+    }
+
+    function isTicketCancelled(t) {
+        return String(t.status || '').toLowerCase() === 'cancelled';
+    }
+
+    /** Active pass: confirmed booking, not yet scanned / not marked used. */
+    function isTicketConfirmedTab(t) {
+        if (isTicketCancelled(t)) return false;
+        if (isTicketUsed(t)) return false;
+        const s = String(t.status || '').toLowerCase();
+        return s === 'confirmed' || s === '';
+    }
+
+    function matchesStatusTab(t, tab) {
+        if (tab === 'all') return true;
+        if (tab === 'used') return isTicketUsed(t);
+        if (tab === 'confirmed') return isTicketConfirmedTab(t);
+        if (tab === 'cancelled') return isTicketCancelled(t);
+        return false;
+    }
+
+    function getTicketDisplayStatus(t) {
+        if (isTicketUsed(t)) return { chipClass: 'used', label: 'Used' };
+        if (isTicketCancelled(t)) return { chipClass: 'cancelled', label: 'Cancelled' };
+        const raw = String(t.status || 'confirmed').toLowerCase();
+        if (raw === 'confirmed' || raw === '') return { chipClass: 'confirmed', label: 'Confirmed' };
+        const safe = raw.replace(/[^a-z0-9_-]/g, '') || 'confirmed';
+        return { chipClass: safe, label: (t.status || 'Confirmed').charAt(0).toUpperCase() + (t.status || '').slice(1) };
+    }
+
     async function initializeTickets() {
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -173,9 +208,9 @@
 
     function updateCounts() {
         document.getElementById('count-all').textContent = allTickets.length;
-        document.getElementById('count-confirmed').textContent = allTickets.filter(t => t.status === 'confirmed').length;
-        document.getElementById('count-used').textContent = allTickets.filter(t => t.status === 'used').length;
-        document.getElementById('count-cancelled').textContent = allTickets.filter(t => t.status === 'cancelled').length;
+        document.getElementById('count-confirmed').textContent = allTickets.filter(isTicketConfirmedTab).length;
+        document.getElementById('count-used').textContent = allTickets.filter(isTicketUsed).length;
+        document.getElementById('count-cancelled').textContent = allTickets.filter(isTicketCancelled).length;
     }
 
     function setActiveTab(tab, el) {
@@ -191,7 +226,7 @@
         document.getElementById('loading-state').classList.add('hide');
 
         const filtered = allTickets.filter(t => {
-            const matchesTab = currentTab === 'all' || t.status === currentTab;
+            const matchesTab = matchesStatusTab(t, currentTab);
             const eventData = t.event_snapshot || {};
             const matchesSearch = !query || 
                                   t.event_title?.toLowerCase().includes(query) || 
@@ -218,7 +253,8 @@
 
     function createTicketCard(t) {
         const eventData = t.event_snapshot || {};
-        const statusClass = `status-${t.status || 'confirmed'}`;
+        const disp = getTicketDisplayStatus(t);
+        const statusClass = `status-${disp.chipClass}`;
         const link = document.createElement('a');
         link.href = `/ticket/${t.id}`;
         link.className = 'ticket-card-link';
@@ -228,7 +264,7 @@
                 <div class="ticket-card-main">
                     <img src="${eventData.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'}" class="ticket-cover">
                     <div class="ticket-main-body">
-                        <span class="status-chip ${statusClass}">${t.status || 'Confirmed'}</span>
+                        <span class="status-chip ${statusClass}">${disp.label}</span>
                         <h3 class="ticket-title">${t.event_title || eventData.title || 'Untitled Event'}</h3>
                         <p class="ticket-sub">${eventData.city || 'District'} • ${eventData.venue || 'Venue'}</p>
                         <p class="ticket-time">${formatDate(eventData.start_time)}</p>
