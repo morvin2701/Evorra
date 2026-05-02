@@ -23,7 +23,7 @@
 
     {% block head %}{% endblock %}
 </head>
-<body class="theme-showmates">
+<body class="theme-showmates{% block body_class %}{% endblock %}">
     <!-- Top nav — Showmates-style: primary CTA + clean links -->
     <nav class="top-navbar sm-topnav">
         <a href="/" class="nav-logo">EVORRA</a>

@@ -342,6 +342,48 @@ body.theme-showmates main {
     z-index: 5;
 }
 
+/* Auth — true full-viewport (nav/footer hidden; no main padding gaps) */
+body.page-auth.theme-showmates .top-navbar,
+body.page-auth.theme-showmates .bottom-nav,
+body.page-auth.theme-showmates .site-footer {
+    display: none !important;
+}
+
+body.page-auth.theme-showmates {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+body.page-auth.theme-showmates main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none !important;
+    min-height: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Override global mobile main padding (bottom nav spacer) — nav is hidden on auth */
+@media (max-width: 900px) {
+    body.page-auth.theme-showmates main {
+        padding-top: env(safe-area-inset-top) !important;
+        padding-bottom: env(safe-area-inset-bottom) !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        min-height: 100vh;
+        min-height: 100dvh;
+        min-height: -webkit-fill-available;
+    }
+}
+
 /* ── Site footer (light, editorial — matches Showmates-style shell) ── */
 .visually-hidden {
     position: absolute;

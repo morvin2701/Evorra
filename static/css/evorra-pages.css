@@ -331,12 +331,13 @@ body.theme-showmates .profile-input-wrapper input {
     color: var(--sm-text) !important;
 }
 
-body.theme-showmates .role-card {
+/* Profile / onboarding role tiles — not auth signup role picker (body.page-auth) */
+body.theme-showmates:not(.page-auth) .role-card {
     border-color: var(--sm-border) !important;
     background: var(--sm-bg) !important;
 }
 
-body.theme-showmates .role-card.active {
+body.theme-showmates:not(.page-auth) .role-card.active {
     border-color: var(--sm-primary) !important;
     background: rgba(220, 38, 38, 0.08) !important;
 }
@@ -443,15 +444,15 @@ body.theme-showmates .interest-chip {
     color: var(--sm-text) !important;
 }
 
-body.theme-showmates .role-card-title {
+body.theme-showmates:not(.page-auth) .role-card-title {
     color: var(--sm-text) !important;
 }
 
-body.theme-showmates .role-card-desc {
+body.theme-showmates:not(.page-auth) .role-card-desc {
     color: #64748b !important;
 }
 
-body.theme-showmates .role-card i {
+body.theme-showmates:not(.page-auth) .role-card i {
     color: var(--sm-muted) !important;
 }
 

@@ -1,289 +1,1228 @@
 {% extends "base.html" %}
 
-{% block title %}Evorra | Join the District{% endblock %}
+{% block body_class %} page-auth{% endblock %}
+
+{% block title %}Evorra | Sign in{% endblock %}
 
 {% block head %}
 <style>
-    .auth-shell {
-        width: min(1160px, calc(100% - 26px));
-        margin: 0 auto;
-        min-height: calc(100vh - 84px);
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 16px;
-        align-items: center;
-        padding: 18px 0 80px;
-        position: relative;
+    /* Let the auth route paint true full viewport (incl. mobile browser chrome) */
+    html {
+        height: 100%;
+        height: -webkit-fill-available;
     }
-    .auth-shell::before {
-        content: "";
+
+    /* Auth — fills <main> edge-to-edge (see body.page-auth in showmates-theme.css) */
+    .auth-page {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    .auth-split {
+        flex: 1 1 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        min-height: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+        width: 100%;
+        align-items: stretch;
+    }
+
+    @media (min-width: 961px) {
+        .auth-split {
+            background: linear-gradient(90deg, #0f172a 0%, #0f172a 50%, var(--sm-bg) 50%, var(--sm-bg) 100%);
+        }
+    }
+
+    /* ── Left: brand hero (uses full half viewport) ── */
+    .auth-hero {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        padding: max(20px, env(safe-area-inset-top)) clamp(16px, 3vw, 44px) max(24px, env(safe-area-inset-bottom));
+        background:
+            radial-gradient(ellipse 90% 70% at 20% 20%, rgba(220, 38, 38, 0.35) 0%, transparent 55%),
+            radial-gradient(ellipse 70% 50% at 85% 75%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+            linear-gradient(165deg, #0c1222 0%, #151f33 42%, #0f172a 100%);
+        color: #f8fafc;
+        overflow: hidden;
+    }
+
+    @media (min-width: 961px) {
+        .auth-hero {
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 8px 0 40px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    .auth-hero-grid {
         position: absolute;
         inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000 20%, transparent 70%);
         pointer-events: none;
-        background:
-            radial-gradient(circle at 20% 18%, rgba(108, 120, 255, 0.22), transparent 35%),
-            radial-gradient(circle at 82% 85%, rgba(86, 217, 255, 0.18), transparent 32%);
-        filter: blur(6px);
+        opacity: 0.6;
     }
-    .auth-stage {
+
+    .auth-hero-glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        pointer-events: none;
+        opacity: 0.55;
+    }
+    .auth-hero-glow--a {
+        width: min(420px, 55vw);
+        height: min(420px, 55vw);
+        top: -12%;
+        right: -8%;
+        background: rgba(220, 38, 38, 0.45);
+    }
+    .auth-hero-glow--b {
+        width: min(280px, 40vw);
+        height: min(280px, 40vw);
+        bottom: 15%;
+        left: -6%;
+        background: rgba(99, 102, 241, 0.25);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-hero-glow--a {
+            animation: auth-orb-a 14s ease-in-out infinite;
+        }
+        .auth-hero-glow--b {
+            animation: auth-orb-b 18s ease-in-out infinite;
+        }
+    }
+    @keyframes auth-orb-a {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(-16px, 20px) scale(1.06); }
+    }
+    @keyframes auth-orb-b {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(24px, -12px); }
+    }
+
+    .auth-hero-top {
         position: relative;
         z-index: 2;
-        width: min(560px, 100%);
-        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: clamp(32px, 6vh, 72px);
     }
-    .auth-topbar { display: flex; justify-content: center; margin-bottom: 12px; }
+
+    .auth-hero-logo {
+        font-size: clamp(1.25rem, 2.5vw, 1.55rem);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: #fff !important;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+    }
+    .auth-hero-logo:hover {
+        opacity: 0.88;
+    }
+
+    .auth-hero-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 14px;
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: #e2e8f0 !important;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(10px);
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .auth-hero-back:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.22);
+        transform: translateX(-2px);
+    }
+
+    .auth-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 42rem;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-hero-content {
+            animation: auth-hero-text 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+        }
+    }
+    @keyframes auth-hero-text {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-hero-eyebrow {
+        margin: 0 0 12px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(248, 250, 252, 0.55);
+    }
+    .auth-hero-title {
+        margin: 0 0 16px;
+        font-size: clamp(1.85rem, 3.8vw, 2.75rem);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        line-height: 1.1;
+        color: #fff;
+    }
+    .auth-hero-lead {
+        margin: 0 0 28px;
+        font-size: clamp(1rem, 1.35vw, 1.12rem);
+        line-height: 1.6;
+        color: rgba(226, 232, 240, 0.88);
+        font-weight: 500;
+        max-width: 36ch;
+    }
+
+    .auth-hero-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .auth-hero-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: rgba(241, 245, 249, 0.92);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-hero-list li:nth-child(1) { animation: auth-li-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both; }
+        .auth-hero-list li:nth-child(2) { animation: auth-li-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both; }
+        .auth-hero-list li:nth-child(3) { animation: auth-li-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.44s both; }
+    }
+    @keyframes auth-li-in {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .auth-hero-list i {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 0.72rem;
+        background: rgba(220, 38, 38, 0.35);
+        border: 1px solid rgba(252, 165, 165, 0.35);
+        color: #fecaca;
+        flex-shrink: 0;
+    }
+
+    /* ── Right: form column (soft handoff from hero + safe bottom for footer) ── */
+    .auth-form-column {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        min-height: 100%;
+        min-height: 0;
+        padding:
+            max(8px, env(safe-area-inset-top))
+            clamp(12px, 2.5vw, 24px)
+            max(12px, calc(8px + env(safe-area-inset-bottom)));
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.65) 0%, transparent 28%),
+            radial-gradient(ellipse 70% 45% at 90% 15%, rgba(220, 38, 38, 0.07) 0%, transparent 45%),
+            linear-gradient(95deg, rgba(248, 250, 252, 0.5) 0%, var(--sm-bg) 18%),
+            var(--sm-bg);
+        overflow: hidden;
+    }
+
+    .auth-stage {
+        width: 100%;
+        max-width: min(680px, 100%);
+        margin-left: auto;
+        margin-right: auto;
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        align-items: stretch;
+    }
+
+    @media (min-width: 961px) {
+        .auth-form-column {
+            justify-content: center;
+        }
+        .auth-stage {
+            max-width: min(720px, 94%);
+        }
+    }
+
+    .auth-form-scroll {
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: min(100%, calc(100dvh - 100px));
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-right: 2px;
+        scrollbar-gutter: stable;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-form-scroll {
+            scroll-behavior: smooth;
+        }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-form-column .auth-stage {
+            animation: auth-form-col-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+        }
+    }
+    @keyframes auth-form-col-in {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .auth-topbar {
+        flex-shrink: 0;
+        margin-bottom: 8px;
+    }
     .auth-switch {
-        width: min(370px, 100%);
+        width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 4px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(9, 16, 32, 0.64);
-        padding: 4px;
+        gap: 6px;
+        padding: 5px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, var(--sm-surface) 0%, var(--sm-bg) 100%);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+            0 6px 22px rgba(15, 23, 42, 0.07);
     }
     .switch-btn {
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         background: transparent;
-        color: rgba(224, 235, 255, 0.72);
-        font-size: .85rem;
+        color: var(--sm-muted);
+        font-size: 0.84rem;
         font-weight: 800;
+        letter-spacing: -0.02em;
         padding: 10px 12px;
         cursor: pointer;
-        transition: .2s ease;
+        font-family: inherit;
+        transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
     }
     .switch-btn.active {
-        color: #08142b;
-        background: linear-gradient(135deg, #89f5d0, #5ad2ff);
-        box-shadow: 0 8px 16px rgba(90, 210, 255, 0.25);
+        color: var(--sm-primary);
+        background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+        box-shadow:
+            0 0 0 1px rgba(220, 38, 38, 0.14),
+            0 8px 24px rgba(220, 38, 38, 0.14);
     }
+    .switch-btn:not(.active):hover {
+        color: var(--sm-text);
+        background: rgba(255, 255, 255, 0.7);
+    }
+
     .auth-panel {
-        border-radius: 24px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background:
-            radial-gradient(circle at 82% 16%, rgba(104, 118, 255, 0.16), transparent 42%),
-            linear-gradient(160deg, rgba(9, 18, 34, 0.93), rgba(10, 21, 40, 0.87));
-        backdrop-filter: blur(12px);
-        box-shadow: 0 28px 64px rgba(0,0,0,0.42);
-        padding: 22px;
+        border-radius: 22px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+            0 20px 50px rgba(15, 23, 42, 0.09),
+            0 2px 8px rgba(15, 23, 42, 0.04);
+        padding: clamp(16px, 2.2vw, 22px);
+        position: relative;
+        overflow: hidden;
+        transition: box-shadow 0.35s ease, border-color 0.25s ease;
+    }
+    .auth-form-scroll:hover .auth-panel {
+        border-color: #e2e8f0;
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.95) inset,
+            0 24px 56px rgba(15, 23, 42, 0.11),
+            0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+    .auth-panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.5), rgba(220, 38, 38, 0.2), transparent);
+        opacity: 0.9;
+        pointer-events: none;
+        z-index: 2;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .auth-panel::after {
+            content: "";
+            position: absolute;
+            inset: -40% -30% auto auto;
+            width: 55%;
+            height: 55%;
+            background: radial-gradient(circle, rgba(220, 38, 38, 0.06) 0%, transparent 68%);
+            pointer-events: none;
+            z-index: 0;
+            animation: auth-panel-shine 8s ease-in-out infinite;
+        }
+    }
+    .auth-panel > * {
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes auth-panel-shine {
+        0%, 100% { opacity: 0.5; transform: translate(0, 0); }
+        50% { opacity: 0.85; transform: translate(-12px, 8px); }
+    }
+
+    .auth-kicker {
+        margin: 0 0 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
     }
     .auth-headline {
         margin: 0 0 6px;
-        color: #fff;
-        font-size: clamp(1.6rem, 2.8vw, 2.08rem);
-        line-height: 1.08;
-        letter-spacing: -.55px;
+        color: var(--sm-text);
+        font-size: clamp(1.35rem, 2.5vw, 1.72rem);
+        line-height: 1.12;
+        letter-spacing: -0.035em;
         font-weight: 900;
     }
     .auth-subline {
-        margin: 0 0 18px;
-        color: rgba(227, 236, 255, 0.72);
-        font-size: .92rem;
+        margin: 0 0 14px;
+        color: var(--sm-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        line-height: 1.5;
     }
+
     .auth-label {
         display: block;
-        margin: 0 0 8px;
-        color: rgba(220, 232, 255, 0.72);
-        font-size: .74rem;
+        margin: 0 0 6px;
+        color: var(--sm-muted);
+        font-size: 0.72rem;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: .5px;
+        letter-spacing: 0.06em;
     }
     .auth-input-group {
         position: relative;
-        margin-bottom: 14px;
+        margin-bottom: 13px;
+        transition: transform 0.2s ease;
+    }
+    .auth-input-group:focus-within .auth-icon {
+        color: var(--sm-primary);
+        opacity: 1;
     }
     .auth-icon {
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
-        color: rgba(215,228,255,0.55);
-        font-size: .9rem;
+        color: var(--sm-muted);
+        font-size: 0.95rem;
+        opacity: 0.85;
+        pointer-events: none;
     }
     .auth-input {
         width: 100%;
         height: 46px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: rgba(255,255,255,0.04) !important;
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-        padding: 0 12px 0 38px;
+        border-radius: 13px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg) !important;
+        color: var(--sm-text) !important;
+        -webkit-text-fill-color: var(--sm-text) !important;
+        padding: 0 14px 0 42px;
         outline: none;
-        font-size: .92rem;
+        font-size: 0.94rem;
         font-weight: 600;
-        transition: .2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
         box-sizing: border-box;
-        caret-color: #eaf2ff;
-        text-shadow: none !important;
-        opacity: 1 !important;
+        caret-color: var(--sm-primary);
+        font-family: inherit;
     }
     .auth-input:focus {
-        border-color: rgba(133, 201, 255, 0.55);
-        box-shadow: 0 0 0 4px rgba(106, 190, 255, 0.12);
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
     }
-    .auth-input::placeholder { color: rgba(218, 229, 255, 0.45); }
+    .auth-input::placeholder {
+        color: #94a3b8;
+    }
+
+    /* Password field — inline visibility toggle */
+    .auth-input-group--password .auth-input {
+        padding-right: 48px;
+    }
+    .auth-pass-toggle {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-radius: 11px;
+        background: transparent;
+        color: var(--sm-muted);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+        transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .auth-pass-toggle:hover {
+        color: var(--sm-primary);
+        background: rgba(220, 38, 38, 0.08);
+    }
+    .auth-pass-toggle:active {
+        transform: translateY(-50%) scale(0.96);
+    }
+    .auth-pass-toggle:focus-visible {
+        outline: 2px solid rgba(220, 38, 38, 0.55);
+        outline-offset: 2px;
+    }
+    .auth-pass-toggle[aria-pressed="true"] {
+        color: var(--sm-primary);
+        background: rgba(220, 38, 38, 0.1);
+    }
+    .auth-input-group--password:focus-within .auth-pass-toggle:not([aria-pressed="true"]) {
+        color: #64748b;
+    }
+
     .auth-input:-webkit-autofill,
     .auth-input:-webkit-autofill:hover,
-    .auth-input:-webkit-autofill:focus,
-    .auth-input:-webkit-autofill:active {
-        -webkit-text-fill-color: #ffffff !important;
-        box-shadow: 0 0 0 1000px rgba(13, 25, 46, 0.96) inset !important;
-        -webkit-box-shadow: 0 0 0 1000px rgba(13, 25, 46, 0.96) inset !important;
+    .auth-input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--sm-text) !important;
+        box-shadow: 0 0 0 1000px #f1f5f9 inset !important;
+        -webkit-box-shadow: 0 0 0 1000px #f1f5f9 inset !important;
         transition: background-color 9999s ease-in-out 0s;
-        caret-color: #ffffff;
-        opacity: 1 !important;
     }
+
+    /* Role picker — glass tiles, compact rhythm */
     .role-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 8px;
     }
+    @media (prefers-reduced-motion: no-preference) {
+        .role-group .role-card:nth-child(1) {
+            animation: role-card-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+        }
+        .role-group .role-card:nth-child(2) {
+            animation: role-card-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+        }
+    }
+    @keyframes role-card-rise {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     .role-card {
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.03);
-        padding: 12px;
+        --role-ease: cubic-bezier(0.22, 1, 0.36, 1);
+        position: relative;
+        border: none;
+        border-radius: 16px;
+        padding: 0;
         cursor: pointer;
-        transition: .2s ease;
+        text-align: left;
+        background: transparent;
+        overflow: visible;
+        outline: none;
+        transition: transform 0.35s var(--role-ease), box-shadow 0.35s var(--role-ease);
     }
-    .role-card i { color: #cde7ff; margin-bottom: 8px; }
-    .role-title { color: #fff; margin: 0 0 2px; font-size: .86rem; font-weight: 800; }
-    .role-sub { color: rgba(220,232,255,0.58); margin: 0; font-size: .74rem; }
-    .role-card.selected {
-        border-color: rgba(117, 229, 255, 0.55);
-        background: rgba(117, 229, 255, 0.12);
-        box-shadow: 0 0 0 1px rgba(117, 229, 255, 0.18) inset;
+    .role-card:focus-visible {
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.35);
     }
-    .btn-evorra { margin-top: 16px; }
-    .auth-foot {
-        text-align: center;
-        margin-top: 16px;
-        color: rgba(226,236,255,0.72);
-        font-size: .9rem;
+    .role-card-surface {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(14px) saturate(1.15);
+        -webkit-backdrop-filter: blur(14px) saturate(1.15);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.9) inset,
+            0 2px 8px rgba(15, 23, 42, 0.04);
+        transition: border-color 0.3s var(--role-ease), background 0.35s var(--role-ease),
+            box-shadow 0.35s var(--role-ease), transform 0.3s var(--role-ease);
     }
-    .auth-foot a { color: #98d7ff; text-decoration: none; font-weight: 700; }
-
-    .error-banner {
-        background: rgba(255, 115, 128, 0.12);
-        border: 1px solid rgba(255, 115, 128, 0.35);
-        border-radius: 10px;
-        padding: 12px;
-        color: #ffd2da;
-        font-size: 0.85rem;
+    .role-card-shine {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        border-radius: inherit;
+        opacity: 0;
+        pointer-events: none;
+        background: linear-gradient(
+            125deg,
+            transparent 40%,
+            rgba(255, 255, 255, 0.55) 48%,
+            transparent 56%
+        );
+        background-size: 200% 200%;
+        transition: opacity 0.4s ease;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .role-card:hover .role-card-shine {
+            opacity: 0.45;
+            animation: role-shine 1.8s ease-in-out infinite;
+        }
+        .role-card.selected .role-card-shine {
+            opacity: 0.18;
+            animation: role-shine 3s ease-in-out infinite;
+        }
+    }
+    @keyframes role-shine {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .role-card-shine { display: none; }
+    }
+    .role-card:not(.selected):hover .role-card-surface {
+        border-color: rgba(203, 213, 225, 0.95);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.95) inset,
+            0 8px 26px rgba(15, 23, 42, 0.08);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .role-card:not(.selected):hover {
+            transform: translateY(-2px);
+        }
+        .role-card.selected {
+            transform: translateY(-1px);
+        }
+    }
+    .role-card.selected .role-card-surface {
+        border-color: rgba(251, 113, 133, 0.55);
+        background: linear-gradient(
+            155deg,
+            rgba(255, 255, 255, 0.94) 0%,
+            rgba(255, 247, 247, 0.88) 45%,
+            rgba(254, 226, 226, 0.55) 100%
+        );
+        backdrop-filter: blur(18px) saturate(1.25);
+        -webkit-backdrop-filter: blur(18px) saturate(1.25);
+        box-shadow:
+            0 0 0 1px rgba(252, 165, 165, 0.45) inset,
+            0 6px 28px rgba(220, 38, 38, 0.12),
+            0 2px 12px rgba(15, 23, 42, 0.05);
+    }
+    /* Host selected — violet glass (matches tile), not rose */
+    #role-organizer.selected .role-card-surface {
+        border-color: rgba(167, 139, 250, 0.55);
+        background: linear-gradient(
+            155deg,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(250, 245, 255, 0.9) 48%,
+            rgba(237, 233, 254, 0.55) 100%
+        );
+        box-shadow:
+            0 0 0 1px rgba(196, 181, 253, 0.45) inset,
+            0 6px 28px rgba(124, 58, 237, 0.14),
+            0 2px 12px rgba(15, 23, 42, 0.05);
+    }
+    .role-card-visual {
+        position: relative;
+        z-index: 2;
+        align-self: center;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        isolation: isolate;
+        transition: transform 0.35s var(--role-ease), box-shadow 0.35s ease;
+        box-shadow:
+            0 2px 10px rgba(15, 23, 42, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    /* Icons — white on gradient tiles (override global .role-card i from evorra-pages.css) */
+    body.page-auth.theme-showmates .role-card .role-card-visual i {
+        font-size: 1.14rem;
+        line-height: 1;
+        color: #ffffff !important;
+        opacity: 1 !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+        -webkit-font-smoothing: antialiased;
+    }
+    body.page-auth.theme-showmates .role-card .role-card-visual i::before {
+        color: inherit;
+    }
+    /* Guest — deep slate so white glyph stays crisp when unselected */
+    .role-card-visual--guest {
+        background: linear-gradient(148deg, #5c6b7e 0%, #3f4b5c 100%);
+    }
+    .role-card:not(.selected) .role-card-visual--guest {
+        background: linear-gradient(148deg, #6b7c90 0%, #4b5568 100%);
+    }
+    .role-card.selected .role-card-visual--guest {
+        background: linear-gradient(148deg, #ef4444 0%, #b91c1c 100%);
+        box-shadow:
+            0 4px 16px rgba(220, 38, 38, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transform: scale(1.03);
+    }
+    /* Host — saturated violet; selection deepens, shadow stays violet (not red) */
+    .role-card-visual--host {
+        background: linear-gradient(148deg, #8b5cf6 0%, #6d28d9 100%);
+    }
+    .role-card:not(.selected) .role-card-visual--host {
+        background: linear-gradient(148deg, #a78bfa 0%, #7c3aed 100%);
+    }
+    .role-card.selected .role-card-visual--host {
+        background: linear-gradient(148deg, #7c3aed 0%, #5b21b6 100%);
+        box-shadow:
+            0 4px 18px rgba(124, 58, 237, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        transform: scale(1.03);
+    }
+    .role-card-mid {
+        position: relative;
+        z-index: 2;
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        justify-content: center;
+        padding: 2px 0;
+    }
+    .role-card-topline {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+    }
+    .role-title {
+        color: #0f172a;
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.22;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .role-card:not(.selected) .role-title {
+        color: #334155;
+    }
+    .role-sub {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.76rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.4;
+        padding-right: 2px;
+    }
+    .role-card.selected .role-sub {
+        color: #475569;
+    }
+    .role-pick-inline {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .role-radio {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        background: rgba(255, 255, 255, 0.95);
+        display: grid;
+        place-items: center;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s var(--role-ease);
+    }
+    .role-card.selected .role-radio {
+        border-color: #dc2626;
+        box-shadow:
+            0 0 0 3px rgba(220, 38, 38, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    #role-organizer.selected .role-radio {
+        border-color: #7c3aed;
+        box-shadow:
+            0 0 0 3px rgba(124, 58, 237, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .role-card.selected .role-radio {
+            animation: role-radio-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+    }
+    @keyframes role-radio-pop {
+        0% { transform: scale(0.85); }
+        100% { transform: scale(1); }
+    }
+    .role-radio-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 28%, #fca5a5 0%, #dc2626 55%, #991b1b 100%);
+        transform: scale(0);
+        opacity: 0;
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    }
+    .role-card.selected .role-radio-dot {
+        transform: scale(1);
+        opacity: 1;
+    }
+    #role-organizer.selected .role-radio-dot {
+        background: radial-gradient(circle at 30% 28%, #c4b5fd 0%, #7c3aed 55%, #5b21b6 100%);
+    }
+    .role-pill {
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.12);
+        border: 1px solid transparent;
+        white-space: nowrap;
+        max-width: 0;
+        padding-left: 0;
+        padding-right: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-width 0.35s var(--role-ease), opacity 0.25s ease, padding 0.25s ease,
+            color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+    .role-card.selected .role-pill {
+        max-width: 120px;
+        padding: 3px 8px;
+        opacity: 1;
+        color: #991b1b;
+        background: rgba(220, 38, 38, 0.12);
+        border-color: rgba(220, 38, 38, 0.28);
+    }
+    #role-organizer.selected .role-pill {
+        color: #5b21b6;
+        background: rgba(124, 58, 237, 0.12);
+        border-color: rgba(124, 58, 237, 0.28);
     }
 
-    .form-view { display: none; }
-    .form-view.active { display: block; }
-    @media (min-width: 980px) {
-        .auth-stage { width: min(620px, 100%); }
+    @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+        .role-card-surface {
+            background: #f8fafc;
+        }
+        .role-card.selected .role-card-surface {
+            background: linear-gradient(155deg, #ffffff 0%, #fff5f5 100%);
+        }
+        #role-organizer.selected .role-card-surface {
+            background: linear-gradient(155deg, #ffffff 0%, #faf5ff 100%);
+        }
     }
+
+    .auth-page .btn-evorra {
+        margin-top: 14px;
+        width: 100%;
+        min-height: 48px;
+        border-radius: 13px;
+        font-weight: 900;
+        font-size: 0.92rem;
+        font-family: inherit;
+        letter-spacing: -0.01em;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+        transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+    }
+    .auth-page .btn-evorra:hover:not(:disabled) {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+        box-shadow: 0 14px 36px rgba(220, 38, 38, 0.34);
+    }
+    .auth-page .btn-evorra:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .auth-terms-row {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .auth-terms-row input[type="checkbox"] {
+        margin-top: 4px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--sm-primary);
+        flex-shrink: 0;
+    }
+    .auth-terms-text {
+        font-size: 0.82rem;
+        color: var(--sm-muted);
+        line-height: 1.55;
+        font-weight: 600;
+        margin: 0;
+    }
+    .auth-terms-text a {
+        color: var(--sm-primary);
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .auth-terms-text a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    /* Secondary link — lives inside card (no floating strip / no wasted gap) */
+    .auth-panel-foot {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--sm-border);
+        text-align: center;
+        color: var(--sm-muted);
+        font-size: 0.86rem;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+    .auth-panel-foot a {
+        color: var(--sm-primary);
+        font-weight: 800;
+        text-decoration: none;
+        margin-left: 2px;
+        transition: color 0.15s ease;
+    }
+    .auth-panel-foot a:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    .error-banner {
+        background: rgba(220, 38, 38, 0.08);
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        border-radius: 12px;
+        padding: 10px 12px;
+        color: #991b1b;
+        font-size: 0.86rem;
+        font-weight: 600;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+        line-height: 1.45;
+    }
+    .error-banner i {
+        margin-top: 2px;
+        flex-shrink: 0;
+        color: var(--sm-primary);
+    }
+
+    .form-view {
+        display: none;
+        flex-direction: column;
+        flex: 0 0 auto;
+        min-height: 0;
+    }
+    .form-view.active {
+        display: flex;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .form-view.active .auth-panel {
+            animation: auth-panel-in 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+    }
+    @keyframes auth-panel-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stack on tablets / phones */
+    @media (max-width: 960px) {
+        .auth-split {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto minmax(0, 1fr);
+            min-height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        .auth-hero {
+            min-height: auto;
+            padding: max(16px, env(safe-area-inset-top)) clamp(14px, 4vw, 22px) 16px;
+        }
+        .auth-hero-top {
+            margin-bottom: 0;
+        }
+        .auth-hero-content {
+            margin-top: 16px;
+            margin-bottom: 0;
+        }
+        .auth-hero-title {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+        .auth-hero-lead {
+            margin-bottom: 14px;
+        }
+        .auth-hero-list {
+            gap: 8px;
+        }
+        .auth-form-column {
+            flex: 1 1 auto;
+            justify-content: center;
+            align-items: stretch;
+            padding-top: max(10px, env(safe-area-inset-top));
+            padding-bottom: max(14px, env(safe-area-inset-bottom));
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .auth-stage {
+            max-width: 100%;
+            flex: 0 1 auto;
+            width: 100%;
+        }
+    }
+
     @media (max-width: 640px) {
-        .auth-shell { width: calc(100% - 20px); padding-top: 14px; }
-        .auth-panel { border-radius: 18px; padding: 14px; }
-        .role-group { grid-template-columns: 1fr; }
+        .auth-panel {
+            border-radius: 20px;
+            padding: 14px 15px 16px;
+        }
+        .auth-panel-foot {
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+        .role-group { gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .auth-hero-content,
+        .auth-form-column .auth-stage,
+        .auth-hero-glow--a,
+        .auth-hero-glow--b,
+        .auth-hero-list li,
+        .auth-panel::after,
+        .role-group .role-card,
+        .role-card.selected .role-radio {
+            animation: none !important;
+        }
+    }
+
+    /* Short viewports: tighter stacks so footer + switch stay in view */
+    @media (max-height: 760px) {
+        .auth-topbar { margin-bottom: 8px; }
+        .auth-switch { padding: 4px; }
+        .switch-btn { padding: 8px 10px; font-size: 0.8rem; }
+        .auth-panel { padding: 14px 15px; }
+        .auth-subline { margin-bottom: 10px; font-size: 0.84rem; }
+        .auth-input-group { margin-bottom: 9px; }
+        .auth-input { height: 42px; font-size: 0.9rem; }
+        .role-card-surface { padding: 9px 10px; gap: 8px; }
+        .role-card-visual { width: 40px; height: 40px; border-radius: 11px; }
+        body.page-auth.theme-showmates .role-card .role-card-visual i { font-size: 1.05rem; }
+        .role-title { font-size: 0.88rem; }
+        .role-sub { font-size: 0.74rem; }
+        .auth-page .btn-evorra { min-height: 44px; margin-top: 10px; }
+        .auth-panel-foot { margin-top: 12px; padding-top: 12px; font-size: 0.8rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-shell">
-    <div class="auth-stage">
-        <div class="auth-topbar">
-            <div class="auth-switch">
-                <button id="switch-signup" class="switch-btn active" onclick="toggleView('signup')">Create Account</button>
-                <button id="switch-login" class="switch-btn" onclick="toggleView('login')">Sign In</button>
+<div class="auth-page">
+    <div class="auth-split">
+        <aside class="auth-hero" aria-label="Evorra">
+            <div class="auth-hero-grid" aria-hidden="true"></div>
+            <div class="auth-hero-glow auth-hero-glow--a" aria-hidden="true"></div>
+            <div class="auth-hero-glow auth-hero-glow--b" aria-hidden="true"></div>
+
+            <div class="auth-hero-top">
+                <a href="/" class="auth-hero-logo">EVORRA</a>
+                <a href="/" class="auth-hero-back"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to home</a>
             </div>
-        </div>
 
-        <!-- Sign Up View -->
-        <div id="signup-view" class="form-view active animate-evorra">
-            <div class="auth-panel">
-                <h1 class="auth-headline">Create account</h1>
-                <p class="auth-subline">Join thousands of event lovers on Evorra</p>
+            <div class="auth-hero-content">
+                <p class="auth-hero-eyebrow">Experience everything</p>
+                <h2 class="auth-hero-title">Your district for live events</h2>
+                <p class="auth-hero-lead">Book in seconds, show your QR at the door, and keep every pass in one place.</p>
+                <ul class="auth-hero-list">
+                    <li><i class="fa-solid fa-check" aria-hidden="true"></i> Secure checkout &amp; instant confirmation</li>
+                    <li><i class="fa-solid fa-check" aria-hidden="true"></i> Digital passes ready to scan</li>
+                    <li><i class="fa-solid fa-check" aria-hidden="true"></i> Powerful tools for organisers</li>
+                </ul>
+            </div>
+        </aside>
 
-                <div id="global-error" class="error-banner hide">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span id="error-msg"></span>
-                </div>
-
-                <label class="auth-label">Full name</label>
-                <div class="auth-input-group">
-                    <i class="fa-regular fa-user auth-icon"></i>
-                    <input type="text" id="s-name" class="auth-input" placeholder="Your full name">
-                </div>
-
-                <label class="auth-label">Email address</label>
-                <div class="auth-input-group">
-                    <i class="fa-regular fa-envelope auth-icon"></i>
-                    <input type="email" id="s-email" class="auth-input" placeholder="you@example.com">
-                </div>
-
-                <label class="auth-label">Password</label>
-                <div class="auth-input-group">
-                    <i class="fa-solid fa-lock auth-icon"></i>
-                    <input type="password" id="s-pass" class="auth-input" placeholder="Min. 6 characters">
-                </div>
-
-                <label class="auth-label">I want to</label>
-                <div class="role-group">
-                    <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')">
-                        <i class="fa-solid fa-ticket"></i>
-                        <p class="role-title">Attend Events</p>
-                        <p class="role-sub">Discover & book</p>
-                    </div>
-                    <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
-                        <i class="fa-solid fa-bullhorn"></i>
-                        <p class="role-title">Host Events</p>
-                        <p class="role-sub">Create & manage</p>
+        <section class="auth-form-column">
+            <div class="auth-stage">
+                <div class="auth-topbar">
+                    <div class="auth-switch" role="tablist" aria-label="Sign up or sign in">
+                        <button type="button" id="switch-signup" class="switch-btn active" role="tab" aria-selected="true" onclick="toggleView('signup')">Create account</button>
+                        <button type="button" id="switch-login" class="switch-btn" role="tab" aria-selected="false" onclick="toggleView('login')">Sign in</button>
                     </div>
                 </div>
 
-                <div style="margin-top: 25px; display: flex; gap: 12px; align-items: flex-start;">
-                    <input type="checkbox" id="s-terms" style="margin-top: 4px; accent-color: var(--primary);">
-                    <p style="font-size: 0.8rem; color: rgba(225,236,255,0.7); line-height: 1.5;">
-                        I agree to the <span style="color: #98d7ff; font-weight: 600;">Terms of Service</span> and
-                        <span style="color: #98d7ff; font-weight: 600;">Privacy Policy</span>
-                    </p>
+                <div id="signup-view" class="form-view active animate-evorra">
+                    <div class="auth-form-scroll">
+                    <div class="auth-panel">
+                        <p class="auth-kicker">New here</p>
+                        <h1 class="auth-headline">Create your account</h1>
+                        <p class="auth-subline">Book tickets, save passes, and get updates in one place.</p>
+
+                        <div id="global-error" class="error-banner hide">
+                            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                            <span id="error-msg"></span>
+                        </div>
+
+                        <label class="auth-label" for="s-name">Full name</label>
+                        <div class="auth-input-group">
+                            <i class="fa-regular fa-user auth-icon" aria-hidden="true"></i>
+                            <input type="text" id="s-name" class="auth-input" placeholder="Your full name" autocomplete="name">
+                        </div>
+
+                        <label class="auth-label" for="s-email">Email</label>
+                        <div class="auth-input-group">
+                            <i class="fa-regular fa-envelope auth-icon" aria-hidden="true"></i>
+                            <input type="email" id="s-email" class="auth-input" placeholder="you@example.com" autocomplete="email">
+                        </div>
+
+                        <label class="auth-label" for="s-pass">Password</label>
+                        <div class="auth-input-group auth-input-group--password">
+                            <i class="fa-solid fa-lock auth-icon" aria-hidden="true"></i>
+                            <input type="password" id="s-pass" class="auth-input" placeholder="At least 6 characters" autocomplete="new-password" minlength="6">
+                            <button type="button" class="auth-pass-toggle" id="s-pass-toggle" aria-label="Show password" aria-pressed="false" aria-controls="s-pass">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <label class="auth-label" id="role-label">I want to</label>
+                        <div class="role-group" role="radiogroup" aria-labelledby="role-label">
+                            <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')" role="radio" tabindex="0" aria-checked="true" aria-pressed="true">
+                                <div class="role-card-surface">
+                                    <span class="role-card-shine" aria-hidden="true"></span>
+                                    <div class="role-card-visual role-card-visual--guest" aria-hidden="true">
+                                        <i class="fa-solid fa-ticket"></i>
+                                    </div>
+                                    <div class="role-card-mid">
+                                        <div class="role-card-topline">
+                                            <p class="role-title">Attend events</p>
+                                            <div class="role-pick-inline" aria-hidden="true">
+                                                <span class="role-pill">Selected</span>
+                                                <span class="role-radio"><span class="role-radio-dot"></span></span>
+                                            </div>
+                                        </div>
+                                        <p class="role-sub">Discover &amp; book</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="role-card" id="role-organizer" onclick="setRole('organizer')" role="radio" tabindex="0" aria-checked="false" aria-pressed="false">
+                                <div class="role-card-surface">
+                                    <span class="role-card-shine" aria-hidden="true"></span>
+                                    <div class="role-card-visual role-card-visual--host" aria-hidden="true">
+                                        <i class="fa-solid fa-bullhorn"></i>
+                                    </div>
+                                    <div class="role-card-mid">
+                                        <div class="role-card-topline">
+                                            <p class="role-title">Host events</p>
+                                            <div class="role-pick-inline" aria-hidden="true">
+                                                <span class="role-pill">Selected</span>
+                                                <span class="role-radio"><span class="role-radio-dot"></span></span>
+                                            </div>
+                                        </div>
+                                        <p class="role-sub">Create &amp; manage</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="auth-terms-row">
+                            <input type="checkbox" id="s-terms" aria-describedby="terms-desc">
+                            <p id="terms-desc" class="auth-terms-text">
+                                I agree to the <a href="/support">Terms</a> and <a href="/support">Privacy</a>.
+                            </p>
+                        </div>
+
+                        <button type="button" id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+
+                        <div class="auth-panel-foot">
+                            Already have an account? <a href="#" onclick="toggleView('login'); return false;">Sign in</a>
+                        </div>
+                    </div>
+                    </div>
                 </div>
 
-                <button id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+                <div id="login-view" class="form-view animate-evorra">
+                    <div class="auth-form-scroll">
+                    <div class="auth-panel">
+                        <p class="auth-kicker">Welcome back</p>
+                        <h1 class="auth-headline">Sign in</h1>
+                        <p class="auth-subline">Use your email and password to continue.</p>
+
+                        <label class="auth-label" for="l-email">Email</label>
+                        <div class="auth-input-group">
+                            <i class="fa-regular fa-envelope auth-icon" aria-hidden="true"></i>
+                            <input type="email" id="l-email" class="auth-input" placeholder="you@example.com" autocomplete="email">
+                        </div>
+
+                        <label class="auth-label" for="l-pass">Password</label>
+                        <div class="auth-input-group auth-input-group--password">
+                            <i class="fa-solid fa-lock auth-icon" aria-hidden="true"></i>
+                            <input type="password" id="l-pass" class="auth-input" placeholder="••••••••" autocomplete="current-password">
+                            <button type="button" class="auth-pass-toggle" id="l-pass-toggle" aria-label="Show password" aria-pressed="false" aria-controls="l-pass">
+                                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <button type="button" id="login-btn" onclick="handleLogin()" class="btn-evorra">Sign in</button>
+
+                        <div class="auth-panel-foot">
+                            New to Evorra? <a href="#" onclick="toggleView('signup'); return false;">Create account</a>
+                        </div>
+                    </div>
+                    </div>
+                </div>
             </div>
-            <p class="auth-foot">
-                Already have an account? <a href="#" onclick="toggleView('login')">Sign in</a>
-            </p>
-        </div>
-
-        <!-- Login View -->
-        <div id="login-view" class="form-view animate-evorra">
-            <div class="auth-panel">
-                <h1 class="auth-headline">Welcome back</h1>
-                <p class="auth-subline">Sign in to access your district experiences</p>
-
-                <label class="auth-label">Email address</label>
-                <div class="auth-input-group">
-                    <i class="fa-regular fa-envelope auth-icon"></i>
-                    <input type="email" id="l-email" class="auth-input" placeholder="you@example.com">
-                </div>
-
-                <label class="auth-label">Password</label>
-                <div class="auth-input-group">
-                    <i class="fa-solid fa-lock auth-icon"></i>
-                    <input type="password" id="l-pass" class="auth-input" placeholder="••••••••">
-                </div>
-
-                <button id="login-btn" onclick="handleLogin()" class="btn-evorra">Sign in</button>
-            </div>
-            <p class="auth-foot">
-                New to Evorra? <a href="#" onclick="toggleView('signup')">Create account</a>
-            </p>
-        </div>
+        </section>
     </div>
 </div>
 {% endblock %}
@@ -295,8 +1234,46 @@
 
     function setRole(role) {
         currentRole = role;
-        document.getElementById('role-attendee').classList.toggle('selected', role === 'attendee');
-        document.getElementById('role-organizer').classList.toggle('selected', role === 'organizer');
+        var attendee = document.getElementById('role-attendee');
+        var organizer = document.getElementById('role-organizer');
+        attendee.classList.toggle('selected', role === 'attendee');
+        organizer.classList.toggle('selected', role === 'organizer');
+        attendee.setAttribute('aria-pressed', role === 'attendee' ? 'true' : 'false');
+        organizer.setAttribute('aria-pressed', role === 'organizer' ? 'true' : 'false');
+        attendee.setAttribute('aria-checked', role === 'attendee' ? 'true' : 'false');
+        organizer.setAttribute('aria-checked', role === 'organizer' ? 'true' : 'false');
+    }
+
+    function setPasswordToggleState(inputId, visible) {
+        const input = document.getElementById(inputId);
+        const btn = document.querySelector('.auth-pass-toggle[aria-controls="' + inputId + '"]');
+        if (!input || !btn) return;
+        input.type = visible ? 'text' : 'password';
+        btn.setAttribute('aria-pressed', visible ? 'true' : 'false');
+        btn.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+        const icon = btn.querySelector('i');
+        if (icon) {
+            icon.classList.remove('fa-eye', 'fa-eye-slash');
+            icon.classList.add(visible ? 'fa-eye-slash' : 'fa-eye');
+        }
+    }
+
+    function resetPasswordVisibility() {
+        setPasswordToggleState('s-pass', false);
+        setPasswordToggleState('l-pass', false);
+    }
+
+    function initPasswordToggles() {
+        document.querySelectorAll('.auth-pass-toggle').forEach(function (btn) {
+            var inputId = btn.getAttribute('aria-controls');
+            if (!inputId) return;
+            btn.addEventListener('click', function () {
+                var input = document.getElementById(inputId);
+                if (!input) return;
+                var show = input.type === 'password';
+                setPasswordToggleState(inputId, show);
+            });
+        });
     }
 
     function toggleView(view) {
@@ -304,7 +1281,23 @@
         document.getElementById('login-view').classList.toggle('active', view === 'login');
         document.getElementById('switch-signup').classList.toggle('active', view === 'signup');
         document.getElementById('switch-login').classList.toggle('active', view === 'login');
+        document.getElementById('switch-signup').setAttribute('aria-selected', view === 'signup');
+        document.getElementById('switch-login').setAttribute('aria-selected', view === 'login');
+        resetPasswordVisibility();
     }
+
+    initPasswordToggles();
+
+    (function initRoleCardKeys() {
+        document.querySelectorAll('.role-card').forEach(function (card) {
+            card.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    card.click();
+                }
+            });
+        });
+    })();
 
     async function handleSignUp() {
         const name = document.getElementById('s-name').value;
@@ -312,7 +1305,6 @@
         const pass = document.getElementById('s-pass').value;
         const terms = document.getElementById('s-terms').checked;
         const btn = document.getElementById('signup-btn');
-        const errBanner = document.getElementById('global-error');
 
         if (!name || !email || pass.length < 6) {
             showError("Please fill all fields correctly. Password min 6 chars.");
@@ -332,7 +1324,6 @@
 
             await res.user.updateProfile({ displayName: name });
 
-            // Firestore User Doc (Reference Flutter Code)
             await db.collection('users').doc(uid).set({
                 uid: uid,
                 displayName: name,
