@@ -50,8 +50,17 @@
         color: #fff; border-color: rgba(87,228,255,0.56);
         background: linear-gradient(145deg, rgba(35,198,243,0.32), rgba(127,95,255,0.3));
     }
-    .results-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    #results-count { font-size: 1.25rem; font-weight: 900; color: #fff; }
+    .results-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 14px; }
+    .results-head-main { flex: 1; min-width: 0; }
+    #results-count { font-size: 1.25rem; font-weight: 900; color: #fff; margin: 0; }
+    .results-sort-hint {
+        margin: 6px 0 0;
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.52);
+        line-height: 1.35;
+        max-width: 520px;
+    }
     #clear-all-filters { background: none; border: none; color: #8E7DFF; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
     #results-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
     .search-result-card {
@@ -127,8 +136,11 @@
 
         <!-- Results Header -->
         <div class="results-head">
-            <h2 id="results-count">Results</h2>
-            <button id="clear-all-filters" class="hide" onclick="clearAllFilters()">Clear All</button>
+            <div class="results-head-main">
+                <h2 id="results-count">Results</h2>
+                <p id="results-sort-hint" class="results-sort-hint" aria-live="polite"></p>
+            </div>
+            <button type="button" id="clear-all-filters" class="hide" onclick="clearAllFilters()">Clear All</button>
         </div>
 
         <!-- Results Grid -->
@@ -183,6 +195,12 @@
     let allEvents = [];
     let currentCategory = 'all';
     let searchQuery = '';
+    /** Profile city boosts matching events when geo is unavailable or events lack coords. */
+    let exploreUserCity = '';
+    /** `{ lat, lng }` after successful `navigator.geolocation`; null otherwise. */
+    let exploreUserCoords = null;
+    /** granted | denied | unavailable | unsupported | pending */
+    let exploreGeoState = 'pending';
     let activeFilters = {
         minPrice: 0,
         maxPrice: 100000,
@@ -201,6 +219,178 @@
             if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
         }
         return false;
+    }
+    /** Start time ms; missing → +Infinity so they sort last among open events. */
+    function getEventStartMs(ev) {
+        const raw = ev && ev.start_time;
+        if (!raw) return Number.POSITIVE_INFINITY;
+        const d = raw.toDate ? raw.toDate() : new Date(raw);
+        const t = d.getTime();
+        return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+    }
+    /** Happening within the gate window: started, not ended, not closed (multi-day OK). */
+    function isEventOngoing(ev, nowMs) {
+        if (!ev || isEventClosed(ev)) return false;
+        const startMs = getEventStartMs(ev);
+        if (!Number.isFinite(startMs)) return false;
+        if (startMs > nowMs) return false;
+        const endRaw = ev.end_time || ev.endTime;
+        const windowHours = Number(ev.same_day_hours || ev.event_hours || 0);
+        if (!endRaw) {
+            const cap = Number.isFinite(windowHours) && windowHours > 0 ? windowHours * 3600000 : 36 * 3600000;
+            return nowMs - startMs <= cap;
+        }
+        const endD = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
+        const endT = endD.getTime();
+        if (Number.isNaN(endT)) {
+            const cap = Number.isFinite(windowHours) && windowHours > 0 ? windowHours * 3600000 : 36 * 3600000;
+            return nowMs - startMs <= cap;
+        }
+        return endT >= nowMs;
+    }
+    function haversineKm(lat1, lng1, lat2, lng2) {
+        const R = 6371;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLng = ((lng2 - lng1) * Math.PI) / 180;
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+        return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+    }
+    /** Venue pin: GeoPoint (`location`), or `latitude`/`longitude`, etc. */
+    function eventVenueLatLng(ev) {
+        if (!ev || typeof ev !== 'object') return null;
+        const loc = ev.location;
+        if (loc != null && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+            return { lat: loc.latitude, lng: loc.longitude };
+        }
+        const lat = Number(ev.latitude ?? ev.lat);
+        const lng = Number(ev.longitude ?? ev.lng ?? ev.long);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            return { lat, lng };
+        }
+        return null;
+    }
+    function geoDistanceKmToEvent(userPos, ev) {
+        if (!userPos) return Number.POSITIVE_INFINITY;
+        const p = eventVenueLatLng(ev);
+        if (!p) return Number.POSITIVE_INFINITY;
+        return haversineKm(userPos.lat, userPos.lng, p.lat, p.lng);
+    }
+    /** Stronger score = better area match vs profile / filter city. */
+    function areaPriorityScore(ev, areaHint) {
+        const needle = safeLower(String(areaHint || '').trim());
+        const filterCity = safeLower(String(activeFilters.city || '').trim());
+        let best = 0;
+        function scoreAgainst(term) {
+            if (!term) return 0;
+            const ec = safeLower(ev.city || '');
+            const evVenue = safeLower(ev.venue_name || ev.venue || '');
+            if (ec && (ec === term || ec.includes(term) || term.includes(ec))) return 3;
+            if (evVenue && term.length >= 3 && evVenue.includes(term)) return 2;
+            return 0;
+        }
+        if (needle) best = Math.max(best, scoreAgainst(needle));
+        if (filterCity) best = Math.max(best, scoreAgainst(filterCity));
+        return best;
+    }
+    /**
+     * Priority when location allowed: open → distance to venue pin → area text match → live → soonest start.
+     * Fallback (no coords / denied / unsupported): same without distance; uses profile + filter city.
+     */
+    function sortExploreEvents(eventsList) {
+        const now = Date.now();
+        const areaHint = exploreUserCity;
+        const userPos = exploreGeoState === 'granted' && exploreUserCoords ? exploreUserCoords : null;
+
+        return eventsList.slice().sort((a, b) => {
+            const aClosed = isEventClosed(a);
+            const bClosed = isEventClosed(b);
+            if (aClosed !== bClosed) return aClosed ? 1 : -1;
+
+            if (userPos) {
+                const da = geoDistanceKmToEvent(userPos, a);
+                const db = geoDistanceKmToEvent(userPos, b);
+                const fa = Number.isFinite(da);
+                const fb = Number.isFinite(db);
+                if (fa !== fb) return fa ? -1 : 1;
+                if (fa && fb && Math.abs(da - db) > 1e-4) return da - db;
+            }
+
+            const pa = areaPriorityScore(a, areaHint);
+            const pb = areaPriorityScore(b, areaHint);
+            if (pa !== pb) return pb - pa;
+
+            const aLive = isEventOngoing(a, now);
+            const bLive = isEventOngoing(b, now);
+            if (aLive !== bLive) return aLive ? -1 : 1;
+
+            return getEventStartMs(a) - getEventStartMs(b);
+        });
+    }
+    function updateExploreSortHint(resultCount) {
+        const hint = document.getElementById('results-sort-hint');
+        if (!hint) return;
+        if (!resultCount) {
+            hint.textContent = '';
+            return;
+        }
+        const profileCityTrim = String(exploreUserCity || '').trim();
+        const filterCityTrim = String(activeFilters.city || '').trim();
+
+        let line = `${resultCount} results · `;
+        if (exploreGeoState === 'granted' && exploreUserCoords) {
+            line +=
+                'Near you (device location): events with venue pins closest first · others use city match · live next · soonest upcoming. ';
+        } else {
+            line += 'City-based area priority (enable location for distance sorting). ';
+            if (exploreGeoState === 'denied') {
+                line += 'Location unavailable — using your Profile city · ';
+            } else if (exploreGeoState === 'unsupported' || exploreGeoState === 'unavailable') {
+                line += 'Browser location not available — ';
+            }
+        }
+        if (profileCityTrim && filterCityTrim) {
+            line += `Profile ${profileCityTrim} + filter “${filterCityTrim}” for area boosts.`;
+        } else if (profileCityTrim) {
+            line += `Profile city: ${profileCityTrim}.`;
+        } else if (filterCityTrim) {
+            line += `Filter city: ${filterCityTrim}.`;
+        } else if (!(exploreGeoState === 'granted' && exploreUserCoords)) {
+            line += 'Add your city in Profile for smarter area boosts.';
+        }
+
+        hint.textContent = line.trim();
+    }
+
+    /** Try device geolocation once; fallback is profile city sorting (already loaded elsewhere). */
+    function requestExploreDeviceLocation() {
+        exploreGeoState = 'pending';
+        exploreUserCoords = null;
+
+        if (typeof navigator === 'undefined' || !navigator.geolocation) {
+            exploreGeoState = 'unsupported';
+            handleSearch();
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (pos) {
+                exploreUserCoords = {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                };
+                exploreGeoState = 'granted';
+                handleSearch();
+            },
+            function (err) {
+                exploreUserCoords = null;
+                exploreGeoState =
+                    err && err.code === 1 ? 'denied' : 'unavailable';
+                handleSearch();
+            },
+            { enableHighAccuracy: false, timeout: 15000, maximumAge: 180000 }
+        );
     }
     function safeLower(value) {
         return String(value || '').toLowerCase();
@@ -275,12 +465,14 @@
             return matchesQuery && matchesCategory && matchesPrice && matchesCity && matchesFeatured && matchesOnline;
         });
 
-        renderResults(filtered);
+        const prioritized = sortExploreEvents(filtered);
+        renderResults(prioritized);
     }
 
     function renderResults(events) {
         const list = document.getElementById('results-list');
-        document.getElementById('results-count').textContent = `${events.length} Results`;
+        document.getElementById('results-count').textContent = `${events.length} results`;
+        updateExploreSortHint(events.length);
         
         if (events.length === 0) {
             list.innerHTML = `
@@ -374,6 +566,33 @@
         document.getElementById('search-input').value = '';
         handleSearch();
     }
+
+    auth.onAuthStateChanged(function (user) {
+        exploreUserCity = '';
+        exploreUserCoords = null;
+        exploreGeoState = 'pending';
+
+        if (!user) {
+            handleSearch();
+            return;
+        }
+
+        db.collection('users')
+            .doc(user.uid)
+            .get()
+            .then(function (doc) {
+                if (doc.exists) {
+                    const d = doc.data() || {};
+                    exploreUserCity = String(d.city || '').trim();
+                }
+                handleSearch();
+            })
+            .catch(function () {
+                handleSearch();
+            });
+
+        requestExploreDeviceLocation();
+    });
 
     initExplore();
 </script>

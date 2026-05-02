@@ -847,8 +847,9 @@
                         </div>
                     </div>
                     <div class="input-group-premium">
-                        <label>Full Address</label>
-                        <textarea id="ev-address" placeholder="Exact coordinates..." class="premium-input premium-input--address"></textarea>
+                        <label>Street address</label>
+                        <textarea id="ev-address" placeholder="Building, street &amp; area (e.g. Block A, Sarkhej-Gandhinagar Hwy…)" class="premium-input premium-input--address"></textarea>
+                        <p style="margin:8px 0 0;font-size:0.72rem;color:rgba(255,255,255,0.48);line-height:1.4;font-weight:600;">Used with venue &amp; city to place a map pin automatically — organisers don&apos;t enter coordinates.</p>
                     </div>
                     <div class="grid-2 studio-grid-tight">
                         <div class="studio-date-tile">
@@ -990,6 +991,12 @@
         if (step === 3) {
             if (!document.getElementById('ev-venue').value.trim()) { alert("Please enter venue name"); return false; }
             if (!document.getElementById('ev-city').value.trim()) { alert("Please enter city"); return false; }
+            const fmt = document.getElementById('ev-format').value;
+            const addrLen = document.getElementById('ev-address').value.trim().length;
+            if (fmt === 'In-Person' && addrLen < 8) {
+                alert("Please enter a clear street address (building/road/area). We use it to place your venue on the map for Explore.");
+                return false;
+            }
             if (!document.getElementById('ev-start').value) { alert("Please select start time"); return false; }
             if (!document.getElementById('ev-end').value) { alert("Please select end time"); return false; }
         }
@@ -1182,6 +1189,55 @@
         return payload;
     }
 
+    /**
+     * Geocode venue text (Photon, no API key). Returns { lat, lng } or null.
+     */
+    async function geocodeOrganizerVenue(format, venue, address, city, state) {
+        if (format !== 'In-Person') return null;
+        const chunks = [];
+        const v = String(venue || '').trim();
+        const a = String(address || '').trim();
+        const c = String(city || '').trim();
+        const s = String(state || '').trim();
+        if (v) chunks.push(v);
+        if (a && a.toLowerCase() !== v.toLowerCase()) chunks.push(a);
+        if (c) chunks.push(c);
+        if (s) chunks.push(s);
+        let q = chunks.join(', ');
+        if (!q || q.length < 5) return null;
+        if (!/\bindia\b/i.test(q)) q += ', India';
+
+        try {
+            const url = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(q) + '&limit=1';
+            const ctl = new AbortController();
+            const to = setTimeout(function () {
+                ctl.abort();
+            }, 14000);
+            let res;
+            try {
+                res = await fetch(url, {
+                    method: 'GET',
+                    headers: { Accept: 'application/json' },
+                    signal: ctl.signal
+                });
+            } finally {
+                clearTimeout(to);
+            }
+            if (!res.ok) return null;
+            const data = await res.json();
+            const f = data.features && data.features[0];
+            if (!f || !f.geometry || !Array.isArray(f.geometry.coordinates)) return null;
+            const lng = f.geometry.coordinates[0];
+            const lat = f.geometry.coordinates[1];
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+            return { lat, lng };
+        } catch (e) {
+            console.warn('Venue geocode skipped:', e);
+            return null;
+        }
+    }
+
     window.launchExperience = async function() {
         if (!validateStep(1) || !validateStep(3)) return;
         if (!document.getElementById('publish-consent').checked) {
@@ -1271,9 +1327,12 @@
             };
             await eventRef.set(coreEventPayload);
 
+            statusText.textContent = "Finding venue location from address…";
+            const geoCoords = await geocodeOrganizerVenue(format, venue, address, city, state);
+
             // Merge optional fields separately, so stricter rules on core create don't block creation.
             try {
-                await eventRef.set({
+                const metaPatch = {
                     subtitle,
                     description,
                     state,
@@ -1283,7 +1342,14 @@
                     rating_average: 0,
                     review_count: 0,
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                };
+                if (geoCoords) {
+                    metaPatch.latitude = geoCoords.lat;
+                    metaPatch.longitude = geoCoords.lng;
+                    metaPatch.location = new firebase.firestore.GeoPoint(geoCoords.lat, geoCoords.lng);
+                }
+
+                await eventRef.set(metaPatch, { merge: true });
             } catch (metaErr) {
                 console.warn('Optional metadata merge failed:', metaErr);
             }
