@@ -40,7 +40,10 @@
         </div>
 
         <div class="nav-actions">
-            <a href="/add-event" class="nav-cta hide-on-mobile" id="nav-list-event">List your event</a>
+            {# Desktop: organisers only (hidden by default; JS reveals). Attendees never see this CTA. #}
+            <a href="/add-event" class="nav-cta hide hide-on-mobile" id="nav-list-event">List your event</a>
+            {# Mobile: nav-links row is collapsed; same CTA for organisers only. #}
+            <a href="/add-event" class="nav-cta hide hide-on-desktop" id="nav-list-event-mobile">List your event</a>
             <div id="user-header"></div>
         </div>
     </nav>
@@ -161,20 +164,59 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        let usersNavProfileUnsubscribe = null;
+
+        /** True for platform admin / organiser — not plain attendees. */
+        function profileCanListEvents(profile) {
+            if (!profile || typeof profile !== 'object') return false;
+            if (profile.is_admin === true || profile.admin === true) return true;
+            if (profile.is_organizer === true || profile.organizer === true) return true;
+            var r = String(profile.role || '').toLowerCase().trim();
+            if (r.includes('organizer') || r.includes('organiser')) return true;
+            if (r === 'admin' || r.includes('admin')) return true;
+            var list = Array.isArray(profile.roles) ? profile.roles : [];
+            for (var i = 0; i < list.length; i++) {
+                var s = String(list[i] || '').toLowerCase();
+                if (s.includes('organizer') || s.includes('organiser') || s === 'admin' || s.includes('admin')) return true;
+            }
+            return false;
+        }
+
+        function setOrganizerNavVisible(show) {
+            ['nav-add-event', 'nav-scan-center', 'nav-list-event', 'nav-list-event-mobile'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                if (show) el.classList.remove('hide');
+                else el.classList.add('hide');
+            });
+        }
+
+        function syncOrganizerNavForUser(user) {
+            if (usersNavProfileUnsubscribe) {
+                try { usersNavProfileUnsubscribe(); } catch (e) {}
+                usersNavProfileUnsubscribe = null;
+            }
+            if (!user) {
+                setOrganizerNavVisible(false);
+                return;
+            }
+            setOrganizerNavVisible(false);
+            usersNavProfileUnsubscribe = db.collection('users').doc(user.uid).onSnapshot(function (doc) {
+                var data = doc.exists ? doc.data() : {};
+                setOrganizerNavVisible(profileCanListEvents(data));
+            }, function () {
+                setOrganizerNavVisible(false);
+            });
+        }
+
         auth.onAuthStateChanged(user => {
             const userHeader = document.getElementById('user-header');
             const path = window.location.pathname || '';
             if (user) {
                 document.getElementById('nav-profile').classList.remove('hide');
                 document.getElementById('nav-login').classList.add('hide');
-                
-                // Check for organizer role to show Add Event
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().role && doc.data().role.toLowerCase().includes('organizer')) {
-                        document.getElementById('nav-add-event').classList.remove('hide');
-                        document.getElementById('nav-scan-center').classList.remove('hide');
-                    }
-                });
+
+                syncOrganizerNavForUser(user);
 
                 userHeader.innerHTML = `
                     <div class="sm-nav-auth">
@@ -203,6 +245,7 @@
                         }
                     });
             } else {
+                syncOrganizerNavForUser(null);
                 const isAuthPage = path === '/auth';
                 const isScanPage = path.startsWith('/scan-pass/');
                 const isScanCenterPage = path === '/scan-center';
