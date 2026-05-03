@@ -683,7 +683,7 @@
                         <p id="dock-price" class="dock-price">₹0</p>
                     </div>
                 </div>
-                <a id="book-btn" href="#" class="btn-evorra dock-cta">Book Now</a>
+                <a id="book-btn" href="#" class="btn-evorra dock-cta" role="button">Book Now</a>
             </div>
             <div id="verified-organizer-row" class="verified-strip hide">
                 <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
@@ -811,7 +811,6 @@
             document.getElementById('event-location').textContent = `${data.venue_name || 'Venue'} • ${data.city || 'District'}`;
             document.getElementById('event-desc').textContent = data.description || 'No description available.';
             document.getElementById('dock-price').textContent = `₹${data.price_start || 0}`;
-            document.getElementById('book-btn').href = `/book/${eventId}`;
             document.getElementById('rating-text').textContent = `${data.rating_average || '0.0'} (${data.review_count || 0} reviews)`;
 
             const verRow = document.getElementById('verified-organizer-row');
@@ -1035,6 +1034,26 @@
         }
     }
 
+    function wireBookNowClick() {
+        const btn = document.getElementById('book-btn');
+        if (!btn || btn.dataset.evorraBookBound === '1') return;
+        btn.dataset.evorraBookBound = '1';
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const bookUrl = '/book/' + eventId;
+            if (auth.currentUser) {
+                window.location.href = bookUrl;
+                return;
+            }
+            if (typeof window.showEvorraAuthPrompt === 'function') {
+                window.showEvorraAuthPrompt(bookUrl);
+            } else {
+                window.location.href = '/auth?next=' + encodeURIComponent(bookUrl);
+            }
+        });
+    }
+
+    wireBookNowClick();
     loadEventDetail();
 </script>
 {% endblock %}

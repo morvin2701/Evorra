@@ -50,7 +50,7 @@
             <a href="/scan-center" id="nav-scan-center" class="nav-link hide {% if request.path == '/scan-center' %}active{% endif %}"><i class="fa-solid fa-qrcode"></i> Scan</a>
             <a href="/my-tickets" class="nav-link {% if request.path == '/my-tickets' %}active{% endif %}"><i class="fa-solid fa-receipt"></i> Tickets</a>
             <a href="/shared-tickets" class="nav-link {% if request.path == '/shared-tickets' %}active{% endif %}"><i class="fa-solid fa-share-nodes"></i> Shared</a>
-            <a href="/profile" id="nav-profile" class="nav-link {% if request.path == '/profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="/profile" id="nav-profile" class="nav-link hide {% if request.path == '/profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> Profile</a>
             <a href="/auth" id="nav-login" class="nav-link hide">Login</a>
         </div>
 
@@ -757,14 +757,24 @@
                     });
             } else {
                 syncOrganizerNavForUser(null);
-                const isAuthPage = path === '/auth';
-                const isScanPage = path.startsWith('/scan-pass/');
-                const isScanCenterPage = path === '/scan-center';
-                if (!isAuthPage && !isScanPage && !isScanCenterPage) {
+                /** Logged-out users may browse home, explore, event pages, support; booking/profile stay gated. */
+                function evorraIsPublicBrowsePath(p) {
+                    if (!p) return false;
+                    if (p === '/auth') return true;
+                    if (p === '/' || p === '/home-mobile') return true;
+                    if (p === '/explore' || p === '/support') return true;
+                    if (p.indexOf('/event/') === 0) return true;
+                    if (p.startsWith('/scan-pass/') || p === '/scan-center') return true;
+                    return false;
+                }
+                if (!evorraIsPublicBrowsePath(path)) {
                     const next = encodeURIComponent(`${window.location.pathname}${window.location.search || ''}`);
                     window.location.replace(`/auth?next=${next}`);
                     return;
                 }
+                document.getElementById('nav-login')?.classList.remove('hide');
+                document.getElementById('nav-profile')?.classList.add('hide');
+                if (userHeader) userHeader.innerHTML = '';
             }
         });
     </script>
@@ -789,7 +799,10 @@
             </div>
             <h2 id="evorra-alert-title" class="evorra-alert-title">Notification</h2>
             <p id="evorra-alert-message" class="evorra-alert-body">This is a system message from Evorra.</p>
-            <button type="button" id="evorra-alert-dismiss" class="evorra-alert-btn">Dismiss</button>
+            <div id="evorra-alert-actions" class="evorra-alert-actions">
+                <button type="button" id="evorra-alert-confirm" class="evorra-alert-btn evorra-alert-btn--confirm hide">Continue</button>
+                <button type="button" id="evorra-alert-dismiss" class="evorra-alert-btn evorra-alert-btn--single">Dismiss</button>
+            </div>
         </div>
     </div>
 
@@ -802,6 +815,8 @@
             var alertTitle = document.getElementById('evorra-alert-title');
             var alertMsg = document.getElementById('evorra-alert-message');
             var alertBtn = document.getElementById('evorra-alert-dismiss');
+            var alertConfirm = document.getElementById('evorra-alert-confirm');
+            var alertActions = document.getElementById('evorra-alert-actions');
             if (!alertRoot || !alertCard) return;
 
             var OPEN = 'evorra-alert--open';
@@ -837,6 +852,16 @@
             }
 
             window.closeEvorraAlert = function () {
+                if (alertConfirm) {
+                    alertConfirm.classList.add('hide');
+                    alertConfirm.onclick = null;
+                }
+                if (alertBtn) {
+                    alertBtn.textContent = 'Dismiss';
+                    alertBtn.classList.remove('evorra-alert-btn--secondary');
+                    alertBtn.classList.add('evorra-alert-btn--single');
+                }
+                if (alertActions) alertActions.classList.remove('evorra-alert-actions--dual');
                 alertRoot.classList.remove(OPEN);
                 alertRoot.setAttribute('aria-hidden', 'true');
                 document.removeEventListener('keydown', onKey);
@@ -871,9 +896,53 @@
             }
 
             window.alert = function (msg) {
+                if (alertConfirm) {
+                    alertConfirm.classList.add('hide');
+                    alertConfirm.onclick = null;
+                }
+                if (alertBtn) {
+                    alertBtn.textContent = 'Dismiss';
+                    alertBtn.classList.remove('evorra-alert-btn--secondary');
+                    alertBtn.classList.add('evorra-alert-btn--single');
+                }
+                if (alertActions) alertActions.classList.remove('evorra-alert-actions--dual');
                 alertMsg.textContent = msg;
                 applyVariant(classifyAlert(msg));
                 openAlert();
+            };
+
+            /**
+             * Booking / gated flows: explain why auth is needed, then user taps through to /auth?next=...
+             */
+            window.showEvorraAuthPrompt = function (nextPath) {
+                var next = String(nextPath || '/').trim() || '/';
+                if (alertConfirm) {
+                    alertConfirm.textContent = 'Log in or sign up';
+                    alertConfirm.classList.remove('hide');
+                    alertConfirm.onclick = function () {
+                        window.closeEvorraAlert();
+                        window.location.href = '/auth?next=' + encodeURIComponent(next);
+                    };
+                }
+                if (alertBtn) {
+                    alertBtn.textContent = 'Not now';
+                    alertBtn.classList.add('evorra-alert-btn--secondary');
+                    alertBtn.classList.remove('evorra-alert-btn--single');
+                }
+                if (alertActions) alertActions.classList.add('evorra-alert-actions--dual');
+                applyVariant('warning');
+                alertTitle.textContent = 'Account required';
+                alertMsg.textContent =
+                    'Please log in or create an account to purchase tickets. After you sign in, we will take you back to finish your booking.';
+                alertIcon.innerHTML = '<i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>';
+                openAlert();
+                if (alertConfirm) {
+                    setTimeout(function () {
+                        try {
+                            alertConfirm.focus();
+                        } catch (err) {}
+                    }, 150);
+                }
             };
 
             if (alertOverlay) {
@@ -890,6 +959,42 @@
     </script>
     
     <style>
+        .evorra-alert-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .evorra-alert-actions--dual {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .evorra-alert-actions .evorra-alert-btn {
+            width: 100%;
+        }
+        .evorra-alert-actions--dual .evorra-alert-btn {
+            flex: 1 1 140px;
+            width: auto;
+            min-width: min(160px, 46%);
+        }
+        .evorra-alert-btn--single {
+            width: 100%;
+        }
+        .evorra-alert-btn--secondary {
+            background: transparent !important;
+            color: var(--sm-text, #1e293b) !important;
+            border: 2px solid rgba(15, 23, 42, 0.14);
+            box-shadow: none !important;
+        }
+        .evorra-alert-btn--secondary:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 23, 42, 0.26);
+            box-shadow: none !important;
+        }
+        .evorra-alert-btn--confirm {
+            order: -1;
+        }
         .hide-on-desktop { display: none; }
         .hide-on-mobile { display: block; }
         .sm-topnav {
