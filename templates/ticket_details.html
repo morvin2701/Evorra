@@ -1061,7 +1061,7 @@
                                 <p id="remaining-count" class="share-metric-value">0</p>
                             </div>
                         </div>
-                        <p id="share-note" class="share-note">Share by email or choose a country code and enter the recipient&apos;s local number (same as on their Evorra profile). WhatsApp only sends a reminder—they still accept in Shared Tickets.</p>
+                        <p id="share-note" class="share-note">Evorra does <strong>not</strong> send SMS. Share by email or by mobile that matches their profile; they get an <strong>in-app</strong> notification (bell / Notifications) and accept under <strong>Shared Tickets</strong>. Use the WhatsApp button if you want to text them yourself.</p>
                         <p id="share-lock-note" class="share-lock-note">Checked-in passes cannot be shared. This ticket has already been used at entry.</p>
                         <div id="transfer-history" class="transfer-history">
                             <p class="transfer-history-title">Transfer History</p>
@@ -1548,18 +1548,105 @@
         return '';
     }
 
+    function formatWhatsAppEventDateLine(ticket) {
+        if (!ticket) return 'TBA';
+        const ev = ticket.event_snapshot || {};
+        let d = null;
+        const st = ev.start_time;
+        if (st) {
+            try {
+                const x = st.toDate ? st.toDate() : new Date(st);
+                if (!Number.isNaN(x.getTime())) d = x;
+            } catch (e) {}
+        }
+        if (!d) {
+            const ms = getEventStartMs(ticket);
+            if (ms != null) {
+                const x = new Date(ms);
+                if (!Number.isNaN(x.getTime())) d = x;
+            }
+        }
+        if (!d) return 'TBA';
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function whatsappInviteWhereLine(ticket) {
+        if (!ticket) return 'TBA';
+        const ev = ticket.event_snapshot || {};
+        const city = ev.city != null ? String(ev.city).trim() : '';
+        const venue = ev.venue != null ? String(ev.venue).trim() : '';
+        return city || venue || 'TBA';
+    }
+
+    /** Unicode escapes so emoji survive tooling/encoding; works in WhatsApp prefilled messages. */
+    const WAEMOJI = {
+        ticket: '\u{1F39F}\uFE0F',
+        notes: '\u{1F3B6}',
+        pin: '\u{1F4CD}',
+        cal: '\u{1F4C5}',
+        person: '\u{1F464}',
+        sparkles: '\u{2728}',
+        pointRight: '\u{1F449}',
+        rocket: '\u{1F680}',
+    };
+
+    function sanitizeWhatsAppSenderName(user) {
+        if (!user) return 'Someone';
+        const raw = String(user.displayName || '').trim();
+        const email = String(user.email || '').trim();
+        const base = raw || (email ? email.split('@')[0].replace(/\./g, ' ') : '');
+        const cleaned = base.replace(/[\*_~`]/g, ' ').replace(/\s+/g, ' ').trim();
+        return cleaned || 'Someone';
+    }
+
+    function canonicalSharedTicketsUrl(shareUrlPlain) {
+        const raw = String(shareUrlPlain || '').trim();
+        if (!raw) return raw;
+        try {
+            return new URL(raw).href.replace(/\/+$/, '');
+        } catch (e) {
+            return raw;
+        }
+    }
+
+    function buildWhatsAppTicketInviteText(activeTicketInner, shareUrlPlain, senderUser) {
+        const ev = activeTicketInner.event_snapshot || {};
+        const title = activeTicketInner.event_title || ev.title || 'an event';
+        const where = whatsappInviteWhereLine(activeTicketInner);
+        const when = formatWhatsAppEventDateLine(activeTicketInner);
+        const linkLine = canonicalSharedTicketsUrl(shareUrlPlain);
+        const fromName = sanitizeWhatsAppSenderName(senderUser);
+        const nl = '\n';
+        const T = WAEMOJI;
+        const oq = '\u201C';
+        const cq = '\u201D';
+        const boldName = `*${fromName}*`;
+        return (
+            `${T.ticket} *You're Invited!*${nl}${nl}` +
+            `You've received a ticket on *Evorra* for:${nl}${nl}` +
+            `${T.notes} *${title}*${nl}` +
+            `${T.pin} ${where}${nl}` +
+            `${T.cal} ${when}${nl}` +
+            `${T.person} From \u2014 ${oq}${boldName}${cq}${nl}` +
+            `${T.sparkles} Don't miss out \u2014 confirm your ticket now!${nl}${nl}${nl}` +
+            `${T.pointRight}  ${linkLine}${nl}${nl}` +
+            `See you at the event ${T.rocket}`
+        );
+    }
+
     function openShareWhatsAppPrefill() {
+        if (!activeTicket) return alert('Ticket is still loading. Try again.');
         const normalized = getShareRecipientPhoneNormalized();
         if (normalized.length < 10) {
             alert('Enter a mobile number (with country code, e.g. +91…) to open WhatsApp.');
             return;
         }
-        const user = auth.currentUser;
-        const base = getPublicBase() || window.location.origin || '';
-        const eventName = (activeTicket && (activeTicket.event_title || '')) || 'an event';
-        const sender = (user && user.displayName) || 'Someone';
-        const msg = `${sender}: Evorra ticket(s) for "${eventName}". Accept in app: Shared Tickets — ${base}/shared-tickets`;
-        window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        const rawBase = getPublicBase() || window.location.origin || '';
+        const shareUrl = `${rawBase.replace(/\/$/, '')}/shared-tickets`;
+        const senderUser = typeof auth !== 'undefined' ? auth.currentUser : null;
+        const msg = buildWhatsAppTicketInviteText(activeTicket, shareUrl, senderUser);
+        const qs = new URLSearchParams({ phone: normalized, text: msg });
+        window.open('https://api.whatsapp.com/send?' + qs.toString(), '_blank', 'noopener,noreferrer');
     }
 
     async function splitAndShareTicket() {
@@ -1631,6 +1718,10 @@
                     ? { shared_to_email: shareVia.emailLower, shared_to_phone: fvDelete }
                     : { shared_to_phone: shareVia.phoneNorm, shared_to_email: fvDelete };
 
+                const shareFieldsForNewDocOnly = shareVia.mode === 'email'
+                    ? { shared_to_email: shareVia.emailLower }
+                    : { shared_to_phone: shareVia.phoneNorm };
+
                 if (remainingQty <= 0) {
                     txn.update(ticketRef, {
                         user_id: targetUid,
@@ -1665,8 +1756,9 @@
 
                 const newRef = db.collection('tickets').doc();
                 const newId = newRef.id;
+                const { shared_to_email: _omitEmail, shared_to_phone: _omitPhone, ...srcForSplitDoc } = src;
                 txn.set(newRef, {
-                    ...src,
+                    ...srcForSplitDoc,
                     id: newId,
                     // Create under current owner first (rules-safe), then transfer ownership after txn.
                     user_id: user.uid,
@@ -1686,7 +1778,7 @@
                     scanned_at: null,
                     last_scanned_by: null,
                     created_time: firebase.firestore.FieldValue.serverTimestamp(),
-                    ...shareFieldsPick,
+                    ...shareFieldsForNewDocOnly,
                 });
                 transferTicketId = newId;
                 transferTargetUid = targetUid;
