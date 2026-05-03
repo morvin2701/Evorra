@@ -659,6 +659,74 @@
         background: var(--sm-bg);
         padding: 14px;
     }
+    .share-or {
+        margin: 10px 0 0;
+        text-align: center;
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+    }
+    .share-phone-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        margin-top: 8px;
+        align-items: stretch;
+    }
+    .share-phone-fields {
+        display: grid;
+        grid-template-columns: minmax(100px, 38%) minmax(0, 1fr);
+        gap: 8px;
+        min-width: 0;
+    }
+    .share-country-select {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
+        font-size: 0.8rem;
+        font-weight: 800;
+        padding: 11px 10px;
+        outline: none;
+        cursor: pointer;
+        font-family: inherit;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .share-country-select:focus {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+    .share-input-national { min-width: 0; }
+    .share-wa-btn {
+        width: 48px;
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid rgba(37, 211, 102, 0.45);
+        background: linear-gradient(145deg, rgba(37, 211, 102, 0.14), rgba(18, 140, 126, 0.1));
+        color: #128c7e;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.22rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        flex-shrink: 0;
+    }
+    .share-wa-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: rgba(37, 211, 102, 0.75);
+        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.18);
+    }
+    .share-wa-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
     .share-input {
         width: 100%;
         box-sizing: border-box;
@@ -797,6 +865,9 @@
         .pass-grid { grid-template-columns: 1fr; }
         .share-row { grid-template-columns: 1fr; }
         .share-metrics { grid-template-columns: 1fr; }
+        .share-phone-row { grid-template-columns: 1fr; }
+        .share-phone-fields { grid-template-columns: 1fr; }
+        .share-wa-btn { width: 100%; min-height: 44px; }
     }
 </style>
 {% endblock %}
@@ -945,7 +1016,37 @@
                 <div class="ticket-card ticket-block">
                     <h2 class="section-title">Share Tickets</h2>
                     <div id="share-box-root" class="share-box">
-                        <input id="share-email" type="email" class="share-input" placeholder="Recipient account email">
+                        <input id="share-email" type="email" class="share-input" placeholder="Recipient Evorra email" autocomplete="email">
+                        <p class="share-or">or mobile (country + local number)</p>
+                        <div class="share-phone-row">
+                            <div class="share-phone-fields">
+                                <label class="visually-hidden" for="share-phone-country">Recipient country</label>
+                                <select id="share-phone-country" class="share-country-select" autocomplete="country">
+                                    <option value="91" selected>India (+91)</option>
+                                    <option value="1">United States (+1)</option>
+                                    <option value="44">United Kingdom (+44)</option>
+                                    <option value="971">UAE (+971)</option>
+                                    <option value="65">Singapore (+65)</option>
+                                    <option value="60">Malaysia (+60)</option>
+                                    <option value="61">Australia (+61)</option>
+                                    <option value="64">New Zealand (+64)</option>
+                                    <option value="880">Bangladesh (+880)</option>
+                                    <option value="92">Pakistan (+92)</option>
+                                    <option value="94">Sri Lanka (+94)</option>
+                                    <option value="977">Nepal (+977)</option>
+                                    <option value="966">Saudi Arabia (+966)</option>
+                                    <option value="27">South Africa (+27)</option>
+                                    <option value="49">Germany (+49)</option>
+                                    <option value="33">France (+33)</option>
+                                    <option value="81">Japan (+81)</option>
+                                    <option value="82">South Korea (+82)</option>
+                                    <option value="86">China (+86)</option>
+                                    <option value="">Other (full number)</option>
+                                </select>
+                                <input id="share-phone-national" type="tel" class="share-input share-input-national" placeholder="Local mobile" inputmode="numeric" autocomplete="tel-national">
+                            </div>
+                            <button type="button" id="share-whatsapp-invite-btn" class="share-wa-btn" title="Ping on WhatsApp with accept link"><i class="fa-brands fa-whatsapp"></i></button>
+                        </div>
                         <div class="share-row">
                             <input id="share-qty" type="number" min="1" step="1" class="share-input" placeholder="Qty">
                             <button id="share-split-btn" class="share-btn" type="button">Share Split</button>
@@ -960,7 +1061,7 @@
                                 <p id="remaining-count" class="share-metric-value">0</p>
                             </div>
                         </div>
-                        <p id="share-note" class="share-note">You can split this ticket quantity and transfer selected tickets to another registered account.</p>
+                        <p id="share-note" class="share-note">Share by email or choose a country code and enter the recipient&apos;s local number (same as on their Evorra profile). WhatsApp only sends a reminder—they still accept in Shared Tickets.</p>
                         <p id="share-lock-note" class="share-lock-note">Checked-in passes cannot be shared. This ticket has already been used at entry.</p>
                         <div id="transfer-history" class="transfer-history">
                             <p class="transfer-history-title">Transfer History</p>
@@ -1278,17 +1379,26 @@
         const box = document.getElementById('share-box-root');
         const btn = document.getElementById('share-split-btn');
         const email = document.getElementById('share-email');
+        const phoneCountry = document.getElementById('share-phone-country');
+        const phoneNational = document.getElementById('share-phone-national');
+        const wa = document.getElementById('share-whatsapp-invite-btn');
         const qty = document.getElementById('share-qty');
         if (!box || !btn) return;
         if (checkedIn) {
             box.classList.add('share-box--locked');
             btn.disabled = true;
             if (email) email.disabled = true;
+            if (phoneCountry) phoneCountry.disabled = true;
+            if (phoneNational) phoneNational.disabled = true;
+            if (wa) wa.disabled = true;
             if (qty) qty.disabled = true;
         } else {
             box.classList.remove('share-box--locked');
             btn.disabled = false;
             if (email) email.disabled = false;
+            if (phoneCountry) phoneCountry.disabled = false;
+            if (phoneNational) phoneNational.disabled = false;
+            if (wa) wa.disabled = false;
             if (qty) qty.disabled = false;
         }
     }
@@ -1402,24 +1512,95 @@
         return userDoc.id;
     }
 
+    /** Combine country dial (from select) + local digits. Empty dial = user entered full international in local field. */
+    function getShareRecipientPhoneNormalized() {
+        const dial = String(document.getElementById('share-phone-country').value || '').replace(/\D/g, '');
+        const national = String(document.getElementById('share-phone-national').value || '').replace(/\D/g, '');
+        if (!national) return '';
+        if (!dial) return national;
+        return dial + national;
+    }
+
+    function resetSharePhoneFields() {
+        const c = document.getElementById('share-phone-country');
+        const n = document.getElementById('share-phone-national');
+        if (c) c.value = '91';
+        if (n) n.value = '';
+    }
+
+    async function resolveRecipientUidByPhone(normalizedDigits) {
+        const d = String(normalizedDigits || '').trim();
+        if (!d) return '';
+
+        let q = await db.collection('users').where('phone_normalized', '==', d).limit(1).get();
+        if (!q.empty) return q.docs[0].id;
+
+        if (d.length > 10) {
+            const tail = d.slice(-10);
+            q = await db.collection('users').where('phone_normalized', '==', tail).limit(1).get();
+            if (!q.empty) return q.docs[0].id;
+            const with91 = '91' + tail;
+            if (d !== with91) {
+                q = await db.collection('users').where('phone_normalized', '==', with91).limit(1).get();
+                if (!q.empty) return q.docs[0].id;
+            }
+        }
+        return '';
+    }
+
+    function openShareWhatsAppPrefill() {
+        const normalized = getShareRecipientPhoneNormalized();
+        if (normalized.length < 10) {
+            alert('Enter a mobile number (with country code, e.g. +91…) to open WhatsApp.');
+            return;
+        }
+        const user = auth.currentUser;
+        const base = getPublicBase() || window.location.origin || '';
+        const eventName = (activeTicket && (activeTicket.event_title || '')) || 'an event';
+        const sender = (user && user.displayName) || 'Someone';
+        const msg = `${sender}: Evorra ticket(s) for "${eventName}". Accept in app: Shared Tickets — ${base}/shared-tickets`;
+        window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+    }
+
     async function splitAndShareTicket() {
         if (!activeTicket) return alert("Ticket is still loading. Try again.");
         const user = auth.currentUser;
         if (!user) return alert("Please login again.");
 
         const email = document.getElementById('share-email').value.trim();
+        const phoneNationalRaw = document.getElementById('share-phone-national').value.trim();
         const qty = toIntQty(document.getElementById('share-qty').value);
         const srcQty = toIntQty(activeTicket.quantity || 1);
-        if (!email) return alert("Enter recipient email.");
+        if (email && phoneNationalRaw) return alert('Use either recipient email or mobile, not both.');
+        if (!email && !phoneNationalRaw) return alert('Enter recipient email or mobile number.');
         if (qty < 1) return alert("Enter valid quantity.");
         if (qty > srcQty) return alert(`You only have ${srcQty} ticket(s).`);
+
+        const fvDelete = firebase.firestore.FieldValue.delete();
+        const shareVia = {};
+        if (email) {
+            shareVia.mode = 'email';
+            shareVia.emailLower = email.toLowerCase();
+            shareVia.phoneNorm = '';
+        } else {
+            shareVia.mode = 'phone';
+            shareVia.phoneNorm = getShareRecipientPhoneNormalized();
+            shareVia.emailLower = '';
+            if (shareVia.phoneNorm.length < 10) return alert('Enter a valid mobile with country code (e.g. +91 for India).');
+        }
 
         const btn = document.getElementById('share-split-btn');
         btn.disabled = true;
         btn.textContent = 'Sharing...';
         try {
-            const targetUid = await resolveRecipientUidByEmail(email);
-            if (!targetUid) throw new Error("Recipient account not found. Ask them to sign up first.");
+            let targetUid;
+            if (shareVia.mode === 'email') {
+                targetUid = await resolveRecipientUidByEmail(shareVia.emailLower);
+                if (!targetUid) throw new Error("Recipient account not found. Ask them to sign up first.");
+            } else {
+                targetUid = await resolveRecipientUidByPhone(shareVia.phoneNorm);
+                if (!targetUid) throw new Error("No Evorra account with this mobile. They must save this number in Edit Profile, or share using their email.");
+            }
             if (targetUid === user.uid) throw new Error("Recipient cannot be your own account.");
 
             const ticketRef = db.collection('tickets').doc(ticketId);
@@ -1446,6 +1627,10 @@
                 const rootId = src.shared_from_ticket_id || ticketId;
                 const msg = `${user.displayName || 'A user'} shared ${qty} ticket(s) for ${src.event_title || 'an event'} with you. Accept or reject it from Shared Tickets.`;
 
+                const shareFieldsPick = shareVia.mode === 'email'
+                    ? { shared_to_email: shareVia.emailLower, shared_to_phone: fvDelete }
+                    : { shared_to_phone: shareVia.phoneNorm, shared_to_email: fvDelete };
+
                 if (remainingQty <= 0) {
                     txn.update(ticketRef, {
                         user_id: targetUid,
@@ -1454,11 +1639,11 @@
                         status: 'shared_pending',
                         shared_by: user.uid,
                         shared_recipient_uid: targetUid,
-                        shared_to_email: email.toLowerCase(),
                         shared_from_ticket_id: rootId,
                         shared_at: firebase.firestore.FieldValue.serverTimestamp(),
                         accepted_at: null,
-                        rejected_at: null
+                        rejected_at: null,
+                        ...shareFieldsPick,
                     });
                     notificationPayload = {
                         user_id: targetUid,
@@ -1493,7 +1678,6 @@
                     shared_from_ticket_id: rootId,
                     shared_by: user.uid,
                     shared_recipient_uid: targetUid,
-                    shared_to_email: email.toLowerCase(),
                     shared_at: firebase.firestore.FieldValue.serverTimestamp(),
                     accepted_at: null,
                     rejected_at: null,
@@ -1501,7 +1685,8 @@
                     checked_in: false,
                     scanned_at: null,
                     last_scanned_by: null,
-                    created_time: firebase.firestore.FieldValue.serverTimestamp()
+                    created_time: firebase.firestore.FieldValue.serverTimestamp(),
+                    ...shareFieldsPick,
                 });
                 transferTicketId = newId;
                 transferTargetUid = targetUid;
@@ -1543,6 +1728,7 @@
 
             alert(`Successfully shared ${qty} ticket(s). Recipient must accept or reject from Shared Tickets.`);
             document.getElementById('share-email').value = '';
+            resetSharePhoneFields();
         } catch (e) {
             alert(e.message || e.code || "Unable to share ticket right now.");
         } finally {
@@ -1580,7 +1766,7 @@
                     const userSnap = await db.collection('users').doc(uid).get();
                     if (userSnap.exists) {
                         const u = userSnap.data() || {};
-                        userMap.set(uid, u.email || u.email_lower || u.displayName || uid);
+                        userMap.set(uid, u.email || u.email_lower || u.phone_number || u.displayName || uid);
                     }
                 } catch (e) {}
             }));
@@ -1643,5 +1829,6 @@
         );
     });
     document.getElementById('share-split-btn').addEventListener('click', splitAndShareTicket);
+    document.getElementById('share-whatsapp-invite-btn').addEventListener('click', openShareWhatsAppPrefill);
 </script>
 {% endblock %}

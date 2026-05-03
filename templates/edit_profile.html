@@ -4,154 +4,586 @@
 
 {% block head %}
 <style>
-    .edit-bg { background: transparent; min-height: 100vh; }
-    .edit-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 22px 0 120px; }
-    .edit-topbar { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    /* Edit Profile — Showmates light shell (inherits body.theme-showmates) */
+    .edit-root {
+        min-height: 100vh;
+        background: var(--sm-bg);
+        color: var(--sm-text);
+        padding-bottom: max(96px, env(safe-area-inset-bottom, 24px));
+    }
+    .edit-shell {
+        width: min(1200px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 28px 0 32px;
+    }
+    .edit-topbar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
     .edit-back {
-        width: 40px; height: 40px; border-radius: 12px; color: #fff; text-decoration: none;
-        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
-        display: inline-flex; align-items: center; justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        color: var(--sm-text);
+        text-decoration: none;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.22s ease, border-color 0.2s ease, box-shadow 0.22s ease, color 0.2s ease;
     }
-    .edit-title { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; color: #fff; }
-    .branding-card {
-        margin-bottom: 18px; border-radius: 20px; padding: 16px;
-        display: grid; grid-template-columns: 68px 1fr; gap: 14px; align-items: center;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
+    .edit-back:hover {
+        transform: translateY(-2px);
+        border-color: rgba(220, 38, 38, 0.28);
+        color: var(--sm-primary);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
     }
-    .branding-icon {
-        width: 68px; height: 68px; background: rgba(255,255,255,0.18); border-radius: 20px;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        font-size: 1.8rem;
+    .edit-headlines { min-width: 0; flex: 1; }
+    .edit-kicker {
+        margin: 0 0 4px;
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
     }
-    .branding-title { font-size: 1.2rem; font-weight: 900; }
-    .branding-sub { font-size: 0.82rem; color: rgba(255,255,255,0.92); margin-top: 4px; }
-    .status-banner {
-        border-radius: 12px; padding: 10px 12px; font-size: 0.85rem; font-weight: 700; margin-bottom: 14px;
-        border: 1px solid transparent;
+    .edit-title {
+        margin: 0;
+        font-size: clamp(1.45rem, 4vw, 1.85rem);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        color: var(--sm-text);
+        line-height: 1.15;
     }
-    .status-banner.success { color: #9af7d2; background: rgba(54, 206, 156, 0.12); border-color: rgba(54,206,156,0.35); }
-    .status-banner.error { color: #ffbbc8; background: rgba(255, 88, 122, 0.12); border-color: rgba(255,88,122,0.35); }
-    .edit-section-title { margin: 26px 0 12px; font-size: 1.08rem; font-weight: 900; color: #fff; }
-    .edit-card {
-        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-        padding: 18px;
+    .edit-sub {
+        margin: 6px 0 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--sm-muted);
+        line-height: 1.45;
     }
-    .profile-input-group { margin-bottom: 16px; }
-    .field-label { color: rgba(255,255,255,0.82); font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; display: block; }
-    .profile-input-wrapper {
-        height: 50px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.05); display: grid; grid-template-columns: 40px 1fr; align-items: center;
+
+    .edit-body {
+        display: grid;
+        gap: 22px;
+        align-items: start;
+    }
+    .edit-main {
+        min-width: 0;
+    }
+    .edit-aside {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    @media (min-width: 960px) {
+        .edit-body {
+            grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+            gap: 28px 32px;
+        }
+        .edit-aside {
+            position: sticky;
+            top: max(92px, calc(env(safe-area-inset-top, 0px) + 88px));
+        }
+    }
+
+    .edit-banner {
+        border-radius: 22px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(135deg, #ffffff 0%, var(--sm-bg) 100%);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+            0 18px 48px rgba(15, 23, 42, 0.06);
         overflow: hidden;
+        margin-bottom: 16px;
+        position: relative;
     }
-    .profile-input-wrapper i { color: rgba(255,255,255,0.68); justify-self: center; }
-    .profile-input-wrapper input {
-        height: 100%; border: none; outline: none; background: transparent; color: #fff;
-        font-size: 0.9rem; padding-right: 12px;
+    .edit-banner::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--sm-primary), #f97316, var(--sm-primary-hover));
+        opacity: 0.85;
+        pointer-events: none;
     }
-    .profile-input-wrapper input::placeholder { color: rgba(255,255,255,0.45); }
-    .field-error { color: #FFB4B4; font-size: 0.72rem; margin-top: 6px; font-weight: 600; }
-    .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .edit-banner-inner {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 14px;
+        align-items: center;
+        padding: 16px 18px;
+        position: relative;
+        z-index: 1;
+    }
+    .edit-banner-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, rgba(220, 38, 38, 0.1), rgba(249, 115, 22, 0.08));
+        border: 1px solid rgba(220, 38, 38, 0.14);
+        color: var(--sm-primary);
+        font-size: 1.35rem;
+    }
+    .edit-banner-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--sm-text);
+    }
+    .edit-banner-desc {
+        margin: 4px 0 0;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--sm-muted);
+        line-height: 1.45;
+    }
+
+    .status-banner {
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        border: 1px solid transparent;
+        line-height: 1.4;
+    }
+    .status-banner.success {
+        color: #047857;
+        background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
+    }
+    .status-banner.error {
+        color: #b91c1c;
+        background: linear-gradient(135deg, #fef2f2, #fff);
+        border-color: rgba(220, 38, 38, 0.25);
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.07);
+    }
+
+    .edit-section-label {
+        margin: 26px 0 10px;
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+    }
+    .edit-main > .edit-section-label:first-of-type {
+        margin-top: 0;
+    }
+    .edit-aside > .edit-section-label {
+        margin-top: 6px;
+    }
+
+    .edit-card {
+        border-radius: 20px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        padding: 18px;
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+            0 16px 40px rgba(15, 23, 42, 0.05);
+    }
+
+    .edit-field {
+        margin-bottom: 16px;
+    }
+    .edit-field:last-child {
+        margin-bottom: 0;
+    }
+    .edit-fields-row {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    @media (min-width: 700px) {
+        .edit-fields-row {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    .edit-fields-row .edit-field {
+        margin-bottom: 0;
+    }
+    .edit-field-label {
+        display: block;
+        margin: 0 0 8px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+    }
+    .edit-input-well {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        align-items: center;
+        gap: 0;
+        height: 52px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, var(--sm-surface), var(--sm-bg));
+        overflow: hidden;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .edit-input-well:focus-within {
+        border-color: rgba(220, 38, 38, 0.42);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+    }
+    .edit-input-well i {
+        text-align: center;
+        font-size: 1rem;
+        color: rgba(220, 38, 38, 0.75);
+    }
+    .edit-input-well input {
+        height: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--sm-text);
+        font-size: 0.93rem;
+        font-weight: 600;
+        padding-right: 14px;
+        font-family: inherit;
+    }
+    .edit-input-well input::placeholder {
+        color: #94a3b8;
+    }
+
+    .edit-phone-grid {
+        display: grid;
+        grid-template-columns: minmax(124px, 38%) minmax(0, 1fr);
+        gap: 10px;
+        align-items: stretch;
+    }
+    .edit-country-well {
+        display: flex;
+        align-items: center;
+        min-height: 52px;
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, var(--sm-surface), var(--sm-bg));
+        padding: 0 4px 0 10px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .edit-country-well:focus-within {
+        border-color: rgba(220, 38, 38, 0.42);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+    }
+    .edit-country-select {
+        width: 100%;
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--sm-text);
+        font-size: 0.82rem;
+        font-weight: 800;
+        padding: 10px 8px 10px 0;
+        outline: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .field-error {
+        color: var(--sm-primary);
+        font-size: 0.73rem;
+        margin-top: 7px;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .edit-role-stack {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    @media (min-width: 960px) {
+        .edit-aside .edit-role-stack {
+            grid-template-columns: 1fr;
+        }
+    }
     .role-card {
-        border-radius: 14px; border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.05); padding: 14px; cursor: pointer; transition: .2s ease;
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, var(--sm-surface), var(--sm-bg));
+        padding: 16px;
+        cursor: pointer;
+        text-align: left;
+        font-family: inherit;
+        outline: none;
+        transition:
+            transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 0.2s ease,
+            box-shadow 0.22s ease;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        display: grid;
+        grid-template-rows: auto auto auto;
+        gap: 0;
+    }
+    .role-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(220, 38, 38, 0.2);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+    .role-card:focus-visible {
+        box-shadow:
+            0 0 0 3px #fff,
+            0 0 0 5px rgba(220, 38, 38, 0.45);
     }
     .role-card.active {
-        border-color: rgba(88,228,255,0.5);
-        background: linear-gradient(145deg, rgba(35,198,243,0.22), rgba(127,95,255,0.22));
+        border-color: rgba(220, 38, 38, 0.42);
+        background: linear-gradient(145deg, #fffefb 0%, #fff 40%, rgba(254, 242, 242, 0.5) 100%);
+        box-shadow:
+            0 0 0 1px rgba(220, 38, 38, 0.12) inset,
+            0 14px 36px rgba(220, 38, 38, 0.1);
     }
-    #save-btn { margin-top: 28px; height: 56px; font-size: 1rem; font-weight: 900; }
-    .role-card-title { color: #fff; font-weight: 800; font-size: 0.9rem; margin: 8px 0 0; }
-    .role-card-desc { color: rgba(255,255,255,0.52); font-size: 0.7rem; margin-top: 5px; line-height: 1.35; }
+    .role-card-icon-wrap {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(249, 115, 22, 0.08));
+        color: var(--sm-primary);
+        font-size: 1.08rem;
+    }
+    .role-card.active .role-card-icon-wrap {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.18), rgba(249, 115, 22, 0.12));
+    }
+    .role-card-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        border: 2px solid var(--sm-surface);
+        background: #e2e8f0;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+        pointer-events: none;
+    }
+    .role-card.active .role-card-badge {
+        transform: scale(1.35);
+        background: linear-gradient(135deg, #22c55e, var(--sm-primary));
+    }
+    .role-card-title {
+        margin: 0;
+        color: var(--sm-text);
+        font-weight: 900;
+        font-size: 0.95rem;
+        letter-spacing: -0.02em;
+    }
+    .role-card-desc {
+        margin: 6px 0 0;
+        color: var(--sm-muted);
+        font-size: 0.73rem;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+
+    .edit-aside #save-btn {
+        margin-top: 18px;
+    }
+    #save-btn {
+        margin-top: 24px;
+        width: 100%;
+        height: 54px;
+        font-size: 0.95rem;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        border-radius: 14px !important;
+        transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+    }
+    #save-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+
+    /* Staggered entrance */
+    .edit-rise {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .edit-rise {
+            opacity: 0;
+            animation: edit-rise-in 0.58s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .edit-rise--delay-1 {
+            animation-delay: 0.06s;
+        }
+        .edit-rise--delay-2 {
+            animation-delay: 0.12s;
+        }
+        .edit-rise--delay-3 {
+            animation-delay: 0.18s;
+        }
+        .edit-rise--delay-4 {
+            animation-delay: 0.24s;
+        }
+        .edit-rise--delay-5 {
+            animation-delay: 0.3s;
+        }
+    }
+    @keyframes edit-rise-in {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     @media (max-width: 640px) {
-        .edit-shell { width: calc(100% - 20px); padding-top: 14px; }
-        .edit-title { font-size: 1.45rem; }
-        .role-grid { grid-template-columns: 1fr; }
-        .branding-card { grid-template-columns: 56px 1fr; }
-        .branding-icon { width: 56px; height: 56px; font-size: 1.4rem; border-radius: 16px; }
+        .edit-shell {
+            width: calc(100% - 22px);
+            padding-top: 18px;
+        }
+        .edit-role-stack {
+            grid-template-columns: 1fr;
+        }
+        .edit-phone-grid {
+            grid-template-columns: 1fr;
+        }
+        .edit-fields-row {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="edit-bg">
+<div class="edit-root">
     <div class="edit-shell">
-        <div class="edit-topbar">
-            <a href="javascript:history.back()" class="edit-back"><i class="fa-solid fa-chevron-left"></i></a>
-            <h1 class="edit-title">Edit Profile</h1>
-        </div>
-
-        <!-- Hero Branding -->
-        <div class="branding-card animate-evorra">
-            <div class="branding-icon">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <header class="edit-topbar edit-rise">
+            <a href="/profile" class="edit-back" aria-label="Back to profile"><i class="fa-solid fa-chevron-left"></i></a>
+            <div class="edit-headlines">
+                <p class="edit-kicker">Account</p>
+                <h1 class="edit-title">Edit Profile</h1>
+                <p class="edit-sub">Details here power tickets, sharing by phone, and organiser tools.</p>
             </div>
-            <div>
-                <h3 class="branding-title">Refine Your Identity</h3>
-                <p class="branding-sub">Keep your profile polished and ready for every event experience.</p>
+        </header>
+
+        <div id="status-banner" class="status-banner hide edit-rise edit-rise--delay-2"></div>
+
+        <div class="edit-body">
+            <div class="edit-main">
+                <p class="edit-section-label edit-rise edit-rise--delay-2">Identity</p>
+                <section class="edit-card edit-rise edit-rise--delay-2" aria-labelledby="section-basic">
+                    <span id="section-basic" class="visually-hidden">Basic profile information</span>
+                    <div class="edit-fields-row">
+                        <div class="edit-field">
+                            <label class="edit-field-label" for="edit-name">Full Name</label>
+                            <div class="edit-input-well">
+                                <i class="fa-regular fa-user" aria-hidden="true"></i>
+                                <input type="text" id="edit-name" name="display_name" placeholder="Your name as on tickets" autocomplete="name">
+                            </div>
+                            <p id="err-name" class="field-error hide"></p>
+                        </div>
+
+                        <div class="edit-field">
+                            <label class="edit-field-label" for="edit-email">Email</label>
+                            <div class="edit-input-well">
+                                <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                                <input type="email" id="edit-email" name="email" placeholder="you@example.com" autocomplete="email">
+                            </div>
+                            <p id="err-email" class="field-error hide"></p>
+                        </div>
+                    </div>
+
+                    <div class="edit-field">
+                        <label class="edit-field-label" for="edit-phone-national">Phone</label>
+                        <div class="edit-phone-grid">
+                            <div class="edit-country-well">
+                                <label class="visually-hidden" for="edit-phone-country">Country calling code</label>
+                                <select id="edit-phone-country" name="country" class="edit-country-select" autocomplete="country">
+                                    <option value="91" selected>India (+91)</option>
+                                    <option value="1">United States (+1)</option>
+                                    <option value="44">United Kingdom (+44)</option>
+                                    <option value="971">UAE (+971)</option>
+                                    <option value="65">Singapore (+65)</option>
+                                    <option value="60">Malaysia (+60)</option>
+                                    <option value="61">Australia (+61)</option>
+                                    <option value="64">New Zealand (+64)</option>
+                                    <option value="880">Bangladesh (+880)</option>
+                                    <option value="92">Pakistan (+92)</option>
+                                    <option value="94">Sri Lanka (+94)</option>
+                                    <option value="977">Nepal (+977)</option>
+                                    <option value="966">Saudi Arabia (+966)</option>
+                                    <option value="27">South Africa (+27)</option>
+                                    <option value="49">Germany (+49)</option>
+                                    <option value="33">France (+33)</option>
+                                    <option value="81">Japan (+81)</option>
+                                    <option value="82">South Korea (+82)</option>
+                                    <option value="86">China (+86)</option>
+                                    <option value="">Other (full digits)</option>
+                                </select>
+                            </div>
+                            <div class="edit-input-well">
+                                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                                <input type="tel" id="edit-phone-national" inputmode="numeric" name="tel-national" placeholder="Local number" autocomplete="tel-national">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="edit-field">
+                        <label class="edit-field-label" for="edit-city">City</label>
+                        <div class="edit-input-well">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <input type="text" id="edit-city" name="city" placeholder="City you browse events from" autocomplete="address-level2">
+                        </div>
+                        <p id="err-city" class="field-error hide"></p>
+                    </div>
+                </section>
             </div>
-        </div>
 
-        <div id="status-banner" class="status-banner hide"></div>
-
-        <h2 class="edit-section-title">Basic Info</h2>
-        <div class="edit-card">
-            <!-- Name -->
-            <div class="profile-input-group">
-                <p class="field-label">Full Name</p>
-                <div class="profile-input-wrapper">
-                    <i class="fa-regular fa-user"></i>
-                    <input type="text" id="edit-name" placeholder="Enter your full name">
+            <aside class="edit-aside">
+                <div class="edit-banner edit-rise edit-rise--delay-1">
+                    <div class="edit-banner-inner">
+                        <div class="edit-banner-icon" aria-hidden="true">
+                            <i class="fa-solid fa-circle-user"></i>
+                        </div>
+                        <div>
+                            <h2 class="edit-banner-title">Show up the way you want</h2>
+                            <p class="edit-banner-desc">Saved securely to your Evorra account.</p>
+                        </div>
+                    </div>
                 </div>
-                <p id="err-name" class="field-error hide"></p>
-            </div>
 
-            <!-- Email -->
-            <div class="profile-input-group">
-                <p class="field-label">Email Address</p>
-                <div class="profile-input-wrapper">
-                    <i class="fa-regular fa-envelope"></i>
-                    <input type="email" id="edit-email" placeholder="you@example.com">
-                </div>
-                <p id="err-email" class="field-error hide"></p>
-            </div>
+                <p class="edit-section-label edit-rise edit-rise--delay-3">How you use Evorra</p>
+                <section class="edit-role-stack edit-rise edit-rise--delay-3" role="radiogroup" aria-label="Account role">
+                    <button type="button" class="role-card active edit-role-btn" id="role-attendee" data-role="attendee" role="radio" aria-checked="true" tabindex="0">
+                        <span class="role-card-badge"></span>
+                        <span class="role-card-icon-wrap" aria-hidden="true"><i class="fa-solid fa-ticket-simple"></i></span>
+                        <span class="role-card-title">Attendee</span>
+                        <span class="role-card-desc">Discover venues, buy tickets and enter with your pass.</span>
+                    </button>
+                    <button type="button" class="role-card edit-role-btn" id="role-organizer" data-role="organizer" role="radio" aria-checked="false" tabindex="0">
+                        <span class="role-card-badge"></span>
+                        <span class="role-card-icon-wrap" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+                        <span class="role-card-title">Organiser</span>
+                        <span class="role-card-desc">Publish events and run check-in from your dashboard.</span>
+                    </button>
+                </section>
 
-            <!-- Phone -->
-            <div class="profile-input-group">
-                <p class="field-label">Phone Number</p>
-                <div class="profile-input-wrapper">
-                    <i class="fa-solid fa-phone-flip"></i>
-                    <input type="text" id="edit-phone" placeholder="+91 98765 43210">
-                </div>
-            </div>
-
-            <!-- City -->
-            <div class="profile-input-group" style="margin-bottom: 0;">
-                <p class="field-label">City</p>
-                <div class="profile-input-wrapper">
-                    <i class="fa-solid fa-city"></i>
-                    <input type="text" id="edit-city" placeholder="Enter your city">
-                </div>
-                <p id="err-city" class="field-error hide"></p>
-            </div>
+                <button type="submit" id="save-btn" class="btn-evorra edit-rise edit-rise--delay-4">Save changes</button>
+            </aside>
         </div>
-
-        <h2 class="edit-section-title">Role</h2>
-        <div class="role-grid">
-            <div class="role-card active" id="role-attendee" onclick="setRole('attendee')">
-                <i class="fa-solid fa-masks-theater"></i>
-                <h4 class="role-card-title">Attendee</h4>
-                <p class="role-card-desc">Browse, save and book events</p>
-            </div>
-            <div class="role-card" id="role-organizer" onclick="setRole('organizer')">
-                <i class="fa-solid fa-id-badge"></i>
-                <h4 class="role-card-title">Organiser</h4>
-                <p class="role-card-desc">Host and manage events</p>
-            </div>
-        </div>
-
-        <button id="save-btn" onclick="saveProfile()" class="btn-evorra">Save Changes</button>
     </div>
 </div>
 {% endblock %}
@@ -160,8 +592,92 @@
 <script>
     let selectedRole = 'attendee';
 
+    const PROFILE_DIAL_PREFIXES = ['880', '971', '977', '966', '27', '60', '65', '86', '81', '82', '92', '94', '49', '33', '61', '64', '44', '91', '1'].sort(function (a, b) {
+        return b.length - a.length;
+    });
+
+    function applyStoredPhoneToForm(data) {
+        const norm = String((data && data.phone_normalized) || '').replace(/\D/g, '');
+        const countrySel = document.getElementById('edit-phone-country');
+        const nationalIn = document.getElementById('edit-phone-national');
+        if (!countrySel || !nationalIn) return;
+        if (norm) {
+            for (let i = 0; i < PROFILE_DIAL_PREFIXES.length; i++) {
+                const dial = PROFILE_DIAL_PREFIXES[i];
+                if (norm.indexOf(dial) === 0 && norm.length > dial.length + 5) {
+                    countrySel.value = dial;
+                    nationalIn.value = norm.slice(dial.length);
+                    return;
+                }
+            }
+            countrySel.value = '';
+            nationalIn.value = norm;
+            return;
+        }
+        const legacy = String((data && data.phone_number) || '').replace(/\D/g, '');
+        if (!legacy) {
+            countrySel.value = '91';
+            nationalIn.value = '';
+            return;
+        }
+        for (let j = 0; j < PROFILE_DIAL_PREFIXES.length; j++) {
+            const dial = PROFILE_DIAL_PREFIXES[j];
+            if (legacy.indexOf(dial) === 0 && legacy.length > dial.length + 5) {
+                countrySel.value = dial;
+                nationalIn.value = legacy.slice(dial.length);
+                return;
+            }
+        }
+        if (legacy.length === 10 && /^[6-9]/.test(legacy)) {
+            countrySel.value = '91';
+            nationalIn.value = legacy;
+            return;
+        }
+        countrySel.value = '';
+        nationalIn.value = legacy;
+    }
+
+    function buildPhoneForSave(dialRaw, nationalRaw) {
+        const dial = String(dialRaw || '').replace(/\D/g, '');
+        const national = String(nationalRaw || '').replace(/\D/g, '');
+        if (!national) return { phone_normalized: '', phone_number: '' };
+        if (!dial) return { phone_normalized: national, phone_number: '+' + national };
+        return {
+            phone_normalized: dial + national,
+            phone_number: '+' + dial + ' ' + national
+        };
+    }
+
+    /** Accepts 'organizer' or 'organiser' from Firestore; stores US spelling used across the app. */
+    function setRole(role) {
+        const r = String(role || '').toLowerCase();
+        const isOrg = r.indexOf('organ') !== -1;
+        selectedRole = isOrg ? 'organizer' : 'attendee';
+
+        document.querySelectorAll('.edit-role-btn').forEach(function (btn) {
+            var btnRole = btn.getAttribute('data-role');
+            var active = btnRole === 'organizer' ? isOrg : !isOrg;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        });
+    }
+
+    function wireRoleCards() {
+        document.querySelectorAll('.edit-role-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setRole(btn.getAttribute('data-role'));
+            });
+            btn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    btn.click();
+                }
+            });
+        });
+    }
+
     async function loadCurrentProfile() {
-        auth.onAuthStateChanged(async (user) => {
+        auth.onAuthStateChanged(async function (user) {
             if (!user) {
                 location.href = '/auth';
                 return;
@@ -170,10 +686,10 @@
             try {
                 const doc = await db.collection('users').doc(user.uid).get();
                 const data = doc.data() || {};
-                
+
                 document.getElementById('edit-name').value = data.display_name || user.displayName || '';
                 document.getElementById('edit-email').value = data.email || user.email || '';
-                document.getElementById('edit-phone').value = data.phone_number || '';
+                applyStoredPhoneToForm(data);
                 var prefCity =
                     (data.city && String(data.city).trim()) ||
                     (Array.isArray(data.cities) && data.cities.length
@@ -183,21 +699,12 @@
                         ? String(data.cities.split(',')[0] || '').trim()
                         : '');
                 document.getElementById('edit-city').value = prefCity;
-                
-                if (data.role) setRole(data.role.toLowerCase());
 
-            } catch (e) { console.error(e); }
+                if (data.role) setRole(data.role);
+            } catch (e) {
+                console.error(e);
+            }
         });
-    }
-
-    function setRole(role) {
-        selectedRole = role;
-        document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
-        if (role.includes('organizer')) {
-            document.getElementById('role-organizer').classList.add('active');
-        } else {
-            document.getElementById('role-attendee').classList.add('active');
-        }
     }
 
     async function saveProfile() {
@@ -206,56 +713,80 @@
 
         const name = document.getElementById('edit-name').value.trim();
         const email = document.getElementById('edit-email').value.trim();
-        const phone = document.getElementById('edit-phone').value.trim();
+        const dial = document.getElementById('edit-phone-country').value;
+        const national = document.getElementById('edit-phone-national').value;
         const city = document.getElementById('edit-city').value.trim();
+        const phones = buildPhoneForSave(dial, national);
 
-        // Simple validation
-        let ok = true;
-        if (!name) { document.getElementById('err-name').textContent = "Name is required"; document.getElementById('err-name').classList.remove('hide'); ok = false; }
-        else document.getElementById('err-name').classList.add('hide');
+        var ok = true;
+        if (!name) {
+            document.getElementById('err-name').textContent = 'Name is required';
+            document.getElementById('err-name').classList.remove('hide');
+            ok = false;
+        } else document.getElementById('err-name').classList.add('hide');
 
-        if (!email) { document.getElementById('err-email').textContent = "Email is required"; document.getElementById('err-email').classList.remove('hide'); ok = false; }
-        else document.getElementById('err-email').classList.add('hide');
+        if (!email) {
+            document.getElementById('err-email').textContent = 'Email is required';
+            document.getElementById('err-email').classList.remove('hide');
+            ok = false;
+        } else document.getElementById('err-email').classList.add('hide');
 
-        if (!city) { document.getElementById('err-city').textContent = "City is required"; document.getElementById('err-city').classList.remove('hide'); ok = false; }
-        else document.getElementById('err-city').classList.add('hide');
+        if (!city) {
+            document.getElementById('err-city').textContent = 'City is required';
+            document.getElementById('err-city').classList.remove('hide');
+            ok = false;
+        } else document.getElementById('err-city').classList.add('hide');
 
         if (!ok) return;
 
-        const btn = document.getElementById('save-btn');
-        btn.textContent = "Saving...";
+        var btn = document.getElementById('save-btn');
+        var prevText = btn.textContent;
+        btn.textContent = 'Saving…';
         btn.disabled = true;
 
         try {
-            await db.collection('users').doc(user.uid).set({
-                display_name: name,
-                email: email,
-                phone_number: phone,
-                city: city,
-                role: selectedRole,
-                updated_time: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            await db.collection('users').doc(user.uid).set(
+                {
+                    display_name: name,
+                    email: email,
+                    email_lower: email.toLowerCase(),
+                    phone_number: phones.phone_number,
+                    phone_normalized: phones.phone_normalized,
+                    city: city,
+                    role: selectedRole,
+                    updated_time: firebase.firestore.FieldValue.serverTimestamp()
+                },
+                { merge: true }
+            );
 
-            // Update Auth Profile
             if (user.displayName !== name) await user.updateProfile({ displayName: name });
 
-            const banner = document.getElementById('status-banner');
-            banner.textContent = "Profile updated successfully!";
-            banner.className = "status-banner success";
+            var banner = document.getElementById('status-banner');
+            banner.textContent = 'Profile updated successfully. Redirecting…';
+            banner.className = 'status-banner success';
             banner.classList.remove('hide');
+            banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            setTimeout(() => { location.href = '/profile'; }, 1500);
-
+            setTimeout(function () {
+                location.href = '/profile';
+            }, 1400);
         } catch (e) {
-            const banner = document.getElementById('status-banner');
-            banner.textContent = e.message || "Failed to update profile";
-            banner.className = "status-banner error";
-            banner.classList.remove('hide');
-            btn.textContent = "Save Changes";
+            var errBanner = document.getElementById('status-banner');
+            errBanner.textContent = e.message || 'Something went wrong. Try again.';
+            errBanner.className = 'status-banner error';
+            errBanner.classList.remove('hide');
+            errBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            btn.textContent = prevText;
             btn.disabled = false;
         }
     }
 
+    document.getElementById('save-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        saveProfile();
+    });
+
+    wireRoleCards();
     loadCurrentProfile();
 </script>
 {% endblock %}

@@ -288,7 +288,7 @@
                     }
 
                     // Organizer Actions
-                    if (role.toLowerCase().includes('organizer')) {
+                    if (/organiz/.test(role.toLowerCase())) {
                         document.getElementById('organizer-actions').classList.remove('hide');
                     }
                 });

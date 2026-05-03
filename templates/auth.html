@@ -1328,6 +1328,8 @@
                 uid: uid,
                 displayName: name,
                 email: email,
+                email_lower: String(email || '').trim().toLowerCase(),
+                phone_normalized: '',
                 photoURL: '',
                 bio: '',
                 role: currentRole,
