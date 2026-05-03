@@ -379,6 +379,159 @@
             0 0 0 1px rgba(16, 185, 129, 0.06) inset,
             0 12px 36px rgba(16, 185, 129, 0.1);
     }
+
+    /* ── QR Locked state — countdown until unlock ── */
+    .qr-locked-state.hide { display: none !important; }
+    .qr-locked-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 14px;
+        padding: 6px 4px 4px;
+    }
+    .qrl-lock-ring {
+        width: clamp(158px, 50vw, 208px);
+        height: clamp(158px, 50vw, 208px);
+        border-radius: 28px;
+        background: linear-gradient(145deg, #fff1f2 0%, #fce7f3 38%, #fee2e2 100%);
+        border: 1px solid rgba(220, 38, 38, 0.2);
+        box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.72),
+            0 18px 42px rgba(220, 38, 38, 0.13),
+            0 8px 24px rgba(15,23,42,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .qrl-lock-ring::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.52), transparent 44%);
+        pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .qrl-lock-ring { animation: qrl-lock-pulse 3.2s ease-in-out infinite; }
+        .qrl-lock-icon { animation: qrl-lock-float 3.2s ease-in-out infinite; }
+    }
+    @keyframes qrl-lock-pulse {
+        0%,100% { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.72), 0 18px 42px rgba(220,38,38,0.12), 0 8px 24px rgba(15,23,42,0.06); }
+        50%      { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8), 0 26px 56px rgba(220,38,38,0.2), 0 12px 30px rgba(15,23,42,0.08); }
+    }
+    @keyframes qrl-lock-float {
+        0%,100% { transform: translateY(0) scale(1); }
+        50%      { transform: translateY(-5px) scale(1.05); }
+    }
+    .qrl-lock-icon {
+        position: relative;
+        z-index: 1;
+        width: clamp(70px, 20vw, 90px);
+        height: clamp(70px, 20vw, 90px);
+        border-radius: 999px;
+        background: linear-gradient(145deg, #ef4444, #dc2626, #b91c1c);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(1.85rem, 5.5vw, 2.4rem);
+        box-shadow:
+            0 4px 0 rgba(100, 0, 0, 0.22),
+            0 14px 30px rgba(220, 38, 38, 0.38);
+    }
+    /* Countdown timer row */
+    .qrl-timer-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 4px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.88) 100%);
+        border: 1px solid rgba(220, 38, 38, 0.14);
+        border-radius: 20px;
+        padding: 14px 16px 12px;
+        box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.9),
+            0 8px 24px rgba(15,23,42,0.07);
+        backdrop-filter: blur(8px);
+    }
+    .qrl-timer-seg {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        min-width: 42px;
+    }
+    .qrl-timer-num {
+        font-size: clamp(1.65rem, 4.4vw, 2.15rem);
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        color: var(--sm-primary);
+        letter-spacing: -0.04em;
+        line-height: 1;
+        display: block;
+    }
+    .qrl-timer-label {
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--sm-muted);
+    }
+    .qrl-timer-colon {
+        font-size: clamp(1.45rem, 3.5vw, 1.9rem);
+        font-weight: 900;
+        color: rgba(220, 38, 38, 0.38);
+        line-height: 1;
+        margin-top: 5px;
+        user-select: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .qrl-timer-colon { animation: qrl-blink 1s step-start infinite; }
+    }
+    @keyframes qrl-blink {
+        0%,100% { opacity: 1; }
+        50%      { opacity: 0.2; }
+    }
+    .qrl-days-wrap.qrl-days-wrap--hidden { display: none; }
+    .qrl-unlock-label {
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--sm-text);
+        line-height: 1.45;
+    }
+    .qrl-unlock-label strong { color: var(--sm-primary); font-weight: 900; }
+    .qrl-lock-sub {
+        margin: 0;
+        font-size: 0.79rem;
+        font-weight: 600;
+        color: var(--sm-muted);
+        line-height: 1.52;
+        max-width: 270px;
+    }
+    .qrl-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(220,38,38,0.22);
+        color: var(--sm-primary);
+        box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+    }
+    .qr-container.qr-container--locked {
+        background: linear-gradient(180deg, #fff1f2 0%, #fff 48%, var(--sm-bg) 100%);
+        border-color: rgba(220, 38, 38, 0.16);
+        box-shadow:
+            inset 0 0 0 1px rgba(220,38,38,0.04),
+            0 12px 36px rgba(220, 38, 38, 0.09);
+    }
     .share-box.share-box--locked {
         opacity: 0.55;
         pointer-events: none;
@@ -694,6 +847,43 @@
                         </div>
 
                         <div id="qr-pass-zone" class="qr-container">
+                            <!-- ── LOCKED: QR unlocks X hours before event ── -->
+                            <div id="qr-locked-state" class="qr-locked-state hide" aria-live="polite">
+                                <div class="qr-caption">QR Unlocks Before Entry</div>
+                                <div class="qr-locked-inner">
+                                    <div class="qrl-lock-ring">
+                                        <span class="qrl-lock-icon"><i class="fa-solid fa-lock" aria-hidden="true"></i></span>
+                                    </div>
+                                    <span class="qrl-badge"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Secure Pass</span>
+                                    <div class="qrl-timer-row" aria-live="off" aria-label="Time until QR unlocks">
+                                        <div class="qrl-days-wrap" id="qrl-days-wrap">
+                                            <div class="qrl-timer-seg">
+                                                <span id="qrl-days" class="qrl-timer-num">00</span>
+                                                <span class="qrl-timer-label">Days</span>
+                                            </div>
+                                        </div>
+                                        <span class="qrl-timer-colon" id="qrl-colon-days">:</span>
+                                        <div class="qrl-timer-seg">
+                                            <span id="qrl-hours" class="qrl-timer-num">00</span>
+                                            <span class="qrl-timer-label">Hrs</span>
+                                        </div>
+                                        <span class="qrl-timer-colon">:</span>
+                                        <div class="qrl-timer-seg">
+                                            <span id="qrl-mins" class="qrl-timer-num">00</span>
+                                            <span class="qrl-timer-label">Min</span>
+                                        </div>
+                                        <span class="qrl-timer-colon">:</span>
+                                        <div class="qrl-timer-seg">
+                                            <span id="qrl-secs" class="qrl-timer-num">00</span>
+                                            <span class="qrl-timer-label">Sec</span>
+                                        </div>
+                                    </div>
+                                    <p id="qrl-unlock-label" class="qrl-unlock-label">Unlocks on <strong>—</strong></p>
+                                    <p class="qrl-lock-sub">Your QR code is secured and will be revealed <strong>8 hours before</strong> the event starts to prevent early scanning.</p>
+                                </div>
+                            </div>
+
+                            <!-- ── ACTIVE: QR visible and ready to scan ── -->
                             <div id="qr-active-state" class="qr-active-state">
                                 <div id="qr-caption" class="qr-caption">Scan at Venue Gate</div>
                                 <div class="qr-stage">
@@ -784,20 +974,24 @@
                     <div class="summary-box">
                         <div id="instructions-qr-phase">
                             <div class="instruction-row">
+                                <div class="instruction-dot"><i class="fa-solid fa-lock"></i></div>
+                                <p class="instruction-text">Your QR is locked until <strong>8 hours before</strong> the event starts — this prevents early scanning and invalid entries.</p>
+                            </div>
+                            <div class="instruction-row">
                                 <div class="instruction-dot"><i class="fa-solid fa-qrcode"></i></div>
-                                <p class="instruction-text">Show this QR code at the venue entry point.</p>
+                                <p class="instruction-text">Once unlocked, show the QR code at the venue entry point for scanning.</p>
                             </div>
                             <div class="instruction-row">
                                 <div class="instruction-dot"><i class="fa-solid fa-sun"></i></div>
-                                <p class="instruction-text">Keep phone brightness high for fast scanning.</p>
+                                <p class="instruction-text">Keep phone brightness high and screen awake for fast scanning.</p>
                             </div>
                             <div class="instruction-row">
                                 <div class="instruction-dot"><i class="fa-solid fa-ticket"></i></div>
-                                <p class="instruction-text">Each ticket QR can only be scanned once.</p>
+                                <p class="instruction-text">Each ticket QR can only be scanned once at entry.</p>
                             </div>
                             <div class="instruction-row">
                                 <div class="instruction-dot"><i class="fa-solid fa-clock"></i></div>
-                                <p class="instruction-text">Reach the venue at least 15 minutes early.</p>
+                                <p class="instruction-text">Reach the venue at least 15 minutes before the event.</p>
                             </div>
                         </div>
                         <div id="instructions-checked-phase" class="hide">
@@ -832,6 +1026,113 @@
     let lastQrEncodedPayload = '';
     let sharedPendingRedirectIssued = false;
     let unauthorizedRedirectIssued = false;
+
+    /** ── QR unlock config ── */
+    const QR_UNLOCK_HOURS_BEFORE = 8; // hours before event start
+    let qrCountdownIntervalId = null;
+    // Resolved event start time in ms (populated from Firestore event doc as fallback
+    // when event_snapshot.start_time is an old display string, not a real Timestamp).
+    let cachedEventStartMs = null;
+
+    function getEventStartMs(ticket) {
+        const st = ticket && ticket.event_snapshot && ticket.event_snapshot.start_time;
+        if (st) {
+            try {
+                const d = st.toDate ? st.toDate() : new Date(st);
+                if (!Number.isNaN(d.getTime())) return d.getTime();
+            } catch (e) {}
+        }
+        // Fallback: use the Firestore-fetched value set by resolveEventStartMs()
+        return cachedEventStartMs;
+    }
+
+    function getQrUnlockMs(ticket) {
+        const startMs = getEventStartMs(ticket);
+        if (startMs === null) return null;
+        return startMs - QR_UNLOCK_HOURS_BEFORE * 60 * 60 * 1000;
+    }
+
+    function qrIsUnlocked(ticket) {
+        if (ticketIsCheckedIn(ticket)) return true;
+        const unlockMs = getQrUnlockMs(ticket);
+        if (unlockMs === null) return true; // no event time at all → open QR
+        return Date.now() >= unlockMs;
+    }
+
+    /**
+     * For tickets created before the start_time fix (event_snapshot.start_time is a
+     * display string), fetch the real Timestamp directly from the events collection.
+     * Called once in applyTicketSnapshot when the snapshot parse fails.
+     */
+    async function resolveEventStartMs(eventId) {
+        if (!eventId) return;
+        try {
+            const evDoc = await db.collection('events').doc(eventId).get();
+            if (!evDoc.exists) return;
+            const st = (evDoc.data() || {}).start_time;
+            if (!st) return;
+            const d = st.toDate ? st.toDate() : new Date(st);
+            if (!Number.isNaN(d.getTime())) {
+                cachedEventStartMs = d.getTime();
+            }
+        } catch (e) {}
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function formatCountdownMs(ms) {
+        const totalSecs = Math.max(0, Math.floor(ms / 1000));
+        const d = Math.floor(totalSecs / 86400);
+        const h = Math.floor((totalSecs % 86400) / 3600);
+        const m = Math.floor((totalSecs % 3600) / 60);
+        const s = totalSecs % 60;
+        return { d, h, m, s };
+    }
+
+    function formatUnlockDateTime(ms) {
+        try {
+            const d = new Date(ms);
+            const datePart = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+            const timePart = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            return `${datePart} at ${timePart}`;
+        } catch (e) { return ''; }
+    }
+
+    function stopQrCountdown() {
+        if (qrCountdownIntervalId !== null) {
+            clearInterval(qrCountdownIntervalId);
+            qrCountdownIntervalId = null;
+        }
+    }
+
+    function startQrCountdown(unlockMs, ticket) {
+        stopQrCountdown();
+        const daysEl   = document.getElementById('qrl-days');
+        const hoursEl  = document.getElementById('qrl-hours');
+        const minsEl   = document.getElementById('qrl-mins');
+        const secsEl   = document.getElementById('qrl-secs');
+        const daysWrap = document.getElementById('qrl-days-wrap');
+        const daysColon = document.getElementById('qrl-colon-days');
+
+        function tick() {
+            const remaining = unlockMs - Date.now();
+            if (remaining <= 0) {
+                stopQrCountdown();
+                applyQrAndCheckedInUi(ticket); // auto-reveal QR
+                return;
+            }
+            const { d, h, m, s } = formatCountdownMs(remaining);
+            const showDays = d > 0;
+            if (daysWrap) daysWrap.classList.toggle('qrl-days-wrap--hidden', !showDays);
+            if (daysColon) daysColon.classList.toggle('qrl-days-wrap--hidden', !showDays);
+            if (daysEl)  daysEl.textContent  = pad2(d);
+            if (hoursEl) hoursEl.textContent = pad2(h);
+            if (minsEl)  minsEl.textContent  = pad2(m);
+            if (secsEl)  secsEl.textContent  = pad2(s);
+        }
+        tick();
+        qrCountdownIntervalId = setInterval(tick, 1000);
+    }
 
     function getPublicBase() {
         return (window.APP_PUBLIC_URL || window.location.origin || '').replace(/\/$/, '');
@@ -875,19 +1176,24 @@
     }
 
     function applyQrAndCheckedInUi(ticket) {
-        const zone = document.getElementById('qr-pass-zone');
-        const activeState = document.getElementById('qr-active-state');
+        const zone         = document.getElementById('qr-pass-zone');
+        const lockedState  = document.getElementById('qr-locked-state');
+        const activeState  = document.getElementById('qr-active-state');
         const checkedState = document.getElementById('qr-checked-state');
-        const qrImg = document.getElementById('qr-img');
-        const qrLoader = document.getElementById('qr-loader');
-        const qrText = document.getElementById('qr-code-text');
-        const caption = document.getElementById('qr-caption');
-        const ring = document.getElementById('qr-checked-ring');
-        const checkedMsg = document.getElementById('qr-checked-msg');
-        const checkedIn = ticketIsCheckedIn(ticket);
+        const qrImg        = document.getElementById('qr-img');
+        const qrLoader     = document.getElementById('qr-loader');
+        const qrText       = document.getElementById('qr-code-text');
+        const caption      = document.getElementById('qr-caption');
+        const ring         = document.getElementById('qr-checked-ring');
+        const checkedMsg   = document.getElementById('qr-checked-msg');
+        const checkedIn    = ticketIsCheckedIn(ticket);
 
+        /* ── 1. CHECKED-IN: entry already used ── */
         if (checkedIn) {
+            stopQrCountdown();
+            zone.classList.remove('qr-container--locked');
             zone.classList.add('qr-container--checked');
+            if (lockedState) lockedState.classList.add('hide');
             activeState.classList.add('hide');
             checkedState.classList.remove('hide');
             qrImg.removeAttribute('src');
@@ -896,24 +1202,44 @@
             caption.textContent = 'Entry complete';
             const when = formatScannedAt(ticket);
             checkedMsg.textContent = when
-                ? `Scanned ${when}. You’re verified at the gate — enjoy the event.`
-                : 'This pass was scanned at the venue. You’re verified — enjoy the event.';
+                ? 'Scanned ' + when + '. You\u2019re verified at the gate \u2014 enjoy the event.'
+                : 'This pass was scanned at the venue. You\u2019re verified \u2014 enjoy the event.';
             if (ring) {
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                    ring.classList.remove('td-checked-ring--pulse');
-                } else {
-                    ring.classList.add('td-checked-ring--pulse');
-                }
+                ring.classList.toggle('td-checked-ring--pulse',
+                    !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
             }
             return;
         }
 
+        /* ── 2. LOCKED: too early, show countdown ── */
+        if (!qrIsUnlocked(ticket)) {
+            stopQrCountdown();
+            zone.classList.remove('qr-container--checked');
+            zone.classList.add('qr-container--locked');
+            if (lockedState) lockedState.classList.remove('hide');
+            activeState.classList.add('hide');
+            checkedState.classList.add('hide');
+
+            const unlockMs = getQrUnlockMs(ticket);
+            const unlockLabelEl = document.getElementById('qrl-unlock-label');
+            if (unlockLabelEl && unlockMs) {
+                unlockLabelEl.innerHTML = 'Unlocks on <strong>' + formatUnlockDateTime(unlockMs) + '</strong>';
+            }
+            if (unlockMs) startQrCountdown(unlockMs, ticket);
+            return;
+        }
+
+        /* ── 3. UNLOCKED: show QR ── */
+        stopQrCountdown();
         zone.classList.remove('qr-container--checked');
+        zone.classList.remove('qr-container--locked');
+        if (lockedState) lockedState.classList.add('hide');
         activeState.classList.remove('hide');
         checkedState.classList.add('hide');
         caption.textContent = 'Scan at Venue Gate';
+
         const qrData = resolveTicketQrData(ticket);
-        if (qrData === lastQrEncodedPayload && qrImg.src) {
+        if (qrData === lastQrEncodedPayload && qrImg.src && qrImg.style.display !== 'none') {
             qrLoader.style.display = 'none';
             qrImg.style.display = 'block';
             qrText.textContent = qrData;
@@ -923,7 +1249,7 @@
         qrLoader.style.display = 'flex';
         qrImg.style.display = 'none';
         qrText.textContent = 'GENERATING…';
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=0&data=${encodeURIComponent(qrData)}`;
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=0&data=' + encodeURIComponent(qrData);
         qrImg.onload = () => {
             qrLoader.style.display = 'none';
             qrImg.style.display = 'block';
@@ -935,7 +1261,6 @@
         };
         qrImg.src = qrUrl;
     }
-
     function applyInstructionsPhase(checkedIn) {
         const pre = document.getElementById('instructions-qr-phase');
         const post = document.getElementById('instructions-checked-phase');
@@ -1017,6 +1342,12 @@
         document.getElementById('pass-type').textContent = ticket.ticket_type_name || '-';
         document.getElementById('pass-qty').textContent = ticket.quantity;
         document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
+
+        // If event_snapshot.start_time is an old display string (not a real Timestamp),
+        // fetch the real date from the event document so the QR lock timer works correctly.
+        if (getEventStartMs(ticket) === null && ticket.event_id) {
+            await resolveEventStartMs(ticket.event_id);
+        }
 
         applyQrAndCheckedInUi(ticket);
         applyInstructionsPhase(checkedIn);
@@ -1275,8 +1606,11 @@
         return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     }
 
+    window.addEventListener('pagehide', function () { stopQrCountdown(); });
+
     auth.onAuthStateChanged(user => {
         if (!user) {
+            stopQrCountdown();
             if (ticketDocUnsubscribe) {
                 try {
                     ticketDocUnsubscribe();

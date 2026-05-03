@@ -1034,6 +1034,32 @@
                     throw new Error("Ticket already checked in.");
                 }
 
+                // ── Scan-window guard: block entry more than 8 h before event starts ──
+                const SCAN_OPEN_HOURS = 8;
+                const rawEventStart = event.start_time;
+                if (rawEventStart) {
+                    let startMs;
+                    try {
+                        const d = rawEventStart.toDate ? rawEventStart.toDate() : new Date(rawEventStart);
+                        startMs = Number.isNaN(d.getTime()) ? null : d.getTime();
+                    } catch (_) { startMs = null; }
+
+                    if (startMs !== null) {
+                        const unlockMs = startMs - SCAN_OPEN_HOURS * 60 * 60 * 1000;
+                        if (Date.now() < unlockMs) {
+                            const unlockDate = new Date(unlockMs);
+                            const fmt = unlockDate.toLocaleString('en-IN', {
+                                weekday: 'short', day: 'numeric', month: 'long',
+                                hour: '2-digit', minute: '2-digit', hour12: true
+                            });
+                            throw new Error(
+                                `Scanning opens ${SCAN_OPEN_HOURS} hours before the event. ` +
+                                `This ticket cannot be scanned before ${fmt}.`
+                            );
+                        }
+                    }
+                }
+
                 const quantity = Number(ticket.quantity || 1);
                 const now = firebase.firestore.FieldValue.serverTimestamp();
 
@@ -1200,12 +1226,41 @@
 
             setScanDetails(currentTicket, currentEvent, ticketId);
 
+            // ── Pre-display: calculate scan-window state ──
+            const SCAN_OPEN_HOURS_DISPLAY = 8;
+            let tooEarly = false;
+            let unlockDisplayStr = '';
+            if (currentEvent && currentEvent.start_time) {
+                try {
+                    const st = currentEvent.start_time;
+                    const evDate = st.toDate ? st.toDate() : new Date(st);
+                    if (!Number.isNaN(evDate.getTime())) {
+                        const unlockMs = evDate.getTime() - SCAN_OPEN_HOURS_DISPLAY * 60 * 60 * 1000;
+                        if (Date.now() < unlockMs) {
+                            tooEarly = true;
+                            unlockDisplayStr = new Date(unlockMs).toLocaleString('en-IN', {
+                                weekday: 'short', day: 'numeric', month: 'long',
+                                hour: '2-digit', minute: '2-digit', hour12: true
+                            });
+                        }
+                    }
+                } catch (_) {}
+            }
+
             if (currentTicket.checked_in) {
                 setStatus('err', '<i class="fa-solid fa-clock-rotate-left"></i> Already Used');
                 document.getElementById('scan-title').textContent = 'Ticket already checked in';
                 document.getElementById('scan-sub').textContent = 'This QR has already been used for entry.';
                 document.getElementById('checkin-btn').disabled = true;
                 document.getElementById('checkin-btn').textContent = 'Already Checked In';
+            } else if (tooEarly) {
+                setStatus('err', '<i class="fa-solid fa-lock"></i> Scanning Not Open Yet');
+                document.getElementById('scan-title').textContent = 'Too early to scan';
+                document.getElementById('scan-sub').textContent =
+                    `Scanning opens ${SCAN_OPEN_HOURS_DISPLAY} hours before the event. ` +
+                    `Come back from: ${unlockDisplayStr}.`;
+                document.getElementById('checkin-btn').disabled = true;
+                document.getElementById('checkin-btn').textContent = 'Scan Not Open Yet';
             } else {
                 setStatus('', '<i class="fa-solid fa-shield"></i> Ready to validate');
                 document.getElementById('scan-title').textContent = 'Verify and check in';

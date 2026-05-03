@@ -498,7 +498,7 @@
             const eventRef = db.collection('events').doc(bookingData.eventId);
             const scanUrlBase = `${publicBase}/scan-pass`;
 
-            const buildTicketPayload = (orderId, paymentId, tData) => ({
+            const buildTicketPayload = (orderId, paymentId, tData, eData) => ({
                 id: orderId,
                 user_id: user.uid,
                 event_id: bookingData.eventId,
@@ -521,7 +521,9 @@
                     cover_image: document.getElementById('event-img').src,
                     city: document.getElementById('event-location').textContent.split(' • ')[1].trim(),
                     venue: document.getElementById('event-location').textContent.split(' • ')[0].trim(),
-                    start_time: document.getElementById('event-time').textContent
+                    // Store real Firestore Timestamp so QR lock timer works correctly
+                    start_time: (eData && eData.start_time) || document.getElementById('event-time').textContent,
+                    end_time: (eData && eData.end_time) || null
                 }
             });
 
@@ -555,7 +557,7 @@
                     const orderId = db.collection('tickets').doc().id;
                     const paymentId = db.collection('payments').doc().id;
 
-                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData));
+                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData, eData));
                     txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
 
                     if (ticketTypeRef) {
@@ -579,10 +581,10 @@
                 if (txnErr?.code !== 'permission-denied') throw txnErr;
 
                 await db.runTransaction(async (txn) => {
-                    const { tData } = await readOrderContext(txn);
+                    const { eData, tData } = await readOrderContext(txn);
                     const orderId = db.collection('tickets').doc().id;
                     const paymentId = db.collection('payments').doc().id;
-                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData));
+                    txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData, eData));
                     txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
                 });
             }
