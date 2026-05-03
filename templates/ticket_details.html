@@ -1646,7 +1646,7 @@
             holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
         document.getElementById('pass-foot-ticket-id').textContent = ticket.id || ticketId || '—';
         const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
-        document.getElementById('hero-status').className = checkedIn
+        document.getElementById('hero-status').className = checkedIn    
             ? 'status-chip status-checked-in'
             : `status-chip status-${heroStatusSlug}`;
 
@@ -1816,7 +1816,7 @@
         }
     }
 
-    function buildWhatsAppTicketInviteText(activeTicketInner, shareUrlPlain, senderUser) {
+    function buildWhatsAppTicketInviteText(activeTicketInner, shareUrlPlain, senderUser, shareQty) {
         const ev = activeTicketInner.event_snapshot || {};
         const titleRaw = String(activeTicketInner.event_title || ev.title || 'an event').trim();
         const titleSafe = (titleRaw || 'an event').replace(/\*/g, '');
@@ -1824,7 +1824,7 @@
         const when = formatWhatsAppEventDateLine(activeTicketInner);
         const linkLine = canonicalSharedTicketsUrl(shareUrlPlain);
         const fromName = sanitizeWhatsAppSenderName(senderUser);
-        const qtyN = Math.max(1, Math.floor(Number(activeTicketInner.quantity || 1)) || 1);
+        const qtyN = Math.max(1, Math.floor(Number(shareQty || 1)) || 1);
         const qtyWords = qtyN === 1 ? '1 Ticket' : `${qtyN} Tickets`;
         const tid = String(activeTicketInner.id || ticketId || '').trim();
         const idLine = tid ? `#${tid}` : '#—';
@@ -1851,10 +1851,14 @@
             alert('Enter a mobile number (with country code, e.g. +91…) to open WhatsApp.');
             return;
         }
+        const srcQty = toIntQty(activeTicket.quantity || 1);
+        const requestedQty = toIntQty(document.getElementById('share-qty').value);
+        if (requestedQty < 1) return alert('Enter valid quantity before opening WhatsApp.');
+        if (requestedQty > srcQty) return alert(`You only have ${srcQty} ticket(s).`);
         const rawBase = getPublicBase() || window.location.origin || '';
         const shareUrl = `${rawBase.replace(/\/$/, '')}/shared-tickets`;
         const senderUser = typeof auth !== 'undefined' ? auth.currentUser : null;
-        const msg = buildWhatsAppTicketInviteText(activeTicket, shareUrl, senderUser);
+        const msg = buildWhatsAppTicketInviteText(activeTicket, shareUrl, senderUser, requestedQty);
         const qs = new URLSearchParams({ phone: normalized, text: msg });
         window.open('https://api.whatsapp.com/send?' + qs.toString(), '_blank', 'noopener,noreferrer');
     }
