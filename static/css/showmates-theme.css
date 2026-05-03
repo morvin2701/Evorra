@@ -1674,6 +1674,77 @@ body.theme-showmates .home-premium .hero-spotlight {
     overflow: hidden;
 }
 
+/* ── Spotlight: unified card wrapper (matches section-panel card rhythm) ── */
+body.theme-showmates .home-premium .spotlight-block {
+    background: var(--sm-surface);
+    border: 1px solid var(--sm-border);
+    border-radius: 28px;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.03);
+    padding: 18px;
+    overflow: hidden;
+    position: relative;
+    gap: 14px;
+}
+body.theme-showmates .home-premium .spotlight-block::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 0;
+    height: 2px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.38), rgba(234, 88, 12, 0.28), transparent);
+    pointer-events: none;
+}
+body.theme-showmates .home-premium .spotlight-block .hero-spotlight {
+    border-radius: 16px !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08) !important;
+    border-color: var(--sm-border) !important;
+}
+body.theme-showmates .home-premium .spotlight-kicker-label {
+    background: rgba(220, 38, 38, 0.07) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    color: var(--sm-primary) !important;
+    border-color: rgba(220, 38, 38, 0.22) !important;
+}
+body.theme-showmates .home-premium .spotlight-kicker-hint {
+    color: var(--sm-muted) !important;
+    font-size: 0.82rem !important;
+}
+
+/* ── Section card inner text colours (light-theme legibility) ── */
+body.theme-showmates .home-premium .marquee-card-title,
+body.theme-showmates .home-premium .upcoming-title,
+body.theme-showmates .home-premium .list-title {
+    color: var(--sm-text) !important;
+}
+body.theme-showmates .home-premium .marquee-card-price,
+body.theme-showmates .home-premium .upcoming-price {
+    color: var(--sm-primary) !important;
+}
+body.theme-showmates .home-premium .marquee-card-heart,
+body.theme-showmates .home-premium .upcoming-heart,
+body.theme-showmates .home-premium .list-heart-btn {
+    background: var(--sm-bg) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+body.theme-showmates .home-premium .marquee-card-body {
+    background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+    border-top: 1px solid var(--sm-border);
+}
+body.theme-showmates .home-premium .upcoming-card-body {
+    background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+    border-top: 1px solid var(--sm-border);
+}
+body.theme-showmates .home-premium .category-badge {
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--sm-text);
+}
+
 /* ── Global Evorra alert modal (Showmates: light card on frosted scrim) ── */
 .evorra-alert {
     position: fixed;

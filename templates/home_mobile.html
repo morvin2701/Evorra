@@ -9,11 +9,21 @@
         background: transparent;
     }
     .home-m-shell {
-        width: min(100%, 620px);
-        padding: 0 8px;
+        width: 100%;
+        padding: 0 12px;
         margin: 10px auto 128px;
         display: grid;
         gap: 12px;
+        overflow-x: clip;
+    }
+    .spotlight-m-wrap,
+    .home-m-shell > * {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .hero-spotlight {
+        max-width: 100%;
+        width: 100%;
     }
     .m-panel {
         border-radius: 20px;
@@ -208,7 +218,7 @@
     }
     @media (max-width: 420px) {
         .home-m-shell {
-            padding: 0 6px;
+            padding: 0 12px;
             margin-top: 8px;
         }
         .m-brand-strip {
@@ -228,6 +238,7 @@
             font-size: 0.95rem;
         }
     }
+    .m-quick-bar { padding: 0; display: flex; gap: 10px; }
     @media (max-width: 900px) {
         .home-m-bg, .home-m-shell {
             max-width: 100%;
