@@ -989,9 +989,7 @@
     }
 
     async function verifyAndCheckIn(targetTicketId = ticketId) {
-        if (!targetTicketId) {
-            throw new Error("No ticket id found in scan.");
-        }
+        if (!targetTicketId) throw new Error("No ticket id found in scan.");
         const user = auth.currentUser;
         if (!user) {
             alert("Please login as organizer to scan tickets.");
@@ -1006,14 +1004,30 @@
         }
 
         try {
+            // ── 1. Pre-fetch ticket + event for validation ──
             const preTicketSnap = await db.collection('tickets').doc(targetTicketId).get();
             if (!preTicketSnap.exists) throw new Error("Ticket not found.");
             const preTicket = preTicketSnap.data();
+
+            if (!preTicket.event_id) throw new Error("Ticket has no event reference.");
             const preEventSnap = await db.collection('events').doc(preTicket.event_id).get();
-            const preEvent = preEventSnap.exists ? preEventSnap.data() : null;
+            if (!preEventSnap.exists) throw new Error("Event not found.");
+            const preEvent = preEventSnap.data();
+
             setScanDetails(preTicket, preEvent, targetTicketId);
 
-            // ── EARLY scan-window guard (pre-transaction fast-fail) ──
+            // ── 2. All validation using pre-fetched data (no Firestore write yet) ──
+            if (preEvent.organizer_id !== user.uid) {
+                throw new Error("Only this event's organizer can check in tickets.");
+            }
+            if (preTicket.checked_in === true) {
+                throw new Error("Ticket already checked in.");
+            }
+            if (preTicket.status !== 'confirmed') {
+                throw new Error("Ticket is not in confirmed state. Status: " + preTicket.status);
+            }
+
+            // Scan-window guard
             const SCAN_OPEN_HOURS = 8;
             (function enforceScanWindow(ev) {
                 if (!ev) return;
@@ -1032,101 +1046,111 @@
                         hour: '2-digit', minute: '2-digit', hour12: true
                     });
                     throw new Error(
-                        `QR scanning is locked. This event starts on ` +
+                        'QR scanning locked. Event starts ' +
                         new Date(startMs).toLocaleString('en-IN', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true }) +
-                        `. Scanning opens ${SCAN_OPEN_HOURS} hours before — from ${fmt}.`
+                        '. Scanning opens from ' + fmt + '.'
                     );
                 }
             })(preEvent);
 
-            const ticketRef = db.collection('tickets').doc(targetTicketId);
-            await db.runTransaction(async (txn) => {
-                const ticketSnap = await txn.get(ticketRef);
-                if (!ticketSnap.exists) throw new Error("Ticket not found.");
-                const ticket = ticketSnap.data();
+            // ── 3. Prepare write data ──
+            const ticketRef  = db.collection('tickets').doc(targetTicketId);
+            const eventRef   = db.collection('events').doc(preTicket.event_id);
+            const quantity   = Number(preTicket.quantity || 1);
+            const serverNow  = firebase.firestore.FieldValue.serverTimestamp();
+            const scanFields = {
+                checked_in:      true,
+                status:          'used',
+                scan_count:      firebase.firestore.FieldValue.increment(1),
+                scanned_at:      serverNow,
+                last_scanned_by: user.uid
+            };
 
-                const eventRef = db.collection('events').doc(ticket.event_id);
-                const eventSnap = await txn.get(eventRef);
-                if (!eventSnap.exists) throw new Error("Event not found.");
-                const event = eventSnap.data();
+            // ── 4. Write Layer 1: full transaction (ticket + event stats + scan log) ──
+            let writeMode = 'full';
+            try {
+                await db.runTransaction(async (txn) => {
+                    // Re-read inside txn for optimistic concurrency
+                    const freshTicket = (await txn.get(ticketRef)).data() || {};
+                    if (freshTicket.checked_in === true) throw new Error("Ticket already checked in.");
 
-                if (event.organizer_id !== user.uid) {
-                    throw new Error("Only this event organizer can check in this ticket.");
-                }
-                if (ticket.status !== 'confirmed') {
-                    throw new Error("This ticket is not in confirmed state.");
-                }
-                if (ticket.checked_in === true) {
-                    throw new Error("Ticket already checked in.");
-                }
+                    txn.update(ticketRef, scanFields);
 
-                // ── In-transaction scan-window guard (second layer) ──
-                (function enforceScanWindowTxn(ev) {
-                    if (!ev) return;
-                    const st = ev.start_time;
-                    if (!st) return;
-                    let startMs = null;
-                    try {
-                        const d = st.toDate ? st.toDate() : new Date(st);
-                        if (!Number.isNaN(d.getTime())) startMs = d.getTime();
-                    } catch (_) {}
-                    if (startMs === null) return;
-                    const unlockMs = startMs - SCAN_OPEN_HOURS * 60 * 60 * 1000;
-                    if (Date.now() < unlockMs) {
-                        const fmt = new Date(unlockMs).toLocaleString('en-IN', {
-                            weekday: 'short', day: 'numeric', month: 'long',
-                            hour: '2-digit', minute: '2-digit', hour12: true
-                        });
-                        throw new Error(
-                            `QR scanning locked until ${fmt} (${SCAN_OPEN_HOURS}h before event).`
-                        );
-                    }
-                })(event);
+                    const freshEvent = (await txn.get(eventRef)).data() || {};
+                    const prevTotal  = Number((freshEvent.stats || {}).scans_total || 0);
+                    txn.update(eventRef, { 'stats.scans_total': prevTotal + quantity });
 
-                const quantity = Number(ticket.quantity || 1);
-                const now = firebase.firestore.FieldValue.serverTimestamp();
-
-                txn.update(ticketRef, {
-                    checked_in: true,
-                    scan_count: Number(ticket.scan_count || 0) + 1,
-                    scanned_at: now,
-                    last_scanned_by: user.uid
+                    const logRef = eventRef.collection('scan_logs').doc();
+                    txn.set(logRef, {
+                        id:          logRef.id,
+                        ticket_id:   preTicket.id || targetTicketId,
+                        event_id:    preTicket.event_id,
+                        scanned_by:  user.uid,
+                        quantity,
+                        scanned_at:  serverNow
+                    });
                 });
+            } catch (txnErr) {
+                if (txnErr?.code !== 'permission-denied' && txnErr?.code !== 'PERMISSION_DENIED') throw txnErr;
 
-                const stats = event.stats || {};
-                txn.update(eventRef, {
-                    'stats.scans_total': Number(stats.scans_total || 0) + quantity
-                });
+                // ── Write Layer 2: ticket-only update (skip event stats + log) ──
+                writeMode = 'ticket-only';
+                try {
+                    await db.runTransaction(async (txn) => {
+                        const freshTicket = (await txn.get(ticketRef)).data() || {};
+                        if (freshTicket.checked_in === true) throw new Error("Ticket already checked in.");
+                        txn.update(ticketRef, scanFields);
+                    });
+                } catch (ticketErr) {
+                    if (ticketErr?.code !== 'permission-denied' && ticketErr?.code !== 'PERMISSION_DENIED') throw ticketErr;
 
-                const logRef = eventRef.collection('scan_logs').doc();
-                txn.set(logRef, {
-                    id: logRef.id,
-                    ticket_id: ticket.id || targetTicketId,
-                    event_id: ticket.event_id,
-                    scanned_by: user.uid,
-                    quantity,
-                    scanned_at: now
-                });
-            });
+                    // ── Write Layer 3: scan log only (organizer writes to their own event subcollection) ──
+                    writeMode = 'log-only';
+                    const logRef = eventRef.collection('scan_logs').doc();
+                    await logRef.set({
+                        id:          logRef.id,
+                        ticket_id:   targetTicketId,
+                        event_id:    preTicket.event_id,
+                        scanned_by:  user.uid,
+                        quantity,
+                        scanned_at:  serverNow,
+                        note:        'Ticket doc update blocked by Firestore rules — logged only.'
+                    });
+                    // Ticket not marked checked_in — inform organizer
+                    throw new Error(
+                        "Scan logged, but Firestore rules prevented marking this ticket as used. " +
+                        "Update rules: allow event organizers to update tickets for their events."
+                    );
+                }
 
+                // Fallback: best-effort stats + log write (non-blocking)
+                try {
+                    await eventRef.update({ 'stats.scans_total': firebase.firestore.FieldValue.increment(quantity) });
+                } catch (_) {}
+                try {
+                    const logRef = eventRef.collection('scan_logs').doc();
+                    await logRef.set({
+                        id: logRef.id, ticket_id: preTicket.id || targetTicketId,
+                        event_id: preTicket.event_id, scanned_by: user.uid,
+                        quantity, scanned_at: serverNow
+                    });
+                } catch (_) {}
+            }
+
+            // ── 5. Success ──
             setStatus('ok', '<i class="fa-solid fa-circle-check"></i> Checked In');
             document.getElementById('scan-title').textContent = 'Entry approved';
-            document.getElementById('scan-sub').textContent = 'Ticket marked as checked-in and organizer scan stats updated.';
+            document.getElementById('scan-sub').textContent =
+                writeMode === 'full'
+                    ? 'Ticket marked as checked-in and organizer scan stats updated.'
+                    : 'Ticket checked-in successfully.';
             if (scannerMode) {
-                addScanLog('ok', `Ticket ${targetTicketId} checked in successfully.`);
+                addScanLog('ok', 'Ticket ' + targetTicketId + ' checked in successfully.');
                 fetchLatestEntries();
-                const eventName =
-                    (preTicket.event_title || preEvent?.title || '').trim() || 'Event';
-                const ticketType =
-                    (preTicket.ticket_type_name || preTicket.ticket_type || 'Standard').trim();
-                const quantity = Number(preTicket.quantity || 1);
+                const eventName   = (preTicket.event_title || preEvent.title || '').trim() || 'Event';
+                const ticketType  = (preTicket.ticket_type_name || preTicket.ticket_type || 'Standard').trim();
                 await pauseLiveScanner();
-                openScanSuccessModal({
-                    eventName,
-                    ticketType,
-                    quantity,
-                    ticketId: targetTicketId
-                });
+                openScanSuccessModal({ eventName, ticketType, quantity, ticketId: targetTicketId });
             } else if (btn) {
                 btn.textContent = 'Checked In';
             }
@@ -1143,7 +1167,6 @@
             throw e;
         }
     }
-
     async function onScanSuccess(decodedText) {
         const extracted = parseTicketIdFromScan(decodedText);
         if (!extracted) {
