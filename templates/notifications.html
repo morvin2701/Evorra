@@ -1,55 +1,503 @@
 {% extends "base.html" %}
 
 {% block title %}Evorra | Notifications{% endblock %}
+{% block body_class %} page-notifications{% endblock %}
 
 {% block content %}
-<div class="home-bg notif-page" style="padding-top: 40px; padding-bottom: 120px;">
-    <div class="notif-shell">
-        <!-- Header -->
-        <div class="notif-header">
-            <div class="notif-header-main">
-                <a href="/profile" class="notif-back" aria-label="Back to profile"><i class="fa-solid fa-chevron-left"></i></a>
-                <div>
-                    <h1 class="notif-title">Notifications</h1>
-                    <p id="notif-count-label" class="notif-count-label">Loading updates...</p>
+<div class="home-bg notif-page notif-page-premium" id="notif-root">
+    <div class="notif-ambient" aria-hidden="true">
+        <span class="notif-ambient-orb notif-ambient-orb--a"></span>
+        <span class="notif-ambient-orb notif-ambient-orb--b"></span>
+        <span class="notif-ambient-grid"></span>
+    </div>
+
+    <div class="notif-shell notif-shell--premium">
+        <section class="notif-hero-wrap" aria-labelledby="notif-page-title">
+            <div class="notif-hero-rail" aria-hidden="true"></div>
+            <div class="notif-hero-inner">
+                <header class="notif-header notif-header--premium notif-hero-header">
+                    <div class="notif-header-main">
+                        <a href="/profile" class="notif-back notif-back--hero" aria-label="Back to profile"><i class="fa-solid fa-chevron-left"></i></a>
+                        <div class="notif-header-copy">
+                            <div class="notif-kicker"><span class="notif-kicker-dot"></span> Live inbox</div>
+                            <h1 id="notif-page-title" class="notif-title">Notifications</h1>
+                            <p id="notif-count-label" class="notif-count-label" role="status" aria-live="polite">Loading updates…</p>
+                        </div>
+                    </div>
+                    <div class="notif-header-aside">
+                        <div id="notif-unread-pill" class="notif-unread-pill hide" aria-hidden="true"><span id="notif-unread-num">0</span> new</div>
+                        <div class="notif-menu-wrap">
+                            <button type="button" id="notif-menu-trigger" class="notif-menu-btn" aria-label="Notification actions" aria-expanded="false" aria-controls="notif-menu">
+                                <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                            </button>
+                            <div id="notif-menu" class="hide notif-dropdown" role="menu">
+                                <button type="button" class="notif-menu-item" role="menuitem" id="notif-action-mark-all">Mark all as read</button>
+                                <button type="button" class="notif-menu-item danger" role="menuitem" id="notif-action-clear-all">Clear all</button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="notif-stat-grid" role="group" aria-label="Inbox summary">
+                    <div class="notif-stat-card notif-stat-card--total">
+                        <span class="notif-stat-icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+                        <div class="notif-stat-copy">
+                            <span class="notif-stat-value" id="notif-stat-total">—</span>
+                            <span class="notif-stat-label">In inbox</span>
+                        </div>
+                    </div>
+                    <div class="notif-stat-card notif-stat-card--unread">
+                        <span class="notif-stat-icon" aria-hidden="true"><i class="fa-solid fa-envelope-open-text"></i></span>
+                        <div class="notif-stat-copy">
+                            <span class="notif-stat-value" id="notif-stat-unread">—</span>
+                            <span class="notif-stat-label">Unread</span>
+                        </div>
+                    </div>
+                    <div class="notif-stat-card notif-stat-card--show">
+                        <span class="notif-stat-icon" aria-hidden="true"><i class="fa-solid fa-filter"></i></span>
+                        <div class="notif-stat-copy">
+                            <span class="notif-stat-value" id="notif-stat-showing">—</span>
+                            <span class="notif-stat-label">In this view</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="notif-menu-wrap">
-                <button type="button" onclick="toggleMenu()" class="notif-menu-btn" aria-label="Menu"><i class="fa-solid fa-ellipsis"></i></button>
-                <div id="notif-menu" class="hide notif-dropdown">
-                    <div class="notif-menu-item" onclick="markAllRead()">Mark all as read</div>
-                    <div class="notif-menu-item danger" onclick="clearAllNotifications()">Clear all</div>
-                </div>
+        </section>
+
+        <div id="filter-scroll" class="notif-filter-scroll notif-filter-bar" role="tablist" aria-label="Filter notifications">
+            <button type="button" class="quick-filter-chip active" data-filter="all" role="tab" aria-selected="true">All</button>
+            <button type="button" class="quick-filter-chip" data-filter="unread" role="tab" aria-selected="false">Unread</button>
+            <button type="button" class="quick-filter-chip" data-filter="booking" role="tab" aria-selected="false">Booking</button>
+            <button type="button" class="quick-filter-chip" data-filter="payment" role="tab" aria-selected="false">Payment</button>
+            <button type="button" class="quick-filter-chip" data-filter="promo" role="tab" aria-selected="false">Offers</button>
+        </div>
+
+        <div id="notifications-list" class="notif-list-region" aria-live="polite">
+            <div class="notif-skeleton-stack" id="notif-skeleton-wrap">
+                <div class="skeleton-notif"></div>
+                <div class="skeleton-notif"></div>
+                <div class="skeleton-notif"></div>
             </div>
-        </div>
-
-        <!-- Filter Bar -->
-        <div id="filter-scroll" class="notif-filter-scroll">
-            <div class="quick-filter-chip active" onclick="setFilter('all', this)">All</div>
-            <div class="quick-filter-chip" onclick="setFilter('unread', this)">Unread</div>
-            <div class="quick-filter-chip" onclick="setFilter('booking', this)">Booking</div>
-            <div class="quick-filter-chip" onclick="setFilter('payment', this)">Payment</div>
-            <div class="quick-filter-chip" onclick="setFilter('promo', this)">Offers</div>
-        </div>
-
-        <!-- Notification List -->
-        <div id="notifications-list">
-            <!-- Loading Skeletons -->
-            <div class="skeleton-notif"></div>
-            <div class="skeleton-notif"></div>
-            <div class="skeleton-notif"></div>
         </div>
     </div>
 </div>
 
 <style>
-    .notif-tile-body { flex: 1; min-width: 0; }
+    /* Notifications — wide layout, light Showmates tokens, premium motion */
+    .page-notifications .notif-page-premium {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding-top: 24px;
+        padding-bottom: 120px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(220, 38, 38, 0.04) 0%, transparent 28%), var(--sm-bg, #f4f6f9);
+    }
+    .page-notifications .notif-shell--premium {
+        width: 100%;
+        max-width: min(1440px, 100%);
+        margin-left: auto;
+        margin-right: auto;
+        box-sizing: border-box;
+    }
+
+    .notif-ambient {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+    .notif-ambient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notif-ambient-orb {
+            animation: notif-orb-drift 22s ease-in-out infinite alternate;
+        }
+    }
+    .notif-ambient-orb--a {
+        width: min(520px, 85vw);
+        height: min(520px, 85vw);
+        top: -140px;
+        right: -12%;
+        background: radial-gradient(circle at 30% 30%, rgba(220, 38, 38, 0.2), transparent 68%);
+    }
+    .notif-ambient-orb--b {
+        width: min(440px, 70vw);
+        height: min(440px, 70vw);
+        bottom: 0;
+        left: -8%;
+        background: radial-gradient(circle at 70% 70%, rgba(99, 102, 241, 0.14), transparent 70%);
+        animation-delay: -8s;
+    }
+    .notif-ambient-grid {
+        position: absolute;
+        inset: 0;
+        opacity: 0.045;
+        background-image:
+            linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(ellipse 90% 55% at 50% 0%, black, transparent);
+    }
+    @keyframes notif-orb-drift {
+        from { transform: translate(0, 0) scale(1); }
+        to { transform: translate(-20px, 24px) scale(1.06); }
+    }
+
+    .notif-shell--premium {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Hero card */
+    .notif-hero-wrap {
+        position: relative;
+        border-radius: 26px;
+        background: var(--sm-surface, #fff);
+        border: 1px solid var(--sm-border, #e8ecf1);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.9) inset,
+            0 24px 56px rgba(15, 23, 42, 0.07),
+            0 4px 16px rgba(15, 23, 42, 0.04);
+        overflow: hidden;
+    }
+    .notif-hero-rail {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: linear-gradient(180deg, var(--sm-primary, #dc2626), var(--sm-accent, #ea580c));
+        opacity: 0.95;
+        overflow: hidden;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notif-hero-rail::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                transparent,
+                rgba(255, 255, 255, 0.55),
+                transparent
+            );
+            animation: notif-rail-sheen 4s ease-in-out infinite;
+        }
+    }
+    @keyframes notif-rail-sheen {
+        0%, 100% { opacity: 0; transform: translateY(-100%); }
+        50% { opacity: 1; transform: translateY(100%); }
+    }
+    .notif-hero-inner {
+        padding: 20px 22px 22px 26px;
+    }
+    @media (min-width: 768px) {
+        .notif-hero-inner {
+            padding: 26px 32px 28px 36px;
+        }
+    }
+    .notif-hero-header.notif-header {
+        margin-bottom: 0;
+        padding: 0;
+        border: none;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    .notif-back--hero {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notif-back--hero:hover {
+            transform: translateX(-2px);
+        }
+    }
+    .notif-kicker {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--sm-muted, #64748b);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .notif-kicker-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        animation: notif-dot-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes notif-dot-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.65; transform: scale(0.9); }
+    }
+    .page-notifications .notif-title {
+        font-size: clamp(1.45rem, 3vw, 1.85rem);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        margin: 0;
+        color: var(--sm-text, #0f172a);
+        line-height: 1.15;
+    }
+    .page-notifications .notif-count-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 8px 0 0;
+        color: var(--sm-muted, #64748b);
+    }
+    .notif-header-aside {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        flex-shrink: 0;
+    }
+    .notif-unread-pill {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.06));
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        color: var(--sm-primary, #dc2626);
+        animation: notif-pill-in 0.55s cubic-bezier(0.2, 1, 0.3, 1) both;
+    }
+    @keyframes notif-pill-in {
+        from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Stat strip */
+    .notif-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 22px;
+    }
+    @media (max-width: 560px) {
+        .notif-stat-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+    }
+    .notif-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid var(--sm-border, #e8ecf1);
+        background: linear-gradient(145deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.98));
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notif-stat-card {
+            animation: notif-stat-pop 0.6s cubic-bezier(0.2, 1, 0.3, 1) both;
+        }
+        .notif-stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .notif-stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .notif-stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .notif-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+            border-color: rgba(220, 38, 38, 0.15);
+        }
+    }
+    @keyframes notif-stat-pop {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .notif-stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+    }
+    .notif-stat-card--total .notif-stat-icon {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.06));
+        color: #2563eb;
+    }
+    .notif-stat-card--unread .notif-stat-icon {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.14), rgba(220, 38, 38, 0.06));
+        color: var(--sm-primary, #dc2626);
+    }
+    .notif-stat-card--show .notif-stat-icon {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(99, 102, 241, 0.06));
+        color: #6366f1;
+    }
+    .notif-stat-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+    .notif-stat-value {
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--sm-text, #0f172a);
+        font-variant-numeric: tabular-nums;
+        line-height: 1.1;
+        transition: color 0.2s ease;
+    }
+    .notif-stat-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--sm-muted, #64748b);
+    }
+
+    /* Filter bar */
+    .notif-filter-bar {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--sm-surface, #fff);
+        border: 1px solid var(--sm-border, #e8ecf1);
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.04);
+        margin-bottom: 2px;
+    }
+    .notif-filter-scroll .quick-filter-chip {
+        border: 1px solid var(--sm-border, #e8ecf1);
+        background: rgba(248, 250, 252, 0.95);
+        color: var(--sm-text, #0f172a);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 10px 18px;
+        border-radius: 999px;
+        white-space: nowrap;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+    .notif-filter-scroll .quick-filter-chip:hover {
+        transform: translateY(-2px);
+        border-color: rgba(220, 38, 38, 0.22);
+        background: #fff;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+    }
+    .notif-filter-scroll .quick-filter-chip:focus-visible {
+        outline: 2px solid rgba(220, 38, 38, 0.45);
+        outline-offset: 2px;
+    }
+    .notif-filter-scroll .quick-filter-chip.active {
+        background: linear-gradient(135deg, var(--sm-primary, #dc2626), var(--sm-primary-hover, #b91c1c));
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 10px 28px rgba(220, 38, 38, 0.28);
+    }
+
+    .notif-menu-item {
+        width: 100%;
+        text-align: left;
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        cursor: pointer;
+        padding: 14px 18px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--sm-text, #0f172a);
+    }
+    .notif-menu-item.danger {
+        color: var(--sm-primary, #dc2626);
+    }
+
+    .notif-list-region {
+        min-height: 42vh;
+    }
+    .notif-skeleton-stack .skeleton-notif {
+        margin-bottom: 14px;
+        height: 102px;
+        border-radius: 20px;
+        border: 1px solid var(--sm-border, #e8ecf1);
+    }
+
+    /* Tiles — light surfaces, accent rail */
+    .notification-tile.notif-tile--premium {
+        position: relative;
+        border-radius: 20px;
+        margin-bottom: 14px;
+        background: var(--sm-surface, #fff) !important;
+        border: 1px solid var(--sm-border, #e8ecf1) !important;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .notification-tile.notif-tile--premium::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--notif-accent, var(--sm-primary, #dc2626));
+        opacity: 0.85;
+        border-radius: 4px 0 0 4px;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notification-tile.notif-tile--premium {
+            animation: notif-tile-enter 0.58s cubic-bezier(0.2, 1, 0.3, 1) both;
+            animation-delay: calc(var(--notif-i, 0) * 42ms);
+        }
+    }
+    @keyframes notif-tile-enter {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .notification-tile.notif-tile--premium.unread {
+        background: linear-gradient(90deg, rgba(220, 38, 38, 0.04), var(--sm-surface, #fff)) !important;
+        border-color: rgba(220, 38, 38, 0.18) !important;
+    }
+    .notification-tile.notif-tile--premium.unread::before {
+        box-shadow: 0 0 16px var(--notif-accent, rgba(220, 38, 38, 0.45));
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .notification-tile.notif-tile--premium:hover {
+            transform: translateX(8px) translateY(-2px);
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+            border-color: rgba(220, 38, 38, 0.12) !important;
+        }
+    }
+    .notification-tile.notif-tile--premium:focus-visible {
+        outline: 2px solid rgba(220, 38, 38, 0.4);
+        outline-offset: 3px;
+    }
+
+    .notif-icon-box {
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+    .notif-tile-body {
+        flex: 1;
+        min-width: 0;
+    }
     .notif-tile-top {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 4px;
+        gap: 12px;
+        margin-bottom: 6px;
     }
     .notif-tile-foot {
         display: flex;
@@ -57,201 +505,552 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 8px;
+        margin-top: 12px;
     }
     .notif-type-pill {
-        padding: 4px 10px;
+        padding: 5px 11px;
         border-radius: 999px;
-        font-size: 0.65rem;
+        font-size: 0.62rem;
         font-weight: 800;
         text-transform: uppercase;
+        letter-spacing: 0.07em;
     }
+    .page-notifications .notif-mark-btn {
+        font-size: 0.74rem;
+        font-weight: 700;
+        padding: 7px 14px;
+        border-radius: 11px;
+        cursor: pointer;
+        background: var(--sm-bg, #f4f6f9) !important;
+        border: 1px solid var(--sm-border, #e8ecf1) !important;
+        color: var(--sm-text, #0f172a) !important;
+        transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+    }
+    .page-notifications .notif-mark-btn:hover {
+        transform: scale(1.03);
+        border-color: rgba(220, 38, 38, 0.25);
+        background: #fff !important;
+    }
+    .page-notifications .notif-item-title {
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.3;
+        color: var(--sm-text, #0f172a);
+    }
+    .page-notifications .notif-item-time {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--sm-muted, #64748b);
+        white-space: nowrap;
+    }
+    .page-notifications .notif-item-body {
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin: 0;
+        color: #475569;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .notif-chevron {
+        align-self: center;
+        color: #cbd5e1;
+        font-size: 0.88rem;
+        transition: transform 0.28s ease, color 0.2s ease;
+    }
+    .notification-tile.notif-tile--premium:hover .notif-chevron {
+        color: var(--sm-primary, #dc2626);
+        transform: translateX(5px);
+    }
+    .page-notifications .unread-pulse {
+        background: var(--sm-primary, #dc2626);
+        box-shadow: 0 0 12px rgba(220, 38, 38, 0.5);
+    }
+
     .notif-error {
         text-align: center;
         margin-top: 40px;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.9rem;
+        padding: 28px 24px;
+        border-radius: 22px;
+        border: 1px dashed rgba(220, 38, 38, 0.25);
+        background: rgba(220, 38, 38, 0.04);
+        color: var(--sm-muted, #64748b);
+        font-size: 0.92rem;
+    }
+    .page-notifications .notif-empty--premium {
+        padding: 56px 24px 48px;
+        border-radius: 24px;
+        border: 1px dashed var(--sm-border, #e8ecf1);
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.8), var(--sm-surface, #fff));
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.04);
+    }
+    .page-notifications .notif-empty--premium h3 {
+        color: var(--sm-text, #0f172a);
+        font-weight: 900;
+        font-size: 1.35rem;
+        letter-spacing: -0.02em;
+    }
+    .page-notifications .notif-empty--premium p {
+        color: var(--sm-muted, #64748b);
+    }
+    .notif-empty--premium .notif-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 22px;
+        border-radius: 28px;
+        background: linear-gradient(145deg, rgba(220, 38, 38, 0.1), rgba(234, 88, 12, 0.06));
+        color: var(--sm-primary, #dc2626);
+        font-size: 2.1rem;
+        animation: notif-empty-float 5s ease-in-out infinite;
+    }
+    @keyframes notif-empty-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .notif-empty-filter-hint {
+        font-size: 0.84rem;
+        color: var(--sm-muted, #64748b);
+        margin-top: 10px;
+    }
+
+    .page-notifications .notification-section-title {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--sm-muted, #64748b);
+        margin: 26px 0 12px 4px;
+        text-transform: uppercase;
+    }
+    .page-notifications .notification-section-title:first-child {
+        margin-top: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .notif-ambient-orb,
+        .notif-kicker-dot,
+        .notif-empty--premium .notif-empty-icon,
+        .notif-stat-card,
+        .notification-tile.notif-tile--premium {
+            animation: none !important;
+        }
+        .notif-stat-card:hover,
+        .notification-tile.notif-tile--premium:hover {
+            transform: none;
+        }
+    }
+
+    /* Beat evorra-pages !important hovers on this page */
+    body.theme-showmates.page-notifications .notification-tile.notif-tile--premium:hover {
+        background: var(--sm-surface, #fff) !important;
+    }
+    body.theme-showmates.page-notifications .notification-tile.notif-tile--premium.unread:hover {
+        background: linear-gradient(90deg, rgba(220, 38, 38, 0.06), var(--sm-surface, #fff)) !important;
     }
 </style>
 {% endblock %}
 
 {% block scripts %}
 <script>
+(function () {
     let currentFilter = 'all';
     let allNotifications = [];
+    let unsubscribe = null;
 
-    async function initNotifications() {
-        auth.onAuthStateChanged(user => {
-            if (!user) {
-                location.href = '/auth';
-                return;
-            }
-
-            // Simplified query to avoid index errors, sorting handled client-side
-            db.collection('notifications')
-              .where('user_id', '==', user.uid)
-              .where('is_archived', '==', false)
-              .onSnapshot(snap => {
-                  allNotifications = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                  // Sort by created_at desc client-side
-                  allNotifications.sort((a, b) => {
-                      const t1 = a.created_at ? a.created_at.toDate() : 0;
-                      const t2 = b.created_at ? b.created_at.toDate() : 0;
-                      return t2 - t1;
-                  });
-                  renderNotifications();
-              }, err => {
-                  console.error("Firestore Error:", err);
-                  document.getElementById('notifications-list').innerHTML = `<p class="notif-error">Error loading notifications. Please try again.</p>`;
-              });
-        });
+    function escapeHtml(s) {
+        if (s == null || s === undefined) return '';
+        const d = document.createElement('div');
+        d.textContent = String(s);
+        return d.innerHTML;
     }
 
-    function renderNotifications() {
-        const list = document.getElementById('notifications-list');
-        const countLabel = document.getElementById('notif-count-label');
-        
-        const filtered = allNotifications.filter(n => {
-            if (currentFilter === 'all') return true;
-            if (currentFilter === 'unread') return !n.is_read;
-            return n.type === currentFilter;
-        });
-
-        const unreadCount = allNotifications.filter(n => !n.is_read).length;
-        countLabel.textContent = unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up';
-
-        if (filtered.length === 0) {
-            list.innerHTML = `
-                <div class="notif-empty">
-                    <div class="notif-empty-icon"><i class="fa-solid fa-bell-slash"></i></div>
-                    <h3>No notifications yet</h3>
-                    <p>You're all caught up. New updates will appear here.</p>
-                </div>
-            `;
-            return;
-        }
-
-        // Group by Date
-        const groups = { 'Today': [], 'Yesterday': [], 'Earlier': [] };
-        const now = new Date();
-        const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
-
-        filtered.forEach(n => {
-            const dt = n.created_at ? n.created_at.toDate() : new Date();
-            if (dt.toDateString() === now.toDateString()) groups['Today'].push(n);
-            else if (dt.toDateString() === yesterday.toDateString()) groups['Yesterday'].push(n);
-            else groups['Earlier'].push(n);
-        });
-
-        list.innerHTML = '';
-        Object.entries(groups).forEach(([title, items]) => {
-            if (items.length > 0) {
-                list.insertAdjacentHTML('beforeend', `<h3 class="notification-section-title">${title}</h3>`);
-                items.forEach(n => {
-                    const icon = getIcon(n.type);
-                    const accent = getAccent(n.type);
-                    const timeText = formatTime(n.created_at);
-                    
-                    const itemHtml = `
-                        <div class="notification-tile ${!n.is_read ? 'unread' : ''} animate-evorra" onclick="handleNotifTap('${n.id}', '${n.action_target}')">
-                            <div class="notif-icon-box" style="background: ${accent}22; color: ${accent};">
-                                <i class="${icon}"></i>
-                            </div>
-                            <div class="notif-tile-body">
-                                <div class="notif-tile-top">
-                                    <h4 class="notif-item-title">${n.title}</h4>
-                                    <span class="notif-item-time">${timeText}</span>
-                                </div>
-                                <p class="notif-item-body">${n.body}</p>
-                                <div class="notif-tile-foot">
-                                    <span class="notif-type-pill" style="background: ${accent}22; color: ${accent};">${n.type}</span>
-                                    ${!n.is_read ? `<button type="button" onclick="event.stopPropagation(); markRead('${n.id}')" class="notif-mark-btn">Mark read</button>` : ''}
-                                </div>
-                            </div>
-                            ${!n.is_read ? '<div class="unread-pulse"></div>' : ''}
-                        </div>
-                    `;
-                    list.insertAdjacentHTML('beforeend', itemHtml);
-                });
-            }
-        });
+    /** Firestore may store body or message; created_at or created_time. */
+    function pickTimestamp(docData) {
+        const a = docData.created_at;
+        const b = docData.created_time;
+        if (a && typeof a.toDate === 'function') return a;
+        if (b && typeof b.toDate === 'function') return b;
+        return null;
     }
 
-    function getIcon(type) {
-        switch(type) {
+    function pickBody(docData) {
+        const raw = docData.body != null ? docData.body : docData.message;
+        return raw != null ? String(raw) : '';
+    }
+
+    /** Map stored types to filter chips: booking | payment | promo | reminder | event | general */
+    function categoryForType(typeRaw) {
+        const t = String(typeRaw || 'general').toLowerCase().trim();
+        if (
+            t === 'booking' ||
+            t === 'ticket_share' ||
+            t === 'ticket_share_update' ||
+            t === 'ticket' ||
+            t === 'event' ||
+            t === 'reminder'
+        ) return 'booking';
+        if (t === 'payment' || t === 'refund' || t === 'payout') return 'payment';
+        if (t === 'promo' || t === 'offer' || t === 'marketing') return 'promo';
+        return t;
+    }
+
+    function labelForType(typeRaw) {
+        const t = String(typeRaw || 'update').toLowerCase().trim();
+        const map = {
+            ticket_share: 'Sharing',
+            ticket_share_update: 'Sharing',
+            booking: 'Booking',
+            payment: 'Payment',
+            promo: 'Offer',
+            offer: 'Offer',
+            reminder: 'Reminder',
+            event: 'Event',
+            refund: 'Refund'
+        };
+        if (map[t]) return map[t];
+        if (!t || t === 'general') return 'Update';
+        return t.replace(/_/g, ' ');
+    }
+
+    function normalizeDoc(doc) {
+        const d = doc.data() || {};
+        const ts = pickTimestamp(d);
+        const typeRaw = d.type || 'general';
+        return {
+            id: doc.id,
+            ...d,
+            _body: pickBody(d),
+            _title: (d.title != null && String(d.title).trim()) ? String(d.title).trim() : 'Notification',
+            _ts: ts,
+            _category: categoryForType(typeRaw),
+            _typeKey: String(typeRaw || 'general').toLowerCase(),
+            _typeLabel: labelForType(typeRaw)
+        };
+    }
+
+    function isArchived(n) {
+        return n.is_archived === true;
+    }
+
+    function matchesFilter(n) {
+        if (isArchived(n)) return false;
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'unread') return !n.is_read;
+        return n._category === currentFilter;
+    }
+
+    function resolveActionUrl(n) {
+        const raw = (n.action_target || n.action_url || n.link || '').trim();
+        if (raw && raw !== 'undefined' && raw !== 'null') return raw;
+        const t = n._typeKey || '';
+        if (t === 'ticket_share' || t === 'ticket_share_update') return '/shared-tickets';
+        if (n.ref_event_id) return '/event/' + encodeURIComponent(String(n.ref_event_id));
+        if (n.ref_ticket_id) return '/ticket/' + encodeURIComponent(String(n.ref_ticket_id));
+        return '';
+    }
+
+    function getIcon(typeKey) {
+        switch (typeKey) {
             case 'booking': return 'fa-solid fa-ticket';
-            case 'payment': return 'fa-solid fa-credit-card';
-            case 'promo': return 'fa-solid fa-tag';
+            case 'ticket_share':
+            case 'ticket_share_update': return 'fa-solid fa-share-nodes';
+            case 'payment':
+            case 'refund': return 'fa-solid fa-credit-card';
+            case 'promo':
+            case 'offer': return 'fa-solid fa-tag';
             case 'reminder': return 'fa-solid fa-clock';
             case 'event': return 'fa-solid fa-calendar-star';
             default: return 'fa-solid fa-bell';
         }
     }
 
-    function getAccent(type) {
-        switch(type) {
+    function getAccent(typeKey) {
+        switch (typeKey) {
             case 'booking': return '#4FD1C5';
-            case 'payment': return '#F6C453';
-            case 'promo': return '#8E7DFF';
+            case 'ticket_share':
+            case 'ticket_share_update': return '#A78BFA';
+            case 'payment':
+            case 'refund': return '#F6C453';
+            case 'promo':
+            case 'offer': return '#8E7DFF';
             case 'reminder': return '#FF8A65';
             case 'event': return '#7AA2FF';
-            default: return '#8A93A8';
+            default: return '#94A3B8';
         }
     }
 
     function formatTime(ts) {
-        if (!ts) return 'Just now';
+        if (!ts || typeof ts.toDate !== 'function') return 'Just now';
         const date = ts.toDate();
-        const diff = (new Date() - date) / 1000;
+        const diff = (Date.now() - date.getTime()) / 1000;
         if (diff < 60) return 'Just now';
         if (diff < 3600) return Math.floor(diff / 60) + 'm';
         if (diff < 86400) return Math.floor(diff / 3600) + 'h';
-        return date.toLocaleDateString();
+        if (diff < 604800) return Math.floor(diff / 86400) + 'd';
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
 
-    function setFilter(f, el) {
-        currentFilter = f;
-        document.querySelectorAll('.quick-filter-chip').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
+    function setFilter(filterId, el) {
+        currentFilter = filterId;
+        document.querySelectorAll('#filter-scroll .quick-filter-chip').forEach(function (c) {
+            const on = c.getAttribute('data-filter') === filterId;
+            c.classList.toggle('active', on);
+            c.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        if (el && typeof el.focus === 'function') el.focus();
         renderNotifications();
     }
 
-    function toggleMenu() {
-        document.getElementById('notif-menu').classList.toggle('hide');
+    function setStatText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
     }
 
-    async function handleNotifTap(id, target) {
+    function renderNotifications() {
+        const list = document.getElementById('notifications-list');
+        const countLabel = document.getElementById('notif-count-label');
+        const unreadPill = document.getElementById('notif-unread-pill');
+        const unreadNum = document.getElementById('notif-unread-num');
+        const skel = document.getElementById('notif-skeleton-wrap');
+        if (skel) skel.remove();
+
+        const visible = allNotifications.filter(matchesFilter);
+        const unreadCount = allNotifications.filter(function (n) { return !isArchived(n) && !n.is_read; }).length;
+        const totalInbox = allNotifications.length;
+        setStatText('notif-stat-total', String(totalInbox));
+        setStatText('notif-stat-unread', String(unreadCount));
+        setStatText('notif-stat-showing', String(visible.length));
+
+        if (unreadCount > 0) {
+            unreadPill.classList.remove('hide');
+            unreadNum.textContent = String(unreadCount);
+            countLabel.textContent = unreadCount === 1 ? '1 unread update' : unreadCount + ' unread updates';
+        } else {
+            unreadPill.classList.add('hide');
+            countLabel.textContent = 'You’re all caught up';
+        }
+
+        if (visible.length === 0) {
+            const filterHint =
+                currentFilter === 'unread'
+                    ? 'No unread items — try All or another category.'
+                    : currentFilter !== 'all'
+                        ? 'Nothing in this category yet. Try All.'
+                        : '';
+            list.innerHTML =
+                '<div class="notif-empty notif-empty--premium">' +
+                    '<div class="notif-empty-icon"><i class="fa-solid fa-bell-slash"></i></div>' +
+                    '<h3>No notifications yet</h3>' +
+                    '<p>New bookings, shares, and offers will land here in real time.</p>' +
+                    (filterHint ? '<p class="notif-empty-filter-hint">' + escapeHtml(filterHint) + '</p>' : '') +
+                '</div>';
+            return;
+        }
+
+        const groups = { Today: [], Yesterday: [], Earlier: [] };
+        const now = new Date();
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+
+        visible.forEach(function (n) {
+            const dt = n._ts && typeof n._ts.toDate === 'function' ? n._ts.toDate() : new Date(0);
+            if (dt.toDateString() === now.toDateString()) groups.Today.push(n);
+            else if (dt.toDateString() === yesterday.toDateString()) groups.Yesterday.push(n);
+            else groups.Earlier.push(n);
+        });
+
+        let html = '';
+        let idx = 0;
+        ['Today', 'Yesterday', 'Earlier'].forEach(function (title) {
+            const items = groups[title];
+            if (!items.length) return;
+            html += '<h3 class="notification-section-title">' + escapeHtml(title) + '</h3>';
+            items.forEach(function (n) {
+                const accent = getAccent(n._typeKey);
+                const icon = getIcon(n._typeKey);
+                const timeText = formatTime(n._ts);
+                const unread = !n.is_read;
+                const actionUrl = resolveActionUrl(n);
+                const hasLink = !!actionUrl;
+                const typeLabel = escapeHtml(n._typeLabel);
+                const titleSafe = escapeHtml(n._title);
+                const bodySafe = escapeHtml(n._body);
+                const chevron = hasLink
+                    ? '<i class="fa-solid fa-chevron-right notif-chevron" aria-hidden="true"></i>'
+                    : '';
+
+                html +=
+                    '<div class="notification-tile notif-tile--premium ' + (unread ? 'unread' : '') + '" ' +
+                    'role="button" tabindex="0" data-notif-id="' + escapeHtml(n.id) + '" ' +
+                    'data-action-url="' + escapeHtml(actionUrl) + '" ' +
+                    'style="--notif-i:' + idx + ';--notif-accent:' + accent + '">' +
+                        '<div class="notif-icon-box" style="background:' + accent + '22;color:' + accent + '">' +
+                            '<i class="' + icon + '" aria-hidden="true"></i>' +
+                        '</div>' +
+                        '<div class="notif-tile-body">' +
+                            '<div class="notif-tile-top">' +
+                                '<h4 class="notif-item-title">' + titleSafe + '</h4>' +
+                                '<span class="notif-item-time">' + escapeHtml(timeText) + '</span>' +
+                            '</div>' +
+                            (n._body ? '<p class="notif-item-body">' + bodySafe + '</p>' : '') +
+                            '<div class="notif-tile-foot">' +
+                                '<span class="notif-type-pill" style="background:' + accent + '22;color:' + accent + '">' + typeLabel + '</span>' +
+                                (unread
+                                    ? '<button type="button" class="notif-mark-btn" data-mark-read="' + escapeHtml(n.id) + '">Mark read</button>'
+                                    : '') +
+                            '</div>' +
+                        '</div>' +
+                        chevron +
+                        (unread ? '<div class="unread-pulse" aria-hidden="true"></div>' : '') +
+                    '</div>';
+                idx += 1;
+            });
+        });
+
+        list.innerHTML = html;
+        bindListInteractions(list);
+    }
+
+    function bindListInteractions(list) {
+        list.querySelectorAll('[data-notif-id]').forEach(function (tile) {
+            tile.addEventListener('click', function (e) {
+                if (e.target.closest('[data-mark-read]')) return;
+                const id = tile.getAttribute('data-notif-id');
+                const url = tile.getAttribute('data-action-url') || '';
+                handleNotifTap(id, url);
+            });
+            tile.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (e.target.closest('[data-mark-read]')) return;
+                    const id = tile.getAttribute('data-notif-id');
+                    const url = tile.getAttribute('data-action-url') || '';
+                    handleNotifTap(id, url);
+                }
+            });
+        });
+        list.querySelectorAll('[data-mark-read]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const id = btn.getAttribute('data-mark-read');
+                if (id) markRead(id);
+            });
+        });
+    }
+
+    async function handleNotifTap(id, url) {
         await markRead(id);
-        if (target && target !== 'null') location.href = target;
+        if (url) window.location.href = url;
     }
 
-    async function markRead(id) {
-        await db.collection('notifications').doc(id).update({ is_read: true });
+    function markRead(id) {
+        return db.collection('notifications').doc(id).update({ is_read: true }).catch(function (err) {
+            console.error('markRead', err);
+        });
     }
 
     async function markAllRead() {
+        const ops = allNotifications.filter(function (n) { return !isArchived(n) && !n.is_read; });
+        if (!ops.length) return;
         const batch = db.batch();
-        allNotifications.forEach(n => {
-            if (!n.is_read) batch.update(db.collection('notifications').doc(n.id), { is_read: true });
+        ops.forEach(function (n) {
+            batch.update(db.collection('notifications').doc(n.id), { is_read: true });
         });
         await batch.commit();
-        toggleMenu();
+        closeMenu();
     }
 
     async function clearAllNotifications() {
-        if (!confirm("Clear all notifications?")) return;
+        const ops = allNotifications.filter(function (n) { return !isArchived(n); });
+        if (!ops.length) return;
+        if (!window.confirm('Clear all notifications from your inbox?')) return;
         const batch = db.batch();
-        allNotifications.forEach(n => {
+        ops.forEach(function (n) {
             batch.update(db.collection('notifications').doc(n.id), { is_archived: true });
         });
         await batch.commit();
-        toggleMenu();
+        closeMenu();
     }
 
-    // Close menu on outside click
-    window.onclick = e => {
-        if (!e.target.closest('button')) document.getElementById('notif-menu').classList.add('hide');
+    function closeMenu() {
+        const menu = document.getElementById('notif-menu');
+        const trigger = document.getElementById('notif-menu-trigger');
+        if (menu) menu.classList.add('hide');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleMenu() {
+        const menu = document.getElementById('notif-menu');
+        const trigger = document.getElementById('notif-menu-trigger');
+        if (!menu || !trigger) return;
+        menu.classList.toggle('hide');
+        const expanded = !menu.classList.contains('hide');
+        trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function initNotifications() {
+        document.querySelectorAll('#filter-scroll .quick-filter-chip').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                setFilter(chip.getAttribute('data-filter') || 'all', chip);
+            });
+        });
+
+        document.getElementById('notif-menu-trigger').addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+        document.getElementById('notif-action-mark-all').addEventListener('click', function () {
+            markAllRead();
+        });
+        document.getElementById('notif-action-clear-all').addEventListener('click', function () {
+            clearAllNotifications();
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.notif-menu-wrap')) closeMenu();
+        });
+
+        auth.onAuthStateChanged(function (user) {
+            if (!user) {
+                window.location.href = '/auth?next=' + encodeURIComponent('/notifications');
+                return;
+            }
+
+            if (unsubscribe) unsubscribe();
+
+            unsubscribe = db.collection('notifications')
+                .where('user_id', '==', user.uid)
+                .onSnapshot(
+                    function (snap) {
+                        allNotifications = snap.docs.map(normalizeDoc).filter(function (n) {
+                            return !isArchived(n);
+                        });
+                        allNotifications.sort(function (a, b) {
+                            const t1 = a._ts && a._ts.toDate ? a._ts.toDate().getTime() : 0;
+                            const t2 = b._ts && b._ts.toDate ? b._ts.toDate().getTime() : 0;
+                            return t2 - t1;
+                        });
+                        renderNotifications();
+                    },
+                    function (err) {
+                        console.error('Firestore notifications:', err);
+                        var sk = document.getElementById('notif-skeleton-wrap');
+                        if (sk) sk.remove();
+                        document.getElementById('notifications-list').innerHTML =
+                            '<p class="notif-error">Couldn’t load notifications. Check your connection and try again.</p>';
+                        document.getElementById('notif-count-label').textContent = 'Unable to sync';
+                        setStatText('notif-stat-total', '—');
+                        setStatText('notif-stat-unread', '—');
+                        setStatText('notif-stat-showing', '—');
+                    }
+                );
+        });
     }
 
     initNotifications();
+})();
 </script>
 {% endblock %}

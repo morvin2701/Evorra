@@ -188,8 +188,40 @@
         }
 
         let usersNavProfileUnsubscribe = null;
+        let evorraNavNotifUnsubscribe = null;
         var navLatestProfilePayload = {};
         var navGeoRequestSerial = 0;
+
+        /** Same unread rules as /notifications: not archived; missing is_read counts as unread. */
+        window.evorraCountUnreadNotifications = function (snap) {
+            var n = 0;
+            snap.forEach(function (doc) {
+                var d = doc.data() || {};
+                if (d.is_archived === true) return;
+                if (d.is_read === true) return;
+                n++;
+            });
+            return n;
+        };
+        window.evorraFormatNotificationBadgeText = function (count) {
+            var c = Math.max(0, Math.floor(Number(count) || 0));
+            if (c <= 0) return '0';
+            if (c > 999) return '999+';
+            return String(c);
+        };
+        window.evorraSetNotificationBadge = function (badgeEl, count) {
+            if (!badgeEl) return;
+            var safe = Math.max(0, Math.floor(Number(count) || 0));
+            badgeEl.textContent = window.evorraFormatNotificationBadgeText(safe);
+            if (safe > 0) {
+                badgeEl.classList.remove('hide');
+                badgeEl.setAttribute('aria-label', safe === 1 ? '1 unread notification' : safe + ' unread notifications');
+            } else {
+                badgeEl.classList.add('hide');
+                badgeEl.setAttribute('aria-label', 'No unread notifications');
+            }
+            badgeEl.classList.toggle('notif-badge--wide', String(badgeEl.textContent).length > 2);
+        };
 
         /** True for platform admin / organiser — not plain attendees. */
         function profileCanListEvents(profile) {
@@ -746,6 +778,11 @@
                 document.getElementById('nav-profile').classList.remove('hide');
                 document.getElementById('nav-login').classList.add('hide');
 
+                if (evorraNavNotifUnsubscribe) {
+                    try { evorraNavNotifUnsubscribe(); } catch (e) {}
+                    evorraNavNotifUnsubscribe = null;
+                }
+
                 syncOrganizerNavForUser(user);
 
                 userHeader.innerHTML = `
@@ -761,20 +798,23 @@
                     </div>
                 `;
 
-                // Global notification listener for navbar badge
-                db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
-                    .onSnapshot(snap => {
-                        const badge = document.getElementById('global-notif-badge');
-                        if (badge) {
-                            if (!snap.empty) {
-                                badge.textContent = snap.size > 9 ? '9+' : snap.size;
-                                badge.classList.remove('hide');
-                            } else {
-                                badge.classList.add('hide');
-                            }
+                evorraNavNotifUnsubscribe = db.collection('notifications')
+                    .where('user_id', '==', user.uid)
+                    .onSnapshot(
+                        function (snap) {
+                            var n = window.evorraCountUnreadNotifications(snap);
+                            var badge = document.getElementById('global-notif-badge');
+                            window.evorraSetNotificationBadge(badge, n);
+                        },
+                        function (err) {
+                            console.warn('[Evorra] Nav notification badge:', err);
                         }
-                    });
+                    );
             } else {
+                if (evorraNavNotifUnsubscribe) {
+                    try { evorraNavNotifUnsubscribe(); } catch (e) {}
+                    evorraNavNotifUnsubscribe = null;
+                }
                 syncOrganizerNavForUser(null);
                 /** Logged-out users may browse home, explore, event pages, support; booking/profile stay gated. */
                 function evorraIsPublicBrowsePath(p) {

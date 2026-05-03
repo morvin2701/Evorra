@@ -833,6 +833,13 @@ body.theme-showmates .sm-nav-notif-badge {
     border: 2px solid var(--sm-surface);
     box-shadow: 0 2px 10px rgba(220, 38, 38, 0.4);
     line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+body.theme-showmates .sm-nav-notif-badge.notif-badge--wide {
+    min-width: 24px;
+    padding: 0 6px;
+    font-size: 0.5rem;
 }
 
 body.theme-showmates .sm-nav-user {

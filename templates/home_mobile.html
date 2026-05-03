@@ -95,9 +95,16 @@
     }
     .m-badge {
         position: absolute; top: -4px; right: -4px;
-        width: 18px; height: 18px; border-radius: 999px;
+        min-width: 18px; height: 18px; border-radius: 999px;
         background: #ff5070; border: 2px solid #11182b;
         font-size: 0.62rem; display: flex; align-items: center; justify-content: center; font-weight: 800;
+        padding: 0 4px;
+        font-variant-numeric: tabular-nums;
+    }
+    .m-badge.notif-badge--wide {
+        min-width: 22px;
+        padding: 0 5px;
+        font-size: 0.54rem;
     }
     .section-eyebrow-m {
         display: inline-flex;
@@ -597,6 +604,7 @@
     let heroCarouselSlides = [];
     let heroCarouselIndex = 0;
     let heroCarouselTimer = null;
+    let homeMobileNotifBadgeUnsubscribe = null;
 
     function esc(s) {
         return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -993,19 +1001,24 @@
 
         clipSelectedCityToMetroName();
 
+        if (homeMobileNotifBadgeUnsubscribe) {
+            try { homeMobileNotifBadgeUnsubscribe(); } catch (_) {}
+            homeMobileNotifBadgeUnsubscribe = null;
+        }
         const user = auth.currentUser;
         if (user) {
-            db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
-                .onSnapshot(snap => {
+            homeMobileNotifBadgeUnsubscribe = db.collection('notifications').where('user_id', '==', user.uid).onSnapshot(
+                (snap) => {
                     const badge = document.getElementById('notif-badge');
-                    if (!badge) return;
-                    if (!snap.empty) {
-                        badge.textContent = snap.size > 9 ? '9+' : snap.size;
-                        badge.classList.remove('hide');
-                    } else {
-                        badge.classList.add('hide');
+                    const n = window.evorraCountUnreadNotifications
+                        ? window.evorraCountUnreadNotifications(snap)
+                        : snap.size;
+                    if (typeof window.evorraSetNotificationBadge === 'function') {
+                        window.evorraSetNotificationBadge(badge, n);
                     }
-                });
+                },
+                (err) => console.warn('[Evorra] Mobile home notification badge:', err)
+            );
         }
         resolveUserGeo();
         loadData();

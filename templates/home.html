@@ -170,6 +170,12 @@
         padding: 0 4px;
         color: #fff;
         box-shadow: 0 2px 8px rgba(255,40,80,0.45);
+        font-variant-numeric: tabular-nums;
+    }
+    .notif-badge.notif-badge--wide {
+        min-width: 22px;
+        padding: 0 5px;
+        font-size: 0.52rem;
     }
 
     /* ── Skeleton ── */
@@ -1393,6 +1399,7 @@
     let heroCarouselSlides = [];
     let heroCarouselIndex = 0;
     let heroCarouselTimer = null;
+    let homeNotifBadgeUnsubscribe = null;
 
     function escapeHtml(s) {
         return String(s ?? '')
@@ -1833,19 +1840,24 @@
 
         clipSelectedCityToMetroName();
 
+        if (homeNotifBadgeUnsubscribe) {
+            try { homeNotifBadgeUnsubscribe(); } catch (_) {}
+            homeNotifBadgeUnsubscribe = null;
+        }
         const user = auth.currentUser;
         if (user) {
-            db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
-                .onSnapshot(snap => {
+            homeNotifBadgeUnsubscribe = db.collection('notifications').where('user_id', '==', user.uid).onSnapshot(
+                (snap) => {
                     const badge = document.getElementById('notif-badge');
-                    if (!badge) return;
-                    if (!snap.empty) {
-                        badge.textContent = snap.size > 9 ? '9+' : snap.size;
-                        badge.classList.remove('hide');
-                    } else {
-                        badge.classList.add('hide');
+                    const n = window.evorraCountUnreadNotifications
+                        ? window.evorraCountUnreadNotifications(snap)
+                        : snap.size;
+                    if (typeof window.evorraSetNotificationBadge === 'function') {
+                        window.evorraSetNotificationBadge(badge, n);
                     }
-                });
+                },
+                (err) => console.warn('[Evorra] Home notification badge:', err)
+            );
         }
         resolveUserGeo();
         loadData();
