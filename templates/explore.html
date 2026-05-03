@@ -26,7 +26,22 @@
         background: rgba(255,255,255,0.05);
     }
     .explore-heading { font-size: 1.72rem; font-weight: 900; letter-spacing: -0.02em; }
-    .filter-btn { width: auto; padding: 10px 20px; font-size: 0.85rem; border-radius: 16px; margin: 0; }
+    .filter-btn {
+        width: auto;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        border-radius: 16px;
+        margin: 0;
+        border: 1px solid rgba(220, 38, 38, 0.25);
+        background: linear-gradient(180deg, #fff 0%, #fff7f7 100%);
+        color: var(--sm-primary);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
+    .filter-btn:hover {
+        border-color: rgba(220, 38, 38, 0.4);
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+    }
     .search-field-container {
         display: grid; grid-template-columns: 22px 1fr 20px; align-items: center;
         gap: 10px; padding: 0 14px; height: 56px; border-radius: 16px;
@@ -100,11 +115,247 @@
         opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
     }
     .explore-toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .filter-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 14px;
+        background: rgba(15, 23, 42, 0.35);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.24s ease;
+    }
+    .filter-overlay.is-open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .filter-sheet {
+        width: min(680px, 100%);
+        max-height: min(86vh, 820px);
+        border-radius: 24px;
+        border: 1px solid var(--sm-border);
+        background:
+            radial-gradient(130% 100% at 100% 0%, rgba(220, 38, 38, 0.08), transparent 62%),
+            linear-gradient(180deg, #ffffff 0%, var(--sm-surface) 100%);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+            0 28px 80px rgba(15, 23, 42, 0.28);
+        transform: translateY(16px) scale(0.98);
+        transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow .32s ease;
+        overflow: hidden;
+    }
+    .filter-overlay.is-open .filter-sheet {
+        transform: translateY(0) scale(1);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+            0 34px 90px rgba(15, 23, 42, 0.34);
+    }
+    .filter-sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 22px;
+        border-bottom: 1px solid var(--sm-border);
+    }
+    .filter-title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.2vw, 1.45rem);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--sm-text);
+    }
+    .filter-subtitle {
+        margin: 4px 0 0;
+        font-size: 0.79rem;
+        color: var(--sm-muted);
+        font-weight: 600;
+    }
+    .filter-close-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        color: var(--sm-text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .filter-close-btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(220, 38, 38, 0.28);
+        background: #fff5f5;
+    }
+    .filter-sheet-body {
+        max-height: min(58vh, 560px);
+        overflow: auto;
+        padding: 16px 22px;
+        display: grid;
+        gap: 16px;
+    }
+    .filter-group {
+        border: 1px solid var(--sm-border);
+        border-radius: 16px;
+        background: var(--sm-bg);
+        padding: 14px;
+    }
+    .filter-label {
+        margin: 0 0 10px;
+        color: var(--sm-muted);
+        font-weight: 800;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+    .filter-row-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .filter-input {
+        width: 100%;
+        height: 46px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: #fff;
+        color: var(--sm-text);
+        font-size: 0.86rem;
+        font-weight: 600;
+        padding: 0 12px;
+        outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .filter-input::placeholder {
+        color: #94a3b8;
+    }
+    .filter-input:focus {
+        border-color: rgba(220, 38, 38, 0.34);
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+        background: #fff;
+    }
+    .filter-check-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 2px;
+        border-top: 1px dashed rgba(148, 163, 184, 0.3);
+    }
+    .filter-check-row:first-child {
+        border-top: none;
+        padding-top: 2px;
+    }
+    .filter-check-row span {
+        color: var(--sm-text);
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.01em;
+    }
+    .filter-toggle {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 46px;
+        height: 26px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.42);
+        background: #fff;
+        position: relative;
+        cursor: pointer;
+        transition: border-color .2s ease, background .2s ease;
+    }
+    .filter-toggle::before {
+        content: "";
+        position: absolute;
+        left: 3px;
+        top: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #94a3b8;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+        transition: transform .24s cubic-bezier(.22,1,.36,1), background .2s ease;
+    }
+    .filter-toggle:checked {
+        border-color: rgba(220, 38, 38, 0.45);
+        background: rgba(220, 38, 38, 0.16);
+    }
+    .filter-toggle:checked::before {
+        transform: translateX(20px);
+        background: #fff;
+    }
+    .filter-sheet-foot {
+        padding: 16px 22px;
+        border-top: 1px solid var(--sm-border);
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.72), rgba(241, 245, 249, 0.94));
+        display: grid;
+        gap: 10px;
+    }
+    .filter-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .filter-reset-btn,
+    .filter-apply-btn {
+        height: 50px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .filter-reset-btn {
+        color: var(--sm-text);
+        border-color: var(--sm-border);
+        background: #fff;
+    }
+    .filter-reset-btn:hover,
+    .filter-apply-btn:hover {
+        transform: translateY(-1px);
+    }
+    .filter-apply-btn {
+        color: #fff;
+        border-color: rgba(220, 38, 38, 0.45);
+        background: linear-gradient(120deg, #dc2626, #f97316);
+        box-shadow: 0 12px 26px rgba(220, 38, 38, 0.24);
+    }
+    html.filter-open,
+    body.filter-open {
+        overflow: hidden !important;
+        height: 100%;
+        overscroll-behavior: none;
+        touch-action: none;
+    }
+    body.filter-open .home-bg.explore-wrap {
+        overscroll-behavior: none;
+    }
     .flex-1 { flex: 1; }
     @media (max-width: 640px) {
         .explore-shell { width: calc(100% - 20px); }
         .explore-heading { font-size: 1.4rem; }
         #results-list { grid-template-columns: 1fr; }
+        .filter-overlay { align-items: flex-end; padding: 0; }
+        .filter-sheet {
+            width: 100%;
+            max-height: min(92vh, 860px);
+            border-radius: 22px 22px 0 0;
+            border-bottom: none;
+            transform: translateY(105%);
+        }
+        .filter-overlay.is-open .filter-sheet { transform: translateY(0); }
+        .filter-sheet-body { padding: 14px; max-height: min(68vh, 620px); }
+        .filter-sheet-head,
+        .filter-sheet-foot { padding-left: 14px; padding-right: 14px; }
+        .filter-row-2,
+        .filter-actions { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -154,37 +405,51 @@
 </div>
 <div id="explore-toast" class="explore-toast"></div>
 
-<!-- Simple Filter Modal Overlay -->
-<div id="filter-modal" class="hide" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; backdrop-filter: blur(10px); display: flex; align-items: flex-end;">
-    <div style="background: #0D1B31; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 5%; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); transform: translateY(100%); transition: transform 0.3s ease;" id="filter-sheet">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <h3 style="color: white; font-size: 1.5rem; font-weight: 900;">Filters</h3>
-            <i class="fa-solid fa-xmark" style="color: white; font-size: 1.5rem; cursor: pointer;" onclick="toggleFilters()"></i>
+<!-- Premium Filter Sheet -->
+<div id="filter-modal" class="filter-overlay hide" aria-hidden="true">
+    <div class="filter-sheet" id="filter-sheet" role="dialog" aria-modal="true" aria-labelledby="filter-sheet-title">
+        <div class="filter-sheet-head">
+            <div>
+                <h3 id="filter-sheet-title" class="filter-title">Advanced Filters</h3>
+                <p class="filter-subtitle">Narrow your event feed by budget, city, and format.</p>
+            </div>
+            <button type="button" class="filter-close-btn" aria-label="Close filters" onclick="toggleFilters()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
-        <div style="max-height: 60vh; overflow-y: auto; padding-bottom: 30px;">
-            <p style="color: rgba(255,255,255,0.5); font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase;">Price Range</p>
-            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <div class="profile-input-wrapper flex-1"><input type="number" id="f-min-price" placeholder="Min Price" style="width: 100%;"></div>
-                <div class="profile-input-wrapper flex-1"><input type="number" id="f-max-price" placeholder="Max Price" style="width: 100%;"></div>
-            </div>
+        <div class="filter-sheet-body">
+            <section class="filter-group">
+                <p class="filter-label">Price Range</p>
+                <div class="filter-row-2">
+                    <input type="number" id="f-min-price" class="filter-input" placeholder="Min price">
+                    <input type="number" id="f-max-price" class="filter-input" placeholder="Max price">
+                </div>
+            </section>
 
-            <p style="color: rgba(255,255,255,0.5); font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; text-transform: uppercase;">City</p>
-            <div class="profile-input-wrapper" style="margin-bottom: 25px;">
-                <input type="text" id="f-city" placeholder="Select City" style="width: 100%;">
-            </div>
+            <section class="filter-group">
+                <p class="filter-label">City</p>
+                <input type="text" id="f-city" class="filter-input" placeholder="Type city name">
+            </section>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-                <span style="color: white; font-weight: 700;">Featured Events Only</span>
-                <input type="checkbox" id="f-featured" style="width: 20px; height: 20px;">
-            </div>
+            <section class="filter-group">
+                <p class="filter-label">Event Type</p>
+                <label class="filter-check-row" for="f-featured">
+                    <span>Featured events only</span>
+                    <input type="checkbox" id="f-featured" class="filter-toggle">
+                </label>
+                <label class="filter-check-row" for="f-online">
+                    <span>Online events only</span>
+                    <input type="checkbox" id="f-online" class="filter-toggle">
+                </label>
+            </section>
+        </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
-                <span style="color: white; font-weight: 700;">Online Events Only</span>
-                <input type="checkbox" id="f-online" style="width: 20px; height: 20px;">
+        <div class="filter-sheet-foot">
+            <div class="filter-actions">
+                <button type="button" class="filter-reset-btn" onclick="clearAllFilters()">Reset all</button>
+                <button type="button" class="filter-apply-btn" onclick="applyFilters()">Apply filters</button>
             </div>
-
-            <button onclick="applyFilters()" class="btn-evorra" style="height: 56px; font-weight: 900; font-size: 1rem;">Apply Filters</button>
         </div>
     </div>
 </div>
@@ -521,13 +786,18 @@
 
     function toggleFilters() {
         const modal = document.getElementById('filter-modal');
-        const sheet = document.getElementById('filter-sheet');
         if (modal.classList.contains('hide')) {
             modal.classList.remove('hide');
-            setTimeout(() => sheet.style.transform = 'translateY(0)', 10);
+            requestAnimationFrame(() => modal.classList.add('is-open'));
+            modal.setAttribute('aria-hidden', 'false');
+            document.documentElement.classList.add('filter-open');
+            document.body.classList.add('filter-open');
         } else {
-            sheet.style.transform = 'translateY(100%)';
-            setTimeout(() => modal.classList.add('hide'), 300);
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.documentElement.classList.remove('filter-open');
+            document.body.classList.remove('filter-open');
+            setTimeout(() => modal.classList.add('hide'), 320);
         }
     }
 
@@ -590,5 +860,17 @@
     });
 
     initExplore();
+
+    (function bindExploreFilterOverlayClose() {
+        const modal = document.getElementById('filter-modal');
+        const sheet = document.getElementById('filter-sheet');
+        if (!modal || !sheet) return;
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal && modal.classList.contains('is-open')) toggleFilters();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) toggleFilters();
+        });
+    })();
 </script>
 {% endblock %}
