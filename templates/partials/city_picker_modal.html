@@ -1,0 +1,21 @@
+{# Global city picker — included from base.html so it works on Profile & all routes #}
+<div id="ev-cp-overlay" class="ev-cp-overlay" onclick="window.__evCpOverlayClick && window.__evCpOverlayClick(event)" role="presentation" aria-hidden="true">
+    <div id="ev-cp-sheet" class="ev-cp-sheet" role="dialog" aria-modal="true" aria-labelledby="ev-cp-title" onclick="event.stopPropagation()">
+        <header class="ev-cp-head">
+            <h2 id="ev-cp-title" class="ev-cp-title"><i class="fa-solid fa-location-crosshairs ev-cp-title-icon"></i> Select Your City</h2>
+            <button type="button" class="ev-cp-close" id="ev-cp-close" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+        <div class="ev-cp-toolbar">
+            <div class="ev-cp-search-wrap">
+                <i class="fa-solid fa-magnifying-glass ev-cp-search-ico"></i>
+                <input type="search" id="ev-cp-search" class="ev-cp-search" placeholder="Search cities &amp; places worldwide…" autocomplete="off" enterkeyhint="search" aria-label="Search cities and places">
+            </div>
+            <button type="button" class="ev-cp-detect" id="ev-cp-detect">
+                <i class="fa-solid fa-location-crosshairs"></i> Detect My Location
+            </button>
+        </div>
+        <div id="ev-cp-body" class="ev-cp-body"></div>
+    </div>
+</div>

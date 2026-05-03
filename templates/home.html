@@ -99,7 +99,7 @@
         position: relative;
         z-index: 2;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
         flex-wrap: wrap;
@@ -131,7 +131,7 @@
         line-height: 1.4;
         max-width: 38ch;
     }
-    .brand-strip-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+    .brand-strip-actions { display: flex; gap: 10px; align-items: flex-start; flex-shrink: 0; padding-top: 4px; }
 
     /* Notification bell */
     .notif-wrap {
@@ -1385,6 +1385,7 @@
     })();
 
     let selectedCatId = '';
+    let selectedCity  = '';
     let allEventsCache = [];
     let userGeo = null;
     const AHMEDABAD_CENTER = { lat: 23.0225, lng: 72.5714 };
@@ -1466,7 +1467,7 @@
     }
     function buildForYouList(events) {
         const pool = events.filter((e) =>
-            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e)
+            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e) && matchesSelectedCity(e)
         );
         const ranked = pool.map((e) => ({ e, s: scoreForYou(e) }));
         ranked.sort((a, b) => b.s - a.s);
@@ -1588,12 +1589,34 @@
         });
     }
     function renderSmartDiscovery(events) {
-        const trendingPool = [...events].filter((e) => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e))
+        const trendingPool = [...events]
+            .filter((e) => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e) && matchesSelectedCity(e))
             .sort((a, b) => trendingScore(b) - trendingScore(a))
             .slice(0, 14);
         renderDiscoveryRow('trending-row', trendingPool);
-        const nearList = rankNearAhmedabad(events).slice(0, 14);
+
+        // Near section: use selected city if set, otherwise fall back to Ahmedabad
+        const nearList = selectedCity
+            ? events.filter(e => e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e) && matchesSelectedCity(e))
+                    .sort((a, b) => trendingScore(b) - trendingScore(a))
+                    .slice(0, 14)
+            : rankNearAhmedabad(events).slice(0, 14);
         renderDiscoveryRow('near-row', nearList);
+
+        // Update near section heading dynamically
+        const nearEyebrow = document.querySelector('#section-near-wrap .section-eyebrow');
+        const nearTitle   = document.querySelector('#section-near-wrap .section-title');
+        const nearSub     = document.querySelector('#section-near-wrap .section-subtitle');
+        if (selectedCity) {
+            if (nearEyebrow) nearEyebrow.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> ${escapeHtml(selectedCity)}`;
+            if (nearTitle)   nearTitle.textContent  = `Events in ${selectedCity}`;
+            if (nearSub)     nearSub.textContent     = `All published events in ${selectedCity}.`;
+        } else {
+            if (nearEyebrow) nearEyebrow.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Near Ahmedabad`;
+            if (nearTitle)   nearTitle.textContent  = 'Around the city';
+            if (nearSub)     nearSub.textContent     = 'Within ~55 km or Ahmedabad — distance-ranked when we have your location.';
+        }
+
         const forYou = buildForYouList(events);
         renderDiscoveryRow('foryou-row', forYou);
         mountHeroCarousel(trendingPool.length ? trendingPool : events.filter((e) => e.is_published !== false && !isEventClosed(e)));
@@ -1616,6 +1639,12 @@
     function matchesSelectedCategory(eventItem) {
         if (!selectedCatId) return true;
         return String(eventItem.category_id || '') === String(selectedCatId);
+    }
+    function matchesSelectedCity(eventItem) {
+        if (!selectedCity) return true;
+        const city = String(eventItem.city || '').toLowerCase().trim();
+        const sel  = selectedCity.toLowerCase().trim();
+        return city === sel || city.includes(sel) || sel.includes(city);
     }
     function toNum(v) {
         const n = Number(v);
@@ -1691,8 +1720,23 @@
         recordEventInterest(eventId);
         location.href = `/event/${eventId}`;
     }
-
     async function initializeHome() {
+        // Restore saved city preference (drop taluka/tehsil pins — they rarely match event.city)
+        try {
+            const saved = localStorage.getItem('evorra_selected_city');
+            if (saved !== null) {
+                if (/\b(taluka|tehsil|subdistrict)\b/i.test(String(saved))) {
+                    localStorage.setItem('evorra_selected_city', '');
+                    selectedCity = '';
+                } else {
+                    selectedCity = saved;
+                }
+            }
+        } catch (_) {}
+        if (typeof window.evorraSyncBrowseCityNav === 'function') {
+            window.evorraSyncBrowseCityNav(undefined);
+        }
+
         const user = auth.currentUser;
         if (user) {
             db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
@@ -1733,6 +1777,12 @@
         renderPopular(allEventsCache);
         renderUpcoming(allEventsCache);
     }
+
+    document.addEventListener('evorra:city-changed', function (ev) {
+        const d = ev.detail || {};
+        selectedCity = d.city != null ? d.city : '';
+        void rerenderHomeLists();
+    });
 
     async function loadData() {
         try {
@@ -1792,6 +1842,7 @@
                 e.is_featured &&
                 e.is_published !== false &&
                 matchesSelectedCategory(e) &&
+                matchesSelectedCity(e) &&
                 !isEventClosed(e)
             )
             .sort((a, b) => {
@@ -1824,7 +1875,7 @@
         const list = document.getElementById('popular-list');
         list.innerHTML = '';
         const popular = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && matchesSelectedCity(e) && !isEventClosed(e))
             .sort((a, b) => {
                 const d = compareByProximity(a, b);
                 if (d !== 0) return d;
@@ -1878,7 +1929,7 @@
         list.innerHTML = '<div class="upcoming-grid" id="upcoming-grid"></div>';
         const grid = document.getElementById('upcoming-grid');
         const upcoming = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && matchesSelectedCity(e) && !isEventClosed(e))
             .sort((a, b) => {
                 const d = compareByProximity(a, b);
                 if (d !== 0) return d;

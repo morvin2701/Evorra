@@ -417,6 +417,7 @@
         line-height: 1.42;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -455,6 +456,7 @@
         .hero-spotlight-slide .hs-img { transition: none !important; }
         .hero-spotlight-slide:hover .hs-img { transform: none !important; }
     }
+
 </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home-premium.css') }}">
 {% endblock %}
@@ -467,7 +469,7 @@
             <div class="m-brand-inner">
                 <div>
                     <h1 class="m-brand-wordmark">Evorra</h1>
-                    <p class="m-brand-sub">Spotlight, trending picks, categories, personalised &amp; near Ahmedabad.</p>
+                    <p class="m-brand-sub">Spotlight, trending picks &amp; personalised picks.</p>
                 </div>
                 <button type="button" class="m-bell" onclick="location.href='/notifications'" aria-label="Notifications">
                     <i class="fa-regular fa-bell"></i>
@@ -580,12 +582,14 @@
         </div>
     </div>
 </div>
+
 <div id="home-toast" class="toast-msg"></div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     let selectedCatId = '';
+    let selectedCity = '';
     let allEventsCache = [];
     let userGeo = null;
     const AHM_CENTER = { lat: 23.0225, lng: 72.5714 };
@@ -647,7 +651,7 @@
             e.is_published !== false
             && !isEventClosed(e)
             && matchesSelectedCategory(e)
-            && nearAhmedabad(e)
+            && matchesSelectedCity(e)
         );
         return pool.sort((a, b) => {
             const da = Number(a.__distanceKm);
@@ -660,7 +664,7 @@
     }
     function buildForYouList(events) {
         const pool = events.filter(e =>
-            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e)
+            e.is_published !== false && !isEventClosed(e) && matchesSelectedCategory(e) && matchesSelectedCity(e)
         );
         const ranked = pool.map(e => ({ e, s: scoreYou(e) }));
         ranked.sort((a, b) => b.s - a.s);
@@ -769,13 +773,17 @@
     }
     function renderMobileSmartSections(events) {
         const open = events.filter(e => e.is_published !== false && !isEventClosed(e));
-        const trendingPool = [...open].filter(e => matchesSelectedCategory(e))
+        const trendingPool = [...open].filter(e => matchesSelectedCategory(e) && matchesSelectedCity(e))
             .sort((a, b) => trendingScore(b) - trendingScore(a)).slice(0, 12);
         const nearPool = rankNearAhmedabadList(events).slice(0, 12);
         const forYouPool = buildForYouList(events);
-        mountHeroCarousel(trendingPool.length ? trendingPool : open.filter(e => matchesSelectedCategory(e)));
+
+        const nearEyebrow = document.querySelector('#m-near-wrap .section-eyebrow-m');
+        if (nearEyebrow) nearEyebrow.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> ${selectedCity ? 'Events in ' + selectedCity : 'Near You'}`;
+
+        mountHeroCarousel(trendingPool.length ? trendingPool : open.filter(e => matchesSelectedCategory(e) && matchesSelectedCity(e)));
         fillMobileScrollRow('m-trending-wrap', 'trending-row-m', trendingPool, 'Trending');
-        fillMobileScrollRow('m-near-wrap', 'near-row-m', nearPool, 'Near Ahmedabad');
+        fillMobileScrollRow('m-near-wrap', 'near-row-m', nearPool, selectedCity || 'Near You');
         fillMobileScrollRow('m-foryou-wrap', 'foryou-row-m', forYouPool, 'Personalised');
         toggleMobileSmartPanels(trendingPool.length > 0, nearPool.length > 0, forYouPool.length > 0);
     }
@@ -796,6 +804,12 @@
     function matchesSelectedCategory(eventItem) {
         if (!selectedCatId) return true;
         return String(eventItem.category_id || '') === String(selectedCatId);
+    }
+    function matchesSelectedCity(eventItem) {
+        if (!selectedCity) return true;
+        const city = String(eventItem.city || '').toLowerCase().trim();
+        const sel = selectedCity.toLowerCase().trim();
+        return city === sel || city.includes(sel) || sel.includes(city);
     }
     function toNum(v) {
         const n = Number(v);
@@ -872,6 +886,20 @@
     }
 
     async function initializeHome() {
+        try {
+            const saved = localStorage.getItem('evorra_selected_city');
+            if (saved !== null) {
+                if (/\b(taluka|tehsil|subdistrict)\b/i.test(String(saved))) {
+                    localStorage.setItem('evorra_selected_city', '');
+                    selectedCity = '';
+                } else {
+                    selectedCity = saved;
+                }
+            }
+        } catch (_) {}
+        if (typeof window.evorraSyncBrowseCityNav === 'function') {
+            window.evorraSyncBrowseCityNav(undefined);
+        }
         const user = auth.currentUser;
         if (user) {
             db.collection('notifications').where('user_id', '==', user.uid).where('is_read', '==', false)
@@ -912,6 +940,12 @@
         renderPopular(allEventsCache);
         renderUpcoming(allEventsCache);
     }
+
+    document.addEventListener('evorra:city-changed', function (ev) {
+        const d = ev.detail || {};
+        selectedCity = d.city != null ? d.city : '';
+        void rerenderHomeLists();
+    });
 
     async function loadData() {
         try {
@@ -964,6 +998,7 @@
                 e.is_featured &&
                 e.is_published !== false &&
                 matchesSelectedCategory(e) &&
+                matchesSelectedCity(e) &&
                 !isEventClosed(e)
             )
             .sort((a, b) => {
@@ -994,7 +1029,7 @@
         const list = document.getElementById('popular-list');
         list.innerHTML = '';
         const popular = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && matchesSelectedCity(e) && !isEventClosed(e))
             .sort((a, b) => {
                 const d = compareByProximity(a, b);
                 if (d !== 0) return d;
@@ -1024,7 +1059,7 @@
         const list = document.getElementById('upcoming-list');
         list.innerHTML = '';
         const upcoming = events
-            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && !isEventClosed(e))
+            .filter(e => e.is_published !== false && matchesSelectedCategory(e) && matchesSelectedCity(e) && !isEventClosed(e))
             .sort((a, b) => {
                 const d = compareByProximity(a, b);
                 if (d !== 0) return d;
@@ -1075,7 +1110,6 @@
         el.classList.add('active');
         await rerenderHomeLists();
     }
-
     auth.onAuthStateChanged(() => initializeHome());
 </script>
 {% endblock %}

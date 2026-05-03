@@ -8,6 +8,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+app.config['GOOGLE_MAPS_API_KEY'] = (os.getenv('GOOGLE_MAPS_API_KEY') or '').strip()
 
 
 @app.context_processor
@@ -24,6 +25,8 @@ def inject_public_runtime_config():
         'cloudinary_upload_url': os.getenv('CLOUDINARY_UPLOAD_URL', ''),
         'cloudinary_upload_folder': os.getenv('CLOUDINARY_UPLOAD_FOLDER', 'events'),
         'app_public_url': os.getenv('APP_PUBLIC_URL', ''),
+        # Google Geocoding API (city picker). Set GOOGLE_MAPS_API_KEY in .env — restrict key by HTTP referrer.
+        'google_maps_api_key': app.config['GOOGLE_MAPS_API_KEY'],
     }
 
 # --- Routes ---

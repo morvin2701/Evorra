@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/showmates-theme.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/evorra-pages.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/city-picker.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Firebase (Compat Mode for easier integration) -->
@@ -28,7 +29,7 @@
     <nav class="top-navbar sm-topnav sm-navbar-shell" role="navigation" aria-label="Main">
         <div class="nav-leading sm-nav-zone-leading">
             <a href="/" class="nav-logo">EVORRA</a>
-            <a href="/profile" id="nav-location-link" class="sm-nav-location" title="City and location — opens Profile">
+            <a href="#" id="nav-location-link" class="sm-nav-location" title="Choose city or area" role="button">
                 <span class="sm-nav-location-glow" aria-hidden="true"></span>
                 <span class="sm-nav-location-icon-wrap" aria-hidden="true">
                     <i class="fa-solid fa-location-crosshairs sm-nav-location-icon"></i>
@@ -65,6 +66,8 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    {% include 'partials/city_picker_modal.html' %}
 
     <footer class="site-footer" role="contentinfo">
         <div class="footer-inner">
@@ -164,6 +167,7 @@
         window.CLOUDINARY_UPLOAD_URL = "{{ cloudinary_upload_url|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_FOLDER = "{{ cloudinary_upload_folder|default('events', true)|e }}";
         window.APP_PUBLIC_URL = "{{ app_public_url|default('', true)|e }}";
+        window.__EVORRA_GOOGLE_MAPS_API_KEY__ = {{ google_maps_api_key | tojson }};
 
         const firebaseConfig = {
             apiKey: "{{ firebase_api_key|default('', true)|e }}",
@@ -273,7 +277,37 @@
             return null;
         }
 
-        function navApplyLocationChip(text, titleAttr) {
+        /** Sync browse/filter city to the top nav chip. Explicit updates apply on every route; localStorage-only override runs on Home. */
+        function navApplyBrowseCityToNavChip(explicitCity) {
+            try {
+                var bc;
+                var hasExplicit = explicitCity !== undefined && explicitCity !== null;
+                if (hasExplicit) {
+                    bc = String(explicitCity);
+                } else {
+                    var pathOnly = (window.location.pathname || '').split('?')[0].replace(/\/+$/, '') || '/';
+                    if (pathOnly !== '/' && pathOnly !== '/home-mobile') return;
+                    bc = localStorage.getItem('evorra_selected_city');
+                }
+                if (bc === null) return;
+                if (bc === '') {
+                    navApplyLocationChip(
+                        'All cities',
+                        'Showing events everywhere — tap to filter by city.',
+                        true
+                    );
+                    return;
+                }
+                var t = String(bc).trim();
+                navApplyLocationChip(t, 'Browsing near ' + t + ' — tap to change.', true);
+            } catch (e) {}
+        }
+
+        function navApplyBrowseCityOverrideIfHome() {
+            navApplyBrowseCityToNavChip(undefined);
+        }
+
+        function navApplyLocationChip(text, titleAttr, skipBrowseOverride) {
             var el = document.getElementById('nav-location-label');
             var link = document.getElementById('nav-location-link');
             if (!el) return;
@@ -291,7 +325,13 @@
                     link.setAttribute('title', titleAttr || 'Set city in Profile or allow location access for GPS');
                 }
             }
+            if (!skipBrowseOverride) navApplyBrowseCityOverrideIfHome();
         }
+
+        /** Pass the chosen city string so the nav updates even if localStorage fails (e.g. private mode). */
+        window.evorraSyncBrowseCityNav = function (explicitCity) {
+            navApplyBrowseCityToNavChip(explicitCity);
+        };
 
         function navHumanLabelFromReversePayload(j, lat, lng) {
             if (!j) return String(lat.toFixed(3)) + '°, ' + String(lng.toFixed(3)) + '°';
@@ -307,6 +347,80 @@
                     '°';
         }
 
+        function navIsTalukaLike(name) {
+            return /\b(taluka|tehsil|subdistrict)\b/i.test(String(name || ''));
+        }
+
+        function navPickGoogleComponent(components, type) {
+            if (!components || !components.length) return '';
+            var ci;
+            var types;
+            for (ci = 0; ci < components.length; ci++) {
+                types = components[ci].types || [];
+                if (types.indexOf(type) >= 0 && components[ci].long_name) {
+                    return String(components[ci].long_name).trim();
+                }
+            }
+            return '';
+        }
+
+        function navCityLabelFromGoogleComponentsFallback(components) {
+            if (!components || !components.length) return '';
+            var v = navPickGoogleComponent(components, 'locality');
+            if (v) return v;
+            v = navPickGoogleComponent(components, 'postal_town');
+            if (v) return v;
+            v = navPickGoogleComponent(components, 'administrative_area_level_2');
+            if (v && !navIsTalukaLike(v)) return v;
+            v = navPickGoogleComponent(components, 'administrative_area_level_3');
+            if (v && !navIsTalukaLike(v)) return v;
+            v =
+                navPickGoogleComponent(components, 'sublocality') ||
+                navPickGoogleComponent(components, 'sublocality_level_1') ||
+                navPickGoogleComponent(components, 'neighborhood');
+            if (v) return v;
+            v = navPickGoogleComponent(components, 'administrative_area_level_3');
+            if (v) return v;
+            return '';
+        }
+
+        /** Prefer locality across all reverse-geocode results (matches event.city e.g. Ahmedabad). */
+        function navFindLocalityAcrossGoogleResults(results) {
+            if (!results || !results.length) return '';
+            var ri;
+            var ci;
+            var comps;
+            var types;
+            for (ri = 0; ri < results.length; ri++) {
+                comps = results[ri].address_components || [];
+                for (ci = 0; ci < comps.length; ci++) {
+                    types = comps[ci].types || [];
+                    if (types.indexOf('locality') >= 0 && comps[ci].long_name) {
+                        return String(comps[ci].long_name).trim();
+                    }
+                }
+            }
+            return '';
+        }
+
+        function navCityLabelFromGoogleResults(results) {
+            if (!results || !results.length) return '';
+            var loc = navFindLocalityAcrossGoogleResults(results);
+            if (loc) return loc;
+            var i;
+            var label;
+            for (i = 0; i < results.length; i++) {
+                label = navCityLabelFromGoogleComponentsFallback(results[i].address_components || []);
+                if (label && !navIsTalukaLike(label)) return label;
+            }
+            for (i = 0; i < results.length; i++) {
+                label = navCityLabelFromGoogleComponentsFallback(results[i].address_components || []);
+                if (label) return label;
+            }
+            var fa = results[0].formatted_address || '';
+            return fa.split(',')[0].trim();
+        }
+
         function navReverseGeocodeLatLng(lat, lng) {
             var url =
                 'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' +
@@ -320,11 +434,38 @@
             });
         }
 
+        /** Seed event browse filter only when user has never chosen a city (localStorage key missing). */
+        function navPersistBrowseCityFromGpsLabel(label) {
+            var t = String(label || '').trim();
+            if (!t) return;
+            try {
+                if (localStorage.getItem('evorra_selected_city') !== null) return;
+                localStorage.setItem('evorra_selected_city', t);
+                if (typeof window.evorraSyncBrowseCityNav === 'function') {
+                    window.evorraSyncBrowseCityNav(t);
+                }
+                window.dispatchEvent(
+                    new CustomEvent('evorra:city-changed', {
+                        detail: { city: t },
+                    })
+                );
+            } catch (e) {}
+        }
+
         function navHydrateChipFromCoordinates(lat, lng, reason) {
             var serial = ++navGeoRequestSerial;
-            navReverseGeocodeLatLng(lat, lng).then(function (data) {
+
+            function finish(label) {
                 if (serial !== navGeoRequestSerial) return;
-                var label = navHumanLabelFromReversePayload(data, lat, lng);
+                var t = String(label || '').trim();
+                if (!t) {
+                    navApplyLocationChip(
+                        lat.toFixed(4) + ', ' + lng.toFixed(4),
+                        'Could not resolve place name — tap to choose a city.'
+                    );
+                    return;
+                }
+                navPersistBrowseCityFromGpsLabel(t);
                 var coordLine = '';
                 try {
                     coordLine = lat.toFixed(5) + ', ' + lng.toFixed(5);
@@ -332,17 +473,63 @@
                     coordLine = '';
                 }
                 var detail =
-                    (reason ? reason + ' · ' : '') +
-                    coordLine +
-                    ' — tap to open Profile and save your city.';
-                navApplyLocationChip(label, detail);
-            }).catch(function () {
-                if (serial !== navGeoRequestSerial) return;
-                navApplyLocationChip(
-                    lat.toFixed(4) + ', ' + lng.toFixed(4),
-                    'GPS coordinates — tap Profile to edit your city.'
-                );
-            });
+                    (reason ? reason + ' · ' : '') + coordLine + ' — tap to change area.';
+                navApplyLocationChip(t, detail);
+            }
+
+            var key =
+                typeof window !== 'undefined' && window.__EVORRA_GOOGLE_MAPS_API_KEY__
+                    ? String(window.__EVORRA_GOOGLE_MAPS_API_KEY__).trim()
+                    : '';
+
+            if (key) {
+                var gUrl =
+                    'https://maps.googleapis.com/maps/api/geocode/json?' +
+                    new URLSearchParams({
+                        latlng: lat + ',' + lng,
+                        key: key,
+                    });
+                fetch(gUrl)
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (data) {
+                        if (serial !== navGeoRequestSerial) return;
+                        if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') throw new Error('google');
+                        if (!data.results || !data.results.length) throw new Error('empty');
+                        var label = navCityLabelFromGoogleResults(data.results);
+                        if (!label) throw new Error('nolabel');
+                        finish(label);
+                    })
+                    .catch(function () {
+                        navReverseGeocodeLatLng(lat, lng)
+                            .then(function (data) {
+                                if (serial !== navGeoRequestSerial) return;
+                                finish(navHumanLabelFromReversePayload(data, lat, lng));
+                            })
+                            .catch(function () {
+                                if (serial !== navGeoRequestSerial) return;
+                                navApplyLocationChip(
+                                    lat.toFixed(4) + ', ' + lng.toFixed(4),
+                                    'GPS coordinates — tap to choose a city.'
+                                );
+                            });
+                    });
+                return;
+            }
+
+            navReverseGeocodeLatLng(lat, lng)
+                .then(function (data) {
+                    if (serial !== navGeoRequestSerial) return;
+                    finish(navHumanLabelFromReversePayload(data, lat, lng));
+                })
+                .catch(function () {
+                    if (serial !== navGeoRequestSerial) return;
+                    navApplyLocationChip(
+                        lat.toFixed(4) + ', ' + lng.toFixed(4),
+                        'GPS coordinates — tap to choose a city.'
+                    );
+                });
         }
 
         function navTryNavigatorGeolocation(onDeniedOrError) {
@@ -488,7 +675,8 @@
             }
         });
     </script>
-    
+    <script src="{{ url_for('static', filename='js/city-picker.js') }}"></script>
+
     <!-- Global Evorra alert (Showmates light card; replaces native alert) -->
     <div id="evorra-alert-root" class="evorra-alert hide" role="presentation" aria-hidden="true">
         <div id="evorra-alert-overlay" class="evorra-alert-overlay" tabindex="-1" aria-hidden="true"></div>
@@ -681,5 +869,26 @@
     </script>
 
     {% block scripts %}{% endblock %}
+    <script>
+        /* Nav "Near …" opens global city picker on every page (no redirect to Profile). */
+        (function () {
+            function bindNavLocationChip() {
+                var link = document.getElementById('nav-location-link');
+                if (!link || link.getAttribute('data-city-modal-bound') === '1') return;
+                link.setAttribute('data-city-modal-bound', '1');
+                link.addEventListener(
+                    'click',
+                    function (e) {
+                        if (typeof window.openCityModal !== 'function') return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.openCityModal();
+                    },
+                    true
+                );
+            }
+            bindNavLocationChip();
+        })();
+    </script>
 </body>
 </html>
