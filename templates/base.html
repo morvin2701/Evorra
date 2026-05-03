@@ -161,13 +161,14 @@
         </a>
     </div>
 
+    <script src="{{ url_for('static', filename='js/ip-location.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/city-match.js') }}"></script>
     <script>
         window.CLOUDINARY_CLOUD_NAME = "{{ cloudinary_cloud_name|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_PRESET = "{{ cloudinary_upload_preset|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_URL = "{{ cloudinary_upload_url|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_FOLDER = "{{ cloudinary_upload_folder|default('events', true)|e }}";
         window.APP_PUBLIC_URL = "{{ app_public_url|default('', true)|e }}";
-        window.__EVORRA_GOOGLE_MAPS_API_KEY__ = {{ google_maps_api_key | tojson }};
 
         const firebaseConfig = {
             apiKey: "{{ firebase_api_key|default('', true)|e }}",
@@ -181,6 +182,10 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        if (window.EvorraIpLocation && typeof window.EvorraIpLocation.ensureLoaded === 'function') {
+            window.EvorraIpLocation.ensureLoaded().catch(function () {});
+        }
 
         let usersNavProfileUnsubscribe = null;
         var navLatestProfilePayload = {};
@@ -351,6 +356,18 @@
             return /\b(taluka|tehsil|subdistrict)\b/i.test(String(name || ''));
         }
 
+        function navNormalizeMetroAreaLabel(name) {
+            var s = String(name || '').trim();
+            if (!s) return '';
+            s = s
+                .replace(/\s+Metropolitan\s+Region$/i, '')
+                .replace(/\s+District$/i, '')
+                .replace(/\s+Taluka$/i, '')
+                .replace(/\s+Tehsil$/i, '')
+                .trim();
+            return s;
+        }
+
         function navPickGoogleComponent(components, type) {
             if (!components || !components.length) return '';
             var ci;
@@ -384,8 +401,30 @@
             return '';
         }
 
-        /** Prefer locality across all reverse-geocode results (matches event.city e.g. Ahmedabad). */
+        /**
+         * Prefer city-level locality for the nav chip.
+         * Google returns results most-specific first (neighborhood before city); scanning forward
+         * picks sub-areas like Ghatlodiya. Scan coarse → fine so the label matches the main city.
+         */
         function navFindLocalityAcrossGoogleResults(results) {
+            if (!results || !results.length) return '';
+            var ri;
+            var ci;
+            var comps;
+            var types;
+            for (ri = results.length - 1; ri >= 0; ri--) {
+                comps = results[ri].address_components || [];
+                for (ci = 0; ci < comps.length; ci++) {
+                    types = comps[ci].types || [];
+                    if (types.indexOf('locality') >= 0 && comps[ci].long_name) {
+                        return navNormalizeMetroAreaLabel(String(comps[ci].long_name).trim());
+                    }
+                }
+            }
+            return '';
+        }
+
+        function navFindAdminLevel2AcrossGoogleResults(results) {
             if (!results || !results.length) return '';
             var ri;
             var ci;
@@ -395,30 +434,69 @@
                 comps = results[ri].address_components || [];
                 for (ci = 0; ci < comps.length; ci++) {
                     types = comps[ci].types || [];
-                    if (types.indexOf('locality') >= 0 && comps[ci].long_name) {
-                        return String(comps[ci].long_name).trim();
+                    if (types.indexOf('administrative_area_level_2') >= 0 && comps[ci].long_name) {
+                        var n = navNormalizeMetroAreaLabel(String(comps[ci].long_name).trim());
+                        if (n && !navIsTalukaLike(n)) return n;
                     }
                 }
             }
             return '';
         }
 
-        function navCityLabelFromGoogleResults(results) {
+        /** India: district (admin_level_2) is usually the city name (Ahmedabad); locality is often a ward (Ghatlodiya). */
+        function navGoogleGeocodeIsIndia(results) {
+            if (!results || !results.length) return false;
+            var ri;
+            var ci;
+            var comps;
+            var types;
+            for (ri = 0; ri < results.length; ri++) {
+                comps = results[ri].address_components || [];
+                for (ci = 0; ci < comps.length; ci++) {
+                    types = comps[ci].types || [];
+                    if (types.indexOf('country') >= 0 && comps[ci].short_name === 'IN') return true;
+                }
+            }
+            return false;
+        }
+
+        /** City name only — used for browse filter / localStorage (not the long street label). */
+        function navBrowseCityFromGoogleResults(results) {
             if (!results || !results.length) return '';
+            if (navGoogleGeocodeIsIndia(results)) {
+                var adIn = navFindAdminLevel2AcrossGoogleResults(results);
+                if (adIn) return adIn;
+            }
             var loc = navFindLocalityAcrossGoogleResults(results);
             if (loc) return loc;
+            return navFindAdminLevel2AcrossGoogleResults(results) || '';
+        }
+
+        /** Nav chip: city only (e.g. Ahmedabad) — same rules as browse filter via navBrowseCityFromGoogleResults. */
+        function navCityLabelFromGoogleResults(results) {
+            if (!results || !results.length) return '';
+            var browse = navBrowseCityFromGoogleResults(results);
+            if (browse) return browse;
+            var loc = navFindLocalityAcrossGoogleResults(results);
+            if (loc) return loc;
+            var ad2 = navFindAdminLevel2AcrossGoogleResults(results);
+            if (ad2) return ad2;
             var i;
             var label;
             for (i = 0; i < results.length; i++) {
-                label = navCityLabelFromGoogleComponentsFallback(results[i].address_components || []);
+                label = navNormalizeMetroAreaLabel(
+                    navCityLabelFromGoogleComponentsFallback(results[i].address_components || [])
+                );
                 if (label && !navIsTalukaLike(label)) return label;
             }
             for (i = 0; i < results.length; i++) {
-                label = navCityLabelFromGoogleComponentsFallback(results[i].address_components || []);
+                label = navNormalizeMetroAreaLabel(
+                    navCityLabelFromGoogleComponentsFallback(results[i].address_components || [])
+                );
                 if (label) return label;
             }
             var fa = results[0].formatted_address || '';
-            return fa.split(',')[0].trim();
+            return navNormalizeMetroAreaLabel(fa.split(',')[0].trim());
         }
 
         function navReverseGeocodeLatLng(lat, lng) {
@@ -455,9 +533,10 @@
         function navHydrateChipFromCoordinates(lat, lng, reason) {
             var serial = ++navGeoRequestSerial;
 
-            function finish(label) {
+            /** results: Google geocode results array, or null when label comes from fallback providers. */
+            function finish(label, results) {
                 if (serial !== navGeoRequestSerial) return;
-                var t = String(label || '').trim();
+                var t = navNormalizeMetroAreaLabel(String(label || '').trim());
                 if (!t) {
                     navApplyLocationChip(
                         lat.toFixed(4) + ', ' + lng.toFixed(4),
@@ -465,7 +544,9 @@
                     );
                     return;
                 }
-                navPersistBrowseCityFromGpsLabel(t);
+                var persist = navBrowseCityFromGoogleResults(results || []);
+                if (!persist) persist = t;
+                navPersistBrowseCityFromGpsLabel(persist);
                 var coordLine = '';
                 try {
                     coordLine = lat.toFixed(5) + ', ' + lng.toFixed(5);
@@ -477,58 +558,46 @@
                 navApplyLocationChip(t, detail);
             }
 
-            var key =
-                typeof window !== 'undefined' && window.__EVORRA_GOOGLE_MAPS_API_KEY__
-                    ? String(window.__EVORRA_GOOGLE_MAPS_API_KEY__).trim()
-                    : '';
+            var ll = lat + ',' + lng;
+            var fullParams = new URLSearchParams({
+                latlng: ll,
+            });
 
-            if (key) {
-                var gUrl =
-                    'https://maps.googleapis.com/maps/api/geocode/json?' +
-                    new URLSearchParams({
-                        latlng: lat + ',' + lng,
-                        key: key,
-                    });
-                fetch(gUrl)
-                    .then(function (r) {
-                        return r.json();
-                    })
-                    .then(function (data) {
-                        if (serial !== navGeoRequestSerial) return;
-                        if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') throw new Error('google');
-                        if (!data.results || !data.results.length) throw new Error('empty');
-                        var label = navCityLabelFromGoogleResults(data.results);
-                        if (!label) throw new Error('nolabel');
-                        finish(label);
-                    })
-                    .catch(function () {
-                        navReverseGeocodeLatLng(lat, lng)
-                            .then(function (data) {
-                                if (serial !== navGeoRequestSerial) return;
-                                finish(navHumanLabelFromReversePayload(data, lat, lng));
-                            })
-                            .catch(function () {
-                                if (serial !== navGeoRequestSerial) return;
-                                navApplyLocationChip(
-                                    lat.toFixed(4) + ', ' + lng.toFixed(4),
-                                    'GPS coordinates — tap to choose a city.'
-                                );
-                            });
-                    });
-                return;
+            function extractNavLabelFromGeocodeData(data) {
+                if (!data || (data.status !== 'OK' && data.status !== 'ZERO_RESULTS')) return null;
+                if (!data.results || !data.results.length) return null;
+                var label = navCityLabelFromGoogleResults(data.results) || '';
+                if (!label) return null;
+                return { label: label, results: data.results };
             }
 
-            navReverseGeocodeLatLng(lat, lng)
+            /** Full reverse geocode only — filtered result_type omits street/route (needed for road + city label). */
+            fetch('/api/geocode/json?' + fullParams)
+                .then(function (r) {
+                    return r.json();
+                })
                 .then(function (data) {
                     if (serial !== navGeoRequestSerial) return;
-                    finish(navHumanLabelFromReversePayload(data, lat, lng));
+                    var parsed = extractNavLabelFromGeocodeData(data);
+                    if (parsed) {
+                        finish(parsed.label, parsed.results);
+                        return;
+                    }
+                    throw new Error('nolabel');
                 })
                 .catch(function () {
-                    if (serial !== navGeoRequestSerial) return;
-                    navApplyLocationChip(
-                        lat.toFixed(4) + ', ' + lng.toFixed(4),
-                        'GPS coordinates — tap to choose a city.'
-                    );
+                    navReverseGeocodeLatLng(lat, lng)
+                        .then(function (data) {
+                            if (serial !== navGeoRequestSerial) return;
+                            finish(navHumanLabelFromReversePayload(data, lat, lng), null);
+                        })
+                        .catch(function () {
+                            if (serial !== navGeoRequestSerial) return;
+                            navApplyLocationChip(
+                                lat.toFixed(4) + ', ' + lng.toFixed(4),
+                                'GPS coordinates — tap to choose a city.'
+                            );
+                        });
                 });
         }
 
@@ -552,13 +621,7 @@
             );
         }
 
-        function navNavbarLocationAfterGeoFailure() {
-            var snap = navLatestProfilePayload || {};
-            var saved = navPickCityStringFromProfile(snap);
-            if (saved && !navIsWeakPlaceName(saved)) {
-                navApplyLocationChip(saved, saved + ' (from Profile) — tap to edit.');
-                return;
-            }
+        function navNavbarLocationAfterGeoFailureFinal(saved) {
             if (saved) {
                 navApplyLocationChip(
                     'Set location',
@@ -570,6 +633,36 @@
                 '',
                 'Allow location access or add your city in Profile for neighbourhood picks.'
             );
+        }
+
+        /** Approximate area via session-cached https://ipapi.co/json/ (see static/js/ip-location.js) */
+        function navNavbarLocationAfterGeoFailure() {
+            var snap = navLatestProfilePayload || {};
+            var saved = navPickCityStringFromProfile(snap);
+            if (saved && !navIsWeakPlaceName(saved)) {
+                navApplyLocationChip(saved, saved + ' (from Profile) — tap to edit.');
+                return;
+            }
+            if (!window.EvorraIpLocation || typeof window.EvorraIpLocation.ensureLoaded !== 'function') {
+                navNavbarLocationAfterGeoFailureFinal(saved);
+                return;
+            }
+            window.EvorraIpLocation.ensureLoaded()
+                .then(function () {
+                    var loc = window.EvorraIpLocation.get();
+                    if (loc && Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude)) {
+                        navHydrateChipFromCoordinates(loc.latitude, loc.longitude, 'Approximate (network)');
+                        return;
+                    }
+                    if (loc && loc.city) {
+                        navApplyLocationChip(loc.city, 'Approximate area (network) — tap to change.');
+                        return;
+                    }
+                    navNavbarLocationAfterGeoFailureFinal(saved);
+                })
+                .catch(function () {
+                    navNavbarLocationAfterGeoFailureFinal(saved);
+                });
         }
 
         /** Strong Profile city wins; placeholders + empty → coords on profile, then device GPS + reverse-geocode. */

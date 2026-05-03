@@ -1,6 +1,10 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
+import json
 import os
+import urllib.error
+import urllib.parse
+import urllib.request
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,11 +29,66 @@ def inject_public_runtime_config():
         'cloudinary_upload_url': os.getenv('CLOUDINARY_UPLOAD_URL', ''),
         'cloudinary_upload_folder': os.getenv('CLOUDINARY_UPLOAD_FOLDER', 'events'),
         'app_public_url': os.getenv('APP_PUBLIC_URL', ''),
-        # Google Geocoding API (city picker). Set GOOGLE_MAPS_API_KEY in .env — restrict key by HTTP referrer.
-        'google_maps_api_key': app.config['GOOGLE_MAPS_API_KEY'],
     }
 
+
+def _proxy_google_geocode():
+    """Forward allowed query params to Google Geocoding JSON API (key from server env only)."""
+    key = (app.config.get('GOOGLE_MAPS_API_KEY') or '').strip()
+    if not key:
+        return jsonify(
+            {
+                'status': 'REQUEST_DENIED',
+                'error_message': 'GOOGLE_MAPS_API_KEY is not set on the server (.env).',
+                'results': [],
+            }
+        )
+
+    latlng = request.args.get('latlng', '').strip()
+    address = request.args.get('address', '').strip()
+    result_type = request.args.get('result_type', '').strip()
+    if not latlng and not address:
+        return jsonify(
+            {'status': 'INVALID_REQUEST', 'error_message': 'Missing latlng or address', 'results': []}
+        ), 400
+
+    params = {'key': key}
+    if latlng:
+        params['latlng'] = latlng
+    if address:
+        params['address'] = address
+    if result_type:
+        params['result_type'] = result_type
+
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?' + urllib.parse.urlencode(params)
+    req = urllib.request.Request(
+        url,
+        headers={
+            'Accept': 'application/json',
+            'Accept-Language': 'en',
+            'User-Agent': 'Evorra/1.0 (Flask geocode proxy)',
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=18) as resp:
+            payload = json.loads(resp.read().decode('utf-8'))
+        return jsonify(payload)
+    except urllib.error.HTTPError as e:
+        return jsonify(
+            {'status': 'ERROR', 'error_message': str(e.reason or e.code), 'results': []}
+        ), 502
+    except Exception as e:
+        return jsonify({'status': 'ERROR', 'error_message': str(e), 'results': []}), 502
+
+
 # --- Routes ---
+
+
+@app.route('/api/geocode/json')
+def api_geocode_json():
+    """Browser-safe proxy: same-origin fetch avoids CORS and keeps the API key on the server."""
+    return _proxy_google_geocode()
+
 
 @app.route('/')
 def home():

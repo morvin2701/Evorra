@@ -1640,12 +1640,6 @@
         if (!selectedCatId) return true;
         return String(eventItem.category_id || '') === String(selectedCatId);
     }
-    function matchesSelectedCity(eventItem) {
-        if (!selectedCity) return true;
-        const city = String(eventItem.city || '').toLowerCase().trim();
-        const sel  = selectedCity.toLowerCase().trim();
-        return city === sel || city.includes(sel) || sel.includes(city);
-    }
     function toNum(v) {
         const n = Number(v);
         return Number.isFinite(n) ? n : null;
@@ -1679,6 +1673,82 @@
         const x = s1 * s1 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * s2 * s2;
         return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
     }
+
+    /** Align browse filter with Firestore city strings (strip Taluka/District suffixes). */
+    function normalizeCityToken(s) {
+        return String(s || '')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+metropolitan region$/i, '')
+            .replace(/\s+taluka$/i, '')
+            .replace(/\s+tehsil$/i, '')
+            .replace(/\s+subdistrict$/i, '')
+            .replace(/\s+district$/i, '')
+            .trim();
+    }
+
+    /**
+     * localStorage sometimes held full address lines ("Road, …, Ahmedabad"). Strip to the main place token.
+     */
+    function sanitizeStoredCityForFilters(raw) {
+        let s = String(raw || '').trim();
+        if (!s) return '';
+        if (!s.includes(',')) return s;
+        const parts = s.split(',').map((p) => p.trim()).filter(Boolean);
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const p = parts[i];
+            if (/^\d{5,8}(-\d{4})?$/.test(p)) continue;
+            if (/^(india|in|usa)$/i.test(p)) continue;
+            if (/\b(taluka|tehsil|subdistrict)\b/i.test(p)) continue;
+            if (p.length < 2) continue;
+            return p;
+        }
+        return parts[0] || s;
+    }
+
+    function cityFilterToken() {
+        if (!selectedCity) return '';
+        var cleaned = sanitizeStoredCityForFilters(selectedCity);
+        if (typeof EvorraCityMatch !== 'undefined') return EvorraCityMatch.canonicalKey(cleaned);
+        return normalizeCityToken(cleaned);
+    }
+
+    function clipSelectedCityToMetroName() {
+        if (!selectedCity || !String(selectedCity).includes(',')) return;
+        const cleaned = sanitizeStoredCityForFilters(selectedCity);
+        if (cleaned && cleaned !== selectedCity) {
+            selectedCity = cleaned;
+            try {
+                localStorage.setItem('evorra_selected_city', cleaned);
+            } catch (_) {}
+            if (typeof window.evorraSyncBrowseCityNav === 'function') {
+                window.evorraSyncBrowseCityNav(selectedCity);
+            }
+        }
+    }
+
+    function matchesSelectedCity(eventItem) {
+        if (!selectedCity || !String(selectedCity).trim()) return true;
+        var selClean = sanitizeStoredCityForFilters(selectedCity);
+        var evCity = String(eventItem.city || '').trim();
+        if (typeof EvorraCityMatch !== 'undefined') {
+            if (EvorraCityMatch.keysMatch(selClean, evCity)) return true;
+        } else {
+            var selN = normalizeCityToken(selClean);
+            var cityN = normalizeCityToken(evCity);
+            if (!selN) return true;
+            if (cityN === selN || cityN.includes(selN) || selN.includes(cityN)) return true;
+        }
+        if (userGeo) {
+            const p = parseEventCoords(eventItem);
+            if (p) {
+                const d = distanceKm(userGeo, p);
+                if (Number.isFinite(d) && d <= 55) return true;
+            }
+        }
+        return false;
+    }
+
     function enrichEventsWithDistance(events) {
         if (!userGeo) {
             return events.map(e => ({ ...e, __distanceKm: Number.POSITIVE_INFINITY }));
@@ -1736,6 +1806,32 @@
         if (typeof window.evorraSyncBrowseCityNav === 'function') {
             window.evorraSyncBrowseCityNav(undefined);
         }
+
+        try {
+            if (window.EvorraIpLocation) {
+                await window.EvorraIpLocation.ensureLoaded();
+                const ipLoc = window.EvorraIpLocation.get();
+                if (ipLoc) {
+                    if (Number.isFinite(ipLoc.latitude) && Number.isFinite(ipLoc.longitude)) {
+                        userGeo = { lat: ipLoc.latitude, lng: ipLoc.longitude };
+                    }
+                    if (localStorage.getItem('evorra_selected_city') === null && ipLoc.city) {
+                        selectedCity = ipLoc.city;
+                        localStorage.setItem('evorra_selected_city', ipLoc.city);
+                        if (typeof window.evorraSyncBrowseCityNav === 'function') {
+                            window.evorraSyncBrowseCityNav(selectedCity);
+                        }
+                        window.dispatchEvent(
+                            new CustomEvent('evorra:city-changed', { detail: { city: ipLoc.city } })
+                        );
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[Evorra] IP location (ipapi.co) init failed', e);
+        }
+
+        clipSelectedCityToMetroName();
 
         const user = auth.currentUser;
         if (user) {
@@ -1837,19 +1933,28 @@
     function renderFeatured(events) {
         const scroll = document.getElementById('featured-scroll');
         scroll.innerHTML = '';
-        const featured = events
-            .filter(e =>
-                e.is_featured &&
-                e.is_published !== false &&
-                matchesSelectedCategory(e) &&
-                matchesSelectedCity(e) &&
-                !isEventClosed(e)
-            )
+        const pool = () =>
+            events.filter(
+                (e) =>
+                    e.is_published !== false &&
+                    matchesSelectedCategory(e) &&
+                    matchesSelectedCity(e) &&
+                    !isEventClosed(e)
+            );
+        let featured = pool()
+            .filter((e) => e.is_featured)
             .sort((a, b) => {
                 const d = compareByProximity(a, b);
                 if (d !== 0) return d;
                 return Number(b.rating_average || 0) - Number(a.rating_average || 0);
             });
+        if (!featured.length) {
+            featured = pool().sort((a, b) => {
+                const d = compareByProximity(a, b);
+                if (d !== 0) return d;
+                return Number(b.rating_average || 0) - Number(a.rating_average || 0);
+            }).slice(0, 8);
+        }
         featured.forEach(e => {
             const card = `
                 <div class="featured-card animate-evorra" onclick="handleEventCardTap('${e.id}', false)">
