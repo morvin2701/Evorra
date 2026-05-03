@@ -550,12 +550,15 @@
                 return { eData, tData };
             };
 
+            let placedOrderId = null;
+
             try {
                 // Primary mode: full integrity write (stock + metrics + order docs)
                 await db.runTransaction(async (txn) => {
                     const { eData, tData } = await readOrderContext(txn);
                     const orderId = db.collection('tickets').doc().id;
                     const paymentId = db.collection('payments').doc().id;
+                    placedOrderId = orderId;
 
                     txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData, eData));
                     txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
@@ -584,14 +587,36 @@
                     const { eData, tData } = await readOrderContext(txn);
                     const orderId = db.collection('tickets').doc().id;
                     const paymentId = db.collection('payments').doc().id;
+                    placedOrderId = orderId;
                     txn.set(db.collection('tickets').doc(orderId), buildTicketPayload(orderId, paymentId, tData, eData));
                     txn.set(db.collection('payments').doc(paymentId), buildPaymentPayload(paymentId, orderId));
                 });
             }
 
-            // Success
+            const eventTitleForNotif = document.getElementById('event-title').textContent || 'Your event';
+            if (placedOrderId) {
+                try {
+                    const notifRef = db.collection('notifications').doc();
+                    await notifRef.set({
+                        id: notifRef.id,
+                        user_id: user.uid,
+                        title: 'Booking confirmed',
+                        message: `${eventTitleForNotif} — ${bookingData.qty} ticket(s) · ₹${bookingData.total}. View your pass anytime.`,
+                        type: 'purchase',
+                        ref_ticket_id: placedOrderId,
+                        ref_event_id: bookingData.eventId,
+                        action_target: `/ticket/${encodeURIComponent(placedOrderId)}`,
+                        is_read: false,
+                        is_archived: false,
+                        created_time: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (notifErr) {
+                    console.warn('[Evorra] Purchase notification:', notifErr?.code || notifErr?.message || notifErr);
+                }
+            }
+
             sessionStorage.clear();
-            location.href = `/payment_success`;
+            window.location.href = '/payment_success';
 
         } catch (e) {
             alert(e.message || "Order failed. Try again.");

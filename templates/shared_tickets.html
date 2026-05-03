@@ -581,7 +581,9 @@
                 message,
                 type: 'ticket_share_update',
                 ref_ticket_id: refTicketId,
+                action_target: '/shared-tickets',
                 is_read: false,
+                is_archived: false,
                 created_time: firebase.firestore.FieldValue.serverTimestamp()
             });
         } catch (err) {

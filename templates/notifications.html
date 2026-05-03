@@ -686,6 +686,8 @@
         const t = String(typeRaw || 'general').toLowerCase().trim();
         if (
             t === 'booking' ||
+            t === 'purchase' ||
+            t === 'event_soon' ||
             t === 'ticket_share' ||
             t === 'ticket_share_update' ||
             t === 'ticket' ||
@@ -703,6 +705,8 @@
             ticket_share: 'Sharing',
             ticket_share_update: 'Sharing',
             booking: 'Booking',
+            purchase: 'Purchase',
+            event_soon: 'Coming up',
             payment: 'Payment',
             promo: 'Offer',
             offer: 'Offer',
@@ -747,6 +751,9 @@
         if (raw && raw !== 'undefined' && raw !== 'null') return raw;
         const t = n._typeKey || '';
         if (t === 'ticket_share' || t === 'ticket_share_update') return '/shared-tickets';
+        if (t === 'event_soon' || t === 'purchase') {
+            if (n.ref_ticket_id) return '/ticket/' + encodeURIComponent(String(n.ref_ticket_id));
+        }
         if (n.ref_event_id) return '/event/' + encodeURIComponent(String(n.ref_event_id));
         if (n.ref_ticket_id) return '/ticket/' + encodeURIComponent(String(n.ref_ticket_id));
         return '';
@@ -754,6 +761,8 @@
 
     function getIcon(typeKey) {
         switch (typeKey) {
+            case 'purchase': return 'fa-solid fa-circle-check';
+            case 'event_soon': return 'fa-solid fa-calendar-day';
             case 'booking': return 'fa-solid fa-ticket';
             case 'ticket_share':
             case 'ticket_share_update': return 'fa-solid fa-share-nodes';
@@ -769,6 +778,8 @@
 
     function getAccent(typeKey) {
         switch (typeKey) {
+            case 'purchase': return '#10B981';
+            case 'event_soon': return '#F59E0B';
             case 'booking': return '#4FD1C5';
             case 'ticket_share':
             case 'ticket_share_update': return '#A78BFA';

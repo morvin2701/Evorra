@@ -223,6 +223,66 @@
             badgeEl.classList.toggle('notif-badge--wide', String(badgeEl.textContent).length > 2);
         };
 
+        function evorraTicketEventStartMs(ticket) {
+            if (!ticket || typeof ticket !== 'object') return null;
+            var snap = ticket.event_snapshot || {};
+            var st = snap.start_time;
+            if (st && typeof st.toDate === 'function') return st.toDate().getTime();
+            if (ticket.event_start_time && typeof ticket.event_start_time.toDate === 'function') {
+                return ticket.event_start_time.toDate().getTime();
+            }
+            if (typeof st === 'string' || typeof st === 'number') {
+                var ms = Date.parse(String(st));
+                if (!isNaN(ms)) return ms;
+            }
+            return null;
+        }
+
+        window.evorraRunEventSoonReminders = async function (uid) {
+            if (!uid || !db) return;
+            try {
+                var sessKey = 'evorra_evsoon_sess_' + uid;
+                if (sessionStorage.getItem(sessKey)) return;
+                var qs = await db.collection('tickets').where('user_id', '==', uid).limit(60).get();
+                var dayMs = 86400000;
+                for (var i = 0; i < qs.docs.length; i++) {
+                    var doc = qs.docs[i];
+                    var t = doc.data() || {};
+                    if (String(t.status || '').toLowerCase() !== 'confirmed') continue;
+                    var startMs = evorraTicketEventStartMs(t);
+                    if (startMs == null || !Number.isFinite(startMs)) continue;
+                    var now = Date.now();
+                    if (startMs <= now) continue;
+                    var daysUntil = (startMs - now) / dayMs;
+                    if (daysUntil <= 0 || daysUntil > 7) continue;
+                    var titleEv = t.event_title || (t.event_snapshot && t.event_snapshot.title) || 'Your event';
+                    var eventDay = new Date(startMs).toISOString().slice(0, 10);
+                    var nid = 'evsoon_' + doc.id + '_' + eventDay;
+                    var docRef = db.collection('notifications').doc(nid);
+                    var existing = await docRef.get();
+                    if (existing.exists) continue;
+                    var dayLabel = daysUntil <= 1
+                        ? 'tomorrow'
+                        : 'in ' + Math.max(1, Math.ceil(daysUntil)) + ' days';
+                    await docRef.set({
+                        user_id: uid,
+                        title: 'Event coming up',
+                        message: titleEv + ' starts ' + dayLabel + '. Have your pass ready.',
+                        type: 'event_soon',
+                        ref_ticket_id: doc.id,
+                        ref_event_id: t.event_id || '',
+                        action_target: '/ticket/' + encodeURIComponent(doc.id),
+                        is_read: false,
+                        is_archived: false,
+                        created_time: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                sessionStorage.setItem(sessKey, '1');
+            } catch (e) {
+                console.warn('[Evorra] Event reminders:', e);
+            }
+        };
+
         /** True for platform admin / organiser — not plain attendees. */
         function profileCanListEvents(profile) {
             if (!profile || typeof profile !== 'object') return false;
@@ -810,6 +870,12 @@
                             console.warn('[Evorra] Nav notification badge:', err);
                         }
                     );
+
+                setTimeout(function () {
+                    if (typeof window.evorraRunEventSoonReminders === 'function') {
+                        window.evorraRunEventSoonReminders(user.uid);
+                    }
+                }, 4000);
             } else {
                 if (evorraNavNotifUnsubscribe) {
                     try { evorraNavNotifUnsubscribe(); } catch (e) {}

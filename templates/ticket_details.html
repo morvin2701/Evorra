@@ -1466,6 +1466,8 @@
                         message: msg,
                         type: "ticket_share",
                         ref_ticket_id: ticketId,
+                        ref_event_id: String(src.event_id || ''),
+                        action_target: '/shared-tickets',
                     };
                     return;
                 }
@@ -1509,6 +1511,8 @@
                     message: msg,
                     type: "ticket_share",
                     ref_ticket_id: newId,
+                    ref_event_id: String(src.event_id || ''),
+                    action_target: '/shared-tickets',
                 };
             });
 
@@ -1529,6 +1533,7 @@
                         id: notifRef.id,
                         ...notificationPayload,
                         is_read: false,
+                        is_archived: false,
                         created_time: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 } catch (notifErr) {
