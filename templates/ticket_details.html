@@ -109,7 +109,76 @@
         color: var(--sm-primary);
         font-size: 0.9rem;
         font-weight: 800;
+        margin: 0 0 14px;
+    }
+    .hero-details-panel {
+        margin-top: 4px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--sm-border);
+    }
+    .hero-quick-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    .hero-quick-item {
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 10px 11px;
+    }
+    .hero-quick-label {
+        display: block;
+        margin: 0 0 4px;
+        color: var(--sm-muted);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .hero-quick-value {
         margin: 0;
+        color: var(--sm-text);
+        font-weight: 800;
+        font-size: 0.84rem;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+    .hero-quick-value.td-id-mono {
+        font-family: ui-monospace, 'Cousine', monospace;
+        font-size: 0.78rem;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+        word-break: break-all;
+    }
+    .hero-static-tips {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .hero-static-tips li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.25);
+        color: var(--sm-muted);
+        font-size: 0.79rem;
+        line-height: 1.45;
+        font-weight: 600;
+    }
+    .hero-static-tips li:first-of-type {
+        border-top: none;
+        padding-top: 0;
+    }
+    .hero-static-tips li i {
+        flex-shrink: 0;
+        width: 18px;
+        text-align: center;
+        margin-top: 2px;
+        color: var(--sm-primary);
+        opacity: 0.85;
     }
     .section-title {
         margin: 0 0 14px;
@@ -153,11 +222,25 @@
     .pass-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        gap: 10px;
+        align-items: flex-start;
+        gap: 12px;
         padding: 14px 18px;
         border-bottom: 1px dashed var(--sm-border);
         background: linear-gradient(90deg, rgba(220, 38, 38, 0.06) 0%, rgba(249, 115, 22, 0.04) 100%);
+    }
+    .pass-header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 0;
+    }
+    .pass-header-sub {
+        margin: 0;
+        font-size: 0.73rem;
+        font-weight: 700;
+        color: var(--sm-muted);
+        line-height: 1.35;
+        max-width: 52ch;
     }
     .pass-header-label {
         font-size: 0.78rem;
@@ -166,6 +249,8 @@
         color: var(--sm-text);
     }
     .pass-header-status {
+        flex-shrink: 0;
+        align-self: center;
         font-size: 0.72rem;
         font-weight: 900;
         letter-spacing: 0.1em;
@@ -275,6 +360,82 @@
         word-break: break-all;
         line-height: 1.4;
         max-width: 100%;
+    }
+    .pass-foot {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px dashed var(--sm-border);
+    }
+    .pass-foot-title {
+        margin: 0 0 8px;
+        font-size: 0.74rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--sm-text);
+    }
+    .pass-foot-list {
+        margin: 0 0 12px;
+        padding: 0;
+        list-style: none;
+    }
+    .pass-foot-list li {
+        position: relative;
+        padding: 7px 0 7px 18px;
+        color: var(--sm-muted);
+        font-size: 0.79rem;
+        line-height: 1.42;
+        font-weight: 600;
+        border-top: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .pass-foot-list li:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+    .pass-foot-list li::before {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0.92em;
+        width: 5px;
+        height: 5px;
+        border-radius: 999px;
+        background: var(--sm-primary);
+        opacity: 0.55;
+    }
+    .pass-foot-list li:first-child::before {
+        top: 0.72em;
+    }
+    .pass-foot-ref {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        font-size: 0.72rem;
+        color: var(--sm-muted);
+        font-weight: 700;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 8px;
+    }
+    .pass-foot-ref-label {
+        flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.68rem;
+        opacity: 0.9;
+    }
+    .pass-foot-ref code {
+        font-family: ui-monospace, 'Cousine', monospace;
+        font-size: 0.76rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+        color: var(--sm-text);
+        word-break: break-all;
+        flex: 1;
+        min-width: 12ch;
     }
     /* Checked-in replaces QR — premium success state */
     .qr-checked-state.hide { display: none !important; }
@@ -868,6 +1029,7 @@
         .share-phone-row { grid-template-columns: 1fr; }
         .share-phone-fields { grid-template-columns: 1fr; }
         .share-wa-btn { width: 100%; min-height: 44px; }
+        .hero-quick-grid { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -889,12 +1051,41 @@
                         <h1 id="hero-title" class="hero-title">Loading...</h1>
                         <p id="hero-location" class="hero-sub">Venue • City</p>
                         <p id="hero-time" class="hero-time">Date TBA</p>
+                        <div class="hero-details-panel" aria-label="Pass summary">
+                            <div class="hero-quick-grid">
+                                <div class="hero-quick-item">
+                                    <span class="hero-quick-label">Ticket ID</span>
+                                    <p id="hero-ticket-id" class="hero-quick-value td-id-mono">—</p>
+                                </div>
+                                <div class="hero-quick-item">
+                                    <span class="hero-quick-label">Pass holder</span>
+                                    <p id="hero-holder-name" class="hero-quick-value">—</p>
+                                </div>
+                            </div>
+                            <ul class="hero-static-tips" role="list">
+                                <li>
+                                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                                    <span>Official Evorra digital pass — venue staff may ask you to refresh this screen for a live QR.</span>
+                                </li>
+                                <li>
+                                    <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+                                    <span>Bring a government-issued photo ID if the organiser asks to match details on file.</span>
+                                </li>
+                                <li>
+                                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                                    <span>Doors and last entry follow the organiser&apos;s timings — arrive with time to spare.</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
                 <div class="ticket-card">
                     <div class="pass-header">
-                        <span class="pass-header-label">Evorra Event Pass</span>
+                        <div class="pass-header-text">
+                            <span class="pass-header-label">Evorra Event Pass</span>
+                            <p class="pass-header-sub">Secured QR entry · Unlock window appears on this page before doors open · One scan per pass at the gate.</p>
+                        </div>
                         <span id="pass-status-text" class="pass-header-status">CONFIRMED</span>
                     </div>
                     <div class="ticket-block">
@@ -976,6 +1167,16 @@
                                     <p id="qr-checked-msg" class="qr-checked-sub">This pass has been scanned at the venue gate. Keep this screen as proof if needed.</p>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="pass-foot">
+                            <p class="pass-foot-title">Reminder</p>
+                            <ul class="pass-foot-list">
+                                <li>Set screen brightness high and avoid cracked glass over the QR for a quick scan.</li>
+                                <li>Transfers and splits stay in Shared Tickets until the recipient accepts — this pass stays yours until then.</li>
+                                <li>Questions or cancellations follow the organiser&apos;s policy and Evorra Help &amp; Support.</li>
+                            </ul>
+                            <p class="pass-foot-ref"><span class="pass-foot-ref-label">Pass reference</span> <code id="pass-foot-ticket-id">—</code></p>
                         </div>
                     </div>
                 </div>
@@ -1438,6 +1639,12 @@
         document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
         document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
         document.getElementById('hero-status').textContent = statusUpper;
+        document.getElementById('hero-ticket-id').textContent = ticket.id || ticketId || '—';
+        const holderDisplay = (user.displayName || '').trim();
+        const holderFromEmailLocal = (String(user.email || '').split('@')[0] || '').replace(/\./g, ' ').trim();
+        document.getElementById('hero-holder-name').textContent =
+            holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
+        document.getElementById('pass-foot-ticket-id').textContent = ticket.id || ticketId || '—';
         const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
         document.getElementById('hero-status').className = checkedIn
             ? 'status-chip status-checked-in'
@@ -1578,15 +1785,15 @@
         return city || venue || 'TBA';
     }
 
-    /** Unicode escapes so emoji survive tooling/encoding; works in WhatsApp prefilled messages. */
-    const WAEMOJI = {
-        ticket: '\u{1F39F}\uFE0F',
-        notes: '\u{1F3B6}',
+    /** Unicode escapes for WhatsApp prefilled invite (avoids mangled emoji in tooling). */
+    const WAInvite = {
+        sparkles: '\u{2728}',
+        piano: '\u{1F3B9}',
         pin: '\u{1F4CD}',
         cal: '\u{1F4C5}',
+        qty: '\u{1F522}',
         person: '\u{1F464}',
-        sparkles: '\u{2728}',
-        pointRight: '\u{1F449}',
+        ticket: '\u{1F39F}\uFE0F',
         rocket: '\u{1F680}',
     };
 
@@ -1611,26 +1818,29 @@
 
     function buildWhatsAppTicketInviteText(activeTicketInner, shareUrlPlain, senderUser) {
         const ev = activeTicketInner.event_snapshot || {};
-        const title = activeTicketInner.event_title || ev.title || 'an event';
+        const titleRaw = String(activeTicketInner.event_title || ev.title || 'an event').trim();
+        const titleSafe = (titleRaw || 'an event').replace(/\*/g, '');
         const where = whatsappInviteWhereLine(activeTicketInner);
         const when = formatWhatsAppEventDateLine(activeTicketInner);
         const linkLine = canonicalSharedTicketsUrl(shareUrlPlain);
         const fromName = sanitizeWhatsAppSenderName(senderUser);
+        const qtyN = Math.max(1, Math.floor(Number(activeTicketInner.quantity || 1)) || 1);
+        const qtyWords = qtyN === 1 ? '1 Ticket' : `${qtyN} Tickets`;
+        const tid = String(activeTicketInner.id || ticketId || '').trim();
+        const idLine = tid ? `#${tid}` : '#—';
         const nl = '\n';
-        const T = WAEMOJI;
-        const oq = '\u201C';
-        const cq = '\u201D';
-        const boldName = `*${fromName}*`;
+        const W = WAInvite;
         return (
-            `${T.ticket} *You're Invited!*${nl}${nl}` +
-            `You've received a ticket on *Evorra* for:${nl}${nl}` +
-            `${T.notes} *${title}*${nl}` +
-            `${T.pin} ${where}${nl}` +
-            `${T.cal} ${when}${nl}` +
-            `${T.person} From \u2014 ${oq}${boldName}${cq}${nl}` +
-            `${T.sparkles} Don't miss out \u2014 confirm your ticket now!${nl}${nl}${nl}` +
-            `${T.pointRight}  ${linkLine}${nl}${nl}` +
-            `See you at the event ${T.rocket}`
+            `${W.sparkles} *YOU'RE INVITED*${W.sparkles}${nl}${nl}` +
+            `You've received a ticket on Evorra for:${nl}${nl}` +
+            `${W.piano} *${titleSafe}*${nl}` +
+            `${W.pin} ${where}${nl}` +
+            `${W.cal} ${when}${nl}` +
+            `${W.qty} Quantity: ${qtyWords}${nl}` +
+            `${W.person} From: ${fromName}${nl}` +
+            `${W.ticket} Ticket ID: ${idLine}${nl}${nl}` +
+            `Don't miss out \u2014 confirm your spot now!${nl}` +
+            `${W.rocket} ${linkLine}`
         );
     }
 
@@ -1829,25 +2039,55 @@
         }
     }
 
+    function transferTimeMs(item) {
+        const sharedAtRaw = item && item.shared_at;
+        const sharedDate = sharedAtRaw?.toDate ? sharedAtRaw.toDate() : (sharedAtRaw ? new Date(sharedAtRaw) : null);
+        if (sharedDate && !Number.isNaN(sharedDate.getTime())) return sharedDate.getTime();
+        const createdRaw = item && item.created_time;
+        const createdDate = createdRaw?.toDate ? createdRaw.toDate() : (createdRaw ? new Date(createdRaw) : null);
+        if (createdDate && !Number.isNaN(createdDate.getTime())) return createdDate.getTime();
+        return 0;
+    }
+
     async function loadTransferHistory() {
         const historyWrap = document.getElementById('transfer-history');
         if (!historyWrap) return;
         historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">Loading transfer history...</p>`;
         try {
             const rootRef = rootTicketId || ticketId;
-            const snap = await db.collection('tickets')
-                .where('shared_from_ticket_id', '==', rootRef)
-                .orderBy('shared_at', 'desc')
-                .limit(30)
-                .get();
+            const senderUid = auth.currentUser && auth.currentUser.uid;
+            if (!senderUid) throw new Error('auth-missing');
+            let docs = [];
 
-            if (snap.empty) {
+            // Prefer indexed server sorting (fast path).
+            try {
+                const snap = await db.collection('tickets')
+                    .where('shared_by', '==', senderUid)
+                    .where('shared_from_ticket_id', '==', rootRef)
+                    .orderBy('shared_at', 'desc')
+                    .limit(30)
+                    .get();
+                docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (indexedErr) {
+                // Fallback when index is missing: fetch unsorted and sort client-side.
+                console.warn('Transfer history indexed query failed, using fallback query:', indexedErr?.code || indexedErr?.message || indexedErr);
+                const fallbackSnap = await db.collection('tickets')
+                    .where('shared_by', '==', senderUid)
+                    .where('shared_from_ticket_id', '==', rootRef)
+                    .limit(60)
+                    .get();
+                docs = fallbackSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => transferTimeMs(b) - transferTimeMs(a))
+                    .slice(0, 30);
+            }
+
+            if (!docs.length) {
                 document.getElementById('share-count').textContent = '0';
                 historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">No transfers yet.</p>`;
                 return;
             }
 
-            const docs = snap.docs.map(d => d.data());
             const sharedQty = docs.reduce((sum, item) => sum + toIntQty(item.quantity || 0), 0);
             document.getElementById('share-count').textContent = String(sharedQty);
 
@@ -1864,9 +2104,9 @@
             }));
 
             const rows = docs.map(item => {
-                const sharedAt = item.shared_at?.toDate ? item.shared_at.toDate() : (item.shared_at ? new Date(item.shared_at) : null);
-                const when = sharedAt && !Number.isNaN(sharedAt.getTime())
-                    ? sharedAt.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+                const tms = transferTimeMs(item);
+                const when = tms > 0
+                    ? new Date(tms).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
                     : 'Time unavailable';
                 const recipient = userMap.get(String(item.user_id || '')) || item.user_id || 'Unknown recipient';
                 return `
@@ -1879,7 +2119,8 @@
 
             historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p>${rows}`;
         } catch (e) {
-            historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">Unable to load transfer history.</p>`;
+            console.error('Transfer history failed:', e?.code || e?.message || e);
+            historyWrap.innerHTML = `<p class="transfer-history-title">Transfer History</p><p class="transfer-empty">Unable to load transfer history right now. Refresh and try again.</p>`;
         }
     }
 

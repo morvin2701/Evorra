@@ -146,6 +146,9 @@ service cloud.firestore {
       allow read: if signedIn() && resource.data.user_id == request.auth.uid;
       allow read: if signedIn() && ticketHasEventId() && isEventOrganizer(resource.data.event_id);
       allow read: if signedIn() && canReadSplitDerivedFromOwnedRoot(resource.data);
+      allow read: if signedIn()
+        && resource.data.keys().hasAny(['shared_by'])
+        && resource.data.shared_by == request.auth.uid;
 
       allow create: if signedIn() && (
         request.resource.data.user_id == request.auth.uid
