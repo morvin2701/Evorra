@@ -118,11 +118,11 @@
     .filter-overlay {
         position: fixed;
         inset: 0;
-        z-index: 2000;
+        z-index: 2147483000;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px 14px;
+        padding: 56px 14px !important;
         background: rgba(15, 23, 42, 0.35);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
@@ -135,8 +135,8 @@
         pointer-events: auto;
     }
     .filter-sheet {
-        width: min(680px, 100%);
-        max-height: min(86vh, 820px);
+        width: min(740px, 100%);
+        max-height: calc(100dvh - 112px);
         border-radius: 24px;
         border: 1px solid var(--sm-border);
         background:
@@ -160,7 +160,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 16px 22px;
+        padding: 18px 24px;
         border-bottom: 1px solid var(--sm-border);
     }
     .filter-title {
@@ -171,14 +171,14 @@
         color: var(--sm-text);
     }
     .filter-subtitle {
-        margin: 4px 0 0;
-        font-size: 0.79rem;
+        margin: 5px 0 0;
+        font-size: 0.82rem;
         color: var(--sm-muted);
-        font-weight: 600;
+        font-weight: 650;
     }
     .filter-close-btn {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 12px;
         border: 1px solid var(--sm-border);
         background: var(--sm-surface);
@@ -197,15 +197,16 @@
     .filter-sheet-body {
         max-height: min(58vh, 560px);
         overflow: auto;
-        padding: 16px 22px;
+        padding: 18px 24px;
         display: grid;
-        gap: 16px;
+        gap: 14px;
     }
     .filter-group {
         border: 1px solid var(--sm-border);
         border-radius: 16px;
-        background: var(--sm-bg);
-        padding: 14px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        padding: 16px;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
     }
     .filter-label {
         margin: 0 0 10px;
@@ -291,9 +292,9 @@
         background: #fff;
     }
     .filter-sheet-foot {
-        padding: 16px 22px;
+        padding: 16px 24px 20px;
         border-top: 1px solid var(--sm-border);
-        background: linear-gradient(180deg, rgba(248, 250, 252, 0.72), rgba(241, 245, 249, 0.94));
+        background: #ffffff;
         display: grid;
         gap: 10px;
     }
@@ -304,10 +305,10 @@
     }
     .filter-reset-btn,
     .filter-apply-btn {
-        height: 50px;
+        height: 52px;
         border-radius: 14px;
         font-weight: 800;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         border: 1px solid transparent;
         cursor: pointer;
         transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
@@ -321,11 +322,24 @@
     .filter-apply-btn:hover {
         transform: translateY(-1px);
     }
+    .filter-reset-btn:active,
+    .filter-apply-btn:active {
+        transform: translateY(0);
+    }
     .filter-apply-btn {
         color: #fff;
         border-color: rgba(220, 38, 38, 0.45);
         background: linear-gradient(120deg, #dc2626, #f97316);
         box-shadow: 0 12px 26px rgba(220, 38, 38, 0.24);
+    }
+    .filter-overlay.is-open .filter-group {
+        animation: filterGroupIn .28s ease both;
+    }
+    .filter-overlay.is-open .filter-group:nth-child(2) { animation-delay: .04s; }
+    .filter-overlay.is-open .filter-group:nth-child(3) { animation-delay: .08s; }
+    @keyframes filterGroupIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     html.filter-open,
     body.filter-open {
@@ -342,16 +356,20 @@
         .explore-shell { width: calc(100% - 20px); }
         .explore-heading { font-size: 1.4rem; }
         #results-list { grid-template-columns: 1fr; }
-        .filter-overlay { align-items: flex-end; padding: 0; }
+        .filter-overlay {
+            align-items: center;
+            justify-content: center;
+            padding: 24px 12px !important;
+        }
         .filter-sheet {
             width: 100%;
-            max-height: min(92vh, 860px);
-            border-radius: 22px 22px 0 0;
-            border-bottom: none;
-            transform: translateY(105%);
+            max-height: calc(100dvh - 48px);
+            border-radius: 20px;
+            border-bottom: 1px solid var(--sm-border);
+            transform: translateY(16px) scale(0.98);
         }
-        .filter-overlay.is-open .filter-sheet { transform: translateY(0); }
-        .filter-sheet-body { padding: 14px; max-height: min(68vh, 620px); }
+        .filter-overlay.is-open .filter-sheet { transform: translateY(0) scale(1); }
+        .filter-sheet-body { padding: 14px; max-height: min(68vh, 620px); gap: 12px; }
         .filter-sheet-head,
         .filter-sheet-foot { padding-left: 14px; padding-right: 14px; }
         .filter-row-2,
@@ -865,6 +883,10 @@
         const modal = document.getElementById('filter-modal');
         const sheet = document.getElementById('filter-sheet');
         if (!modal || !sheet) return;
+        // Move modal to <body> so fixed positioning uses full viewport (not main/content container).
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
         modal.addEventListener('click', function (e) {
             if (e.target === modal && modal.classList.contains('is-open')) toggleFilters();
         });
