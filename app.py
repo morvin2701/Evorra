@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
 import json
 import os
@@ -82,6 +82,12 @@ def _proxy_google_geocode():
 
 
 # --- Routes ---
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """Serve default favicon path for browsers that request /favicon.ico."""
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/api/geocode/json')

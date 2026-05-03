@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Evorra">
+  <defs>
+    <linearGradient id="evorra-favicon-grad" x1="2" y1="4" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="42%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#evorra-favicon-grad)"/>
+  <path fill="#ffffff" d="M8 7h16v4H12v3h9v4h-9v3h12v4H8z"/>
+</svg>

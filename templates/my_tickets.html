@@ -63,12 +63,35 @@
     .ticket-cover { width: 100%; height: 100%; min-height: 132px; object-fit: cover; }
     .ticket-main-body { padding: 13px; }
     .status-chip {
-        display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 10px; font-size: 0.66rem; font-weight: 800;
-        text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid transparent;
+        display: inline-flex; align-items: center; border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border: 1px solid transparent;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.35);
     }
-    .status-confirmed { color: #88f5cb; background: rgba(136,245,203,0.12); border-color: rgba(136,245,203,0.28); }
-    .status-used { color: #9ac5ff; background: rgba(154,197,255,0.12); border-color: rgba(154,197,255,0.28); }
-    .status-cancelled { color: #ff9db0; background: rgba(255,157,176,0.12); border-color: rgba(255,157,176,0.28); }
+    /* High-contrast pills so Confirmed / Used / Cancelled read clearly on the card */
+    .status-confirmed {
+        color: #bbf7d0;
+        background: rgba(34,197,94,0.38);
+        border-color: rgba(74,222,128,0.65);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+    }
+    .status-used {
+        color: #dbeafe;
+        background: rgba(59,130,246,0.42);
+        border-color: rgba(147,197,253,0.7);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.18) inset;
+    }
+    .status-cancelled {
+        color: #ffe4e6;
+        background: rgba(244,63,94,0.42);
+        border-color: rgba(251,113,133,0.72);
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.18) inset;
+    }
     .ticket-title { color: #fff; font-size: 0.98rem; font-weight: 800; margin: 8px 0 4px; line-height: 1.25; }
     .ticket-sub { color: rgba(255,255,255,0.56); font-size: 0.75rem; margin-bottom: 4px; }
     .ticket-time { color: var(--secondary); font-size: 0.76rem; font-weight: 700; }
