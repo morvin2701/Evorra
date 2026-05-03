@@ -282,7 +282,28 @@
             return null;
         }
 
-        /** Sync browse/filter city to the top nav chip. Explicit updates apply on every route; localStorage-only override runs on Home. */
+        /** Strip address-style saved strings so the chip shows the metro name (matches Home behaviour). */
+        function navSanitizeBrowseCityStored(raw) {
+            var s = String(raw || '').trim();
+            if (!s) return '';
+            if (!s.includes(',')) return s;
+            var parts = s.split(',').map(function (p) {
+                return p.trim();
+            }).filter(Boolean);
+            var i;
+            var p;
+            for (i = parts.length - 1; i >= 0; i--) {
+                p = parts[i];
+                if (/^\d{5,8}(-\d{4})?$/.test(p)) continue;
+                if (/^(india|in|usa)$/i.test(p)) continue;
+                if (/\b(taluka|tehsil|subdistrict)\b/i.test(p)) continue;
+                if (p.length < 2) continue;
+                return p;
+            }
+            return parts[0] || s;
+        }
+
+        /** Sync browse/filter city to the top nav chip on every route (same source as Home: localStorage + city picker). */
         function navApplyBrowseCityToNavChip(explicitCity) {
             try {
                 var bc;
@@ -290,8 +311,6 @@
                 if (hasExplicit) {
                     bc = String(explicitCity);
                 } else {
-                    var pathOnly = (window.location.pathname || '').split('?')[0].replace(/\/+$/, '') || '/';
-                    if (pathOnly !== '/' && pathOnly !== '/home-mobile') return;
                     bc = localStorage.getItem('evorra_selected_city');
                 }
                 if (bc === null) return;
@@ -303,7 +322,7 @@
                     );
                     return;
                 }
-                var t = String(bc).trim();
+                var t = navSanitizeBrowseCityStored(String(bc).trim());
                 navApplyLocationChip(t, 'Browsing near ' + t + ' — tap to change.', true);
             } catch (e) {}
         }
