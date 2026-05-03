@@ -1013,6 +1013,32 @@
             const preEvent = preEventSnap.exists ? preEventSnap.data() : null;
             setScanDetails(preTicket, preEvent, targetTicketId);
 
+            // ── EARLY scan-window guard (pre-transaction fast-fail) ──
+            const SCAN_OPEN_HOURS = 8;
+            (function enforceScanWindow(ev) {
+                if (!ev) return;
+                const st = ev.start_time;
+                if (!st) return;
+                let startMs = null;
+                try {
+                    const d = st.toDate ? st.toDate() : new Date(st);
+                    if (!Number.isNaN(d.getTime())) startMs = d.getTime();
+                } catch (_) {}
+                if (startMs === null) return;
+                const unlockMs = startMs - SCAN_OPEN_HOURS * 60 * 60 * 1000;
+                if (Date.now() < unlockMs) {
+                    const fmt = new Date(unlockMs).toLocaleString('en-IN', {
+                        weekday: 'short', day: 'numeric', month: 'long',
+                        hour: '2-digit', minute: '2-digit', hour12: true
+                    });
+                    throw new Error(
+                        `QR scanning is locked. This event starts on ` +
+                        new Date(startMs).toLocaleString('en-IN', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true }) +
+                        `. Scanning opens ${SCAN_OPEN_HOURS} hours before — from ${fmt}.`
+                    );
+                }
+            })(preEvent);
+
             const ticketRef = db.collection('tickets').doc(targetTicketId);
             await db.runTransaction(async (txn) => {
                 const ticketSnap = await txn.get(ticketRef);
@@ -1034,31 +1060,28 @@
                     throw new Error("Ticket already checked in.");
                 }
 
-                // ── Scan-window guard: block entry more than 8 h before event starts ──
-                const SCAN_OPEN_HOURS = 8;
-                const rawEventStart = event.start_time;
-                if (rawEventStart) {
-                    let startMs;
+                // ── In-transaction scan-window guard (second layer) ──
+                (function enforceScanWindowTxn(ev) {
+                    if (!ev) return;
+                    const st = ev.start_time;
+                    if (!st) return;
+                    let startMs = null;
                     try {
-                        const d = rawEventStart.toDate ? rawEventStart.toDate() : new Date(rawEventStart);
-                        startMs = Number.isNaN(d.getTime()) ? null : d.getTime();
-                    } catch (_) { startMs = null; }
-
-                    if (startMs !== null) {
-                        const unlockMs = startMs - SCAN_OPEN_HOURS * 60 * 60 * 1000;
-                        if (Date.now() < unlockMs) {
-                            const unlockDate = new Date(unlockMs);
-                            const fmt = unlockDate.toLocaleString('en-IN', {
-                                weekday: 'short', day: 'numeric', month: 'long',
-                                hour: '2-digit', minute: '2-digit', hour12: true
-                            });
-                            throw new Error(
-                                `Scanning opens ${SCAN_OPEN_HOURS} hours before the event. ` +
-                                `This ticket cannot be scanned before ${fmt}.`
-                            );
-                        }
+                        const d = st.toDate ? st.toDate() : new Date(st);
+                        if (!Number.isNaN(d.getTime())) startMs = d.getTime();
+                    } catch (_) {}
+                    if (startMs === null) return;
+                    const unlockMs = startMs - SCAN_OPEN_HOURS * 60 * 60 * 1000;
+                    if (Date.now() < unlockMs) {
+                        const fmt = new Date(unlockMs).toLocaleString('en-IN', {
+                            weekday: 'short', day: 'numeric', month: 'long',
+                            hour: '2-digit', minute: '2-digit', hour12: true
+                        });
+                        throw new Error(
+                            `QR scanning locked until ${fmt} (${SCAN_OPEN_HOURS}h before event).`
+                        );
                     }
-                }
+                })(event);
 
                 const quantity = Number(ticket.quantity || 1);
                 const now = firebase.firestore.FieldValue.serverTimestamp();
