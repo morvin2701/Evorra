@@ -101,9 +101,11 @@ service cloud.firestore {
         && request.resource.data.organizer_id == request.auth.uid;
       allow update, delete: if isEventOrganizer(eventId);
 
+      // Legacy path kept read-only for backward compatibility during migration.
+      // Canonical path is /ticket_types.
       match /ticketTypes/{ticketTypeId} {
         allow read: if true;
-        allow create, update, delete: if isEventOrganizer(eventId);
+        allow create, update, delete: if false;
       }
 
       match /ticket_types/{ticketTypeId} {
@@ -193,8 +195,13 @@ service cloud.firestore {
     }
 
     match /qr_validations/{scanId} {
-      allow read: if signedIn();
-      allow create: if signedIn();
+      allow read: if signedIn()
+        && resource.data.event_id is string
+        && isEventOrganizer(resource.data.event_id);
+      allow create: if signedIn()
+        && request.resource.data.event_id is string
+        && isEventOrganizer(request.resource.data.event_id)
+        && request.resource.data.scanned_by == request.auth.uid;
       allow update, delete: if false;
     }
   }
