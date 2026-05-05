@@ -935,6 +935,59 @@
         text-decoration: underline;
         text-underline-offset: 3px;
     }
+    .auth-divider {
+        margin: 14px 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--sm-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--sm-border);
+    }
+    .auth-social-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .auth-social-btn {
+        min-height: 46px;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: #fff;
+        color: var(--sm-text);
+        font-family: inherit;
+        font-size: 0.84rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .auth-social-btn:hover {
+        transform: translateY(-1px);
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+    .auth-social-btn i {
+        font-size: 0.95rem;
+    }
+    .auth-social-btn--google i {
+        color: #ea4335;
+    }
+    .auth-social-btn--apple i {
+        color: #0f172a;
+    }
 
     .error-banner {
         background: rgba(220, 38, 38, 0.08);
@@ -1032,7 +1085,7 @@
             margin-top: 12px;
             padding-top: 12px;
         }
-        .role-group { gap: 8px; }
+        .auth-social-grid { grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1057,11 +1110,6 @@
         .auth-subline { margin-bottom: 10px; font-size: 0.84rem; }
         .auth-input-group { margin-bottom: 9px; }
         .auth-input { height: 42px; font-size: 0.9rem; }
-        .role-card-surface { padding: 9px 10px; gap: 8px; }
-        .role-card-visual { width: 40px; height: 40px; border-radius: 11px; }
-        body.page-auth.theme-showmates .role-card .role-card-visual i { font-size: 1.05rem; }
-        .role-title { font-size: 0.88rem; }
-        .role-sub { font-size: 0.74rem; }
         .auth-page .btn-evorra { min-height: 44px; margin-top: 10px; }
         .auth-panel-foot { margin-top: 12px; padding-top: 12px; font-size: 0.8rem; }
     }
@@ -1135,46 +1183,6 @@
                             </button>
                         </div>
 
-                        <label class="auth-label" id="role-label">I want to</label>
-                        <div class="role-group" role="radiogroup" aria-labelledby="role-label">
-                            <div class="role-card selected" id="role-attendee" onclick="setRole('attendee')" role="radio" tabindex="0" aria-checked="true" aria-pressed="true">
-                                <div class="role-card-surface">
-                                    <span class="role-card-shine" aria-hidden="true"></span>
-                                    <div class="role-card-visual role-card-visual--guest" aria-hidden="true">
-                                        <i class="fa-solid fa-ticket"></i>
-                                    </div>
-                                    <div class="role-card-mid">
-                                        <div class="role-card-topline">
-                                            <p class="role-title">Attend events</p>
-                                            <div class="role-pick-inline" aria-hidden="true">
-                                                <span class="role-pill">Selected</span>
-                                                <span class="role-radio"><span class="role-radio-dot"></span></span>
-                                            </div>
-                                        </div>
-                                        <p class="role-sub">Discover &amp; book</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="role-card" id="role-organizer" onclick="setRole('organizer')" role="radio" tabindex="0" aria-checked="false" aria-pressed="false">
-                                <div class="role-card-surface">
-                                    <span class="role-card-shine" aria-hidden="true"></span>
-                                    <div class="role-card-visual role-card-visual--host" aria-hidden="true">
-                                        <i class="fa-solid fa-bullhorn"></i>
-                                    </div>
-                                    <div class="role-card-mid">
-                                        <div class="role-card-topline">
-                                            <p class="role-title">Host events</p>
-                                            <div class="role-pick-inline" aria-hidden="true">
-                                                <span class="role-pill">Selected</span>
-                                                <span class="role-radio"><span class="role-radio-dot"></span></span>
-                                            </div>
-                                        </div>
-                                        <p class="role-sub">Create &amp; manage</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="auth-terms-row">
                             <input type="checkbox" id="s-terms" aria-describedby="terms-desc">
                             <p id="terms-desc" class="auth-terms-text">
@@ -1183,6 +1191,15 @@
                         </div>
 
                         <button type="button" id="signup-btn" onclick="handleSignUp()" class="btn-evorra">Create account</button>
+                        <div class="auth-divider">or continue with</div>
+                        <div class="auth-social-grid">
+                            <button type="button" class="auth-social-btn auth-social-btn--google" onclick="handleGoogleAuth()">
+                                <i class="fa-brands fa-google" aria-hidden="true"></i> Google
+                            </button>
+                            <button type="button" class="auth-social-btn auth-social-btn--apple" onclick="handleAppleAuth()">
+                                <i class="fa-brands fa-apple" aria-hidden="true"></i> Apple
+                            </button>
+                        </div>
 
                         <div class="auth-panel-foot">
                             Already have an account? <a href="#" onclick="toggleView('login'); return false;">Sign in</a>
@@ -1214,6 +1231,15 @@
                         </div>
 
                         <button type="button" id="login-btn" onclick="handleLogin()" class="btn-evorra">Sign in</button>
+                        <div class="auth-divider">or continue with</div>
+                        <div class="auth-social-grid">
+                            <button type="button" class="auth-social-btn auth-social-btn--google" onclick="handleGoogleAuth()">
+                                <i class="fa-brands fa-google" aria-hidden="true"></i> Google
+                            </button>
+                            <button type="button" class="auth-social-btn auth-social-btn--apple" onclick="handleAppleAuth()">
+                                <i class="fa-brands fa-apple" aria-hidden="true"></i> Apple
+                            </button>
+                        </div>
 
                         <div class="auth-panel-foot">
                             New to Evorra? <a href="#" onclick="toggleView('signup'); return false;">Create account</a>
@@ -1229,20 +1255,8 @@
 
 {% block scripts %}
 <script>
-    let currentRole = 'attendee';
+    const defaultRole = 'attendee';
     const nextUrl = new URLSearchParams(window.location.search).get('next') || '/';
-
-    function setRole(role) {
-        currentRole = role;
-        var attendee = document.getElementById('role-attendee');
-        var organizer = document.getElementById('role-organizer');
-        attendee.classList.toggle('selected', role === 'attendee');
-        organizer.classList.toggle('selected', role === 'organizer');
-        attendee.setAttribute('aria-pressed', role === 'attendee' ? 'true' : 'false');
-        organizer.setAttribute('aria-pressed', role === 'organizer' ? 'true' : 'false');
-        attendee.setAttribute('aria-checked', role === 'attendee' ? 'true' : 'false');
-        organizer.setAttribute('aria-checked', role === 'organizer' ? 'true' : 'false');
-    }
 
     function setPasswordToggleState(inputId, visible) {
         const input = document.getElementById(inputId);
@@ -1288,16 +1302,61 @@
 
     initPasswordToggles();
 
-    (function initRoleCardKeys() {
-        document.querySelectorAll('.role-card').forEach(function (card) {
-            card.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    card.click();
-                }
+    async function ensureUserDoc(user, preferredName) {
+        if (!user) return;
+        const uid = user.uid;
+        const docRef = db.collection('users').doc(uid);
+        const snap = await docRef.get();
+        const email = String(user.email || '').trim();
+        const displayName =
+            String((preferredName || user.displayName || '').trim()) ||
+            (email ? email.split('@')[0].replace(/\./g, ' ') : 'Evorra User');
+        const payload = {
+            uid: uid,
+            displayName: displayName,
+            email: email,
+            email_lower: email.toLowerCase(),
+            phone_normalized: '',
+            photoURL: user.photoURL || '',
+            bio: '',
+            role: defaultRole,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        };
+        if (!snap.exists) {
+            await docRef.set({
+                ...payload,
+                eventsHosted: 0,
+                eventsAttended: 0,
+                followersCount: 0,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             });
-        });
-    })();
+            return;
+        }
+        await docRef.set(payload, { merge: true });
+    }
+
+    async function signInWithProvider(provider) {
+        try {
+            const res = await auth.signInWithPopup(provider);
+            await ensureUserDoc(res.user);
+            window.location.href = nextUrl;
+        } catch (e) {
+            showError((e && e.message) || 'Social sign-in failed. Please try again.');
+        }
+    }
+
+    function handleGoogleAuth() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        signInWithProvider(provider);
+    }
+
+    function handleAppleAuth() {
+        const provider = new firebase.auth.OAuthProvider('apple.com');
+        provider.addScope('email');
+        provider.addScope('name');
+        signInWithProvider(provider);
+    }
 
     async function handleSignUp() {
         const name = document.getElementById('s-name').value;
@@ -1332,7 +1391,7 @@
                 phone_normalized: '',
                 photoURL: '',
                 bio: '',
-                role: currentRole,
+                role: defaultRole,
                 eventsHosted: 0,
                 eventsAttended: 0,
                 followersCount: 0,
