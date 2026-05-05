@@ -757,26 +757,11 @@
             }
         };
 
-        function finishDetectFromCoords(lat, lng) {
-            reverseGeocodeCoords(lat, lng)
-                .then(function (raw) {
+        function applyCityLabelFromString(raw) {
+            mapRawCityToSelection(raw)
+                .then(function (ok) {
                     resetBtn();
-                    if (!raw) {
-                        alert('Could not determine your city.');
-                        return;
-                    }
-                    ensureEventsLoaded().then(function () {
-                        var list = buildCityListFromCache();
-                        var matched = null;
-                        for (var i = 0; i < list.length; i++) {
-                            var c = list[i];
-                            if (pickerCityMatches(c.name, raw)) {
-                                matched = c;
-                                break;
-                            }
-                        }
-                        applySelection(matched ? matched.name : raw);
-                    });
+                    if (!ok) alert('Could not determine your city.');
                 })
                 .catch(function () {
                     resetBtn();
@@ -784,22 +769,15 @@
                 });
         }
 
-        function applyCityLabelFromString(raw) {
-            var cityStr = String(raw || '').trim();
-            if (!cityStr) return;
-            ensureEventsLoaded().then(function () {
-                resetBtn();
-                var list = buildCityListFromCache();
-                var matched = null;
-                for (var i = 0; i < list.length; i++) {
-                    var c = list[i];
-                    if (pickerCityMatches(c.name, cityStr)) {
-                        matched = c;
-                        break;
-                    }
-                }
-                applySelection(matched ? matched.name : cityStr);
-            });
+        function finishDetectFromCoords(lat, lng) {
+            reverseGeocodeCoords(lat, lng)
+                .then(function (raw) {
+                    applyCityLabelFromString(raw);
+                })
+                .catch(function () {
+                    resetBtn();
+                    alert('Could not fetch your location.');
+                });
         }
 
         function tryDetectViaIpApi() {
@@ -853,6 +831,82 @@
         );
     }
 
+    function mapRawCityToSelection(raw) {
+        var cityStr = String(raw || '').trim();
+        if (!cityStr) return Promise.resolve(false);
+        return ensureEventsLoaded().then(function () {
+            var list = buildCityListFromCache();
+            var matched = null;
+            for (var i = 0; i < list.length; i++) {
+                var c = list[i];
+                if (pickerCityMatches(c.name, cityStr)) {
+                    matched = c;
+                    break;
+                }
+            }
+            applySelection(matched ? matched.name : cityStr);
+            return true;
+        });
+    }
+
+    function storedCityLooksUsable() {
+        var stored = String(getStoredCity() || '').trim();
+        if (!stored) return false;
+        return ensureEventsLoaded().then(function () {
+            var list = buildCityListFromCache();
+            for (var i = 0; i < list.length; i++) {
+                if (pickerCityMatches(list[i].name, stored)) return true;
+            }
+            return false;
+        });
+    }
+
+    function autoDetectAccurateLocationOnLoad() {
+        var ssKey = 'evorra_auto_loc_checked_v2';
+        try {
+            if (sessionStorage.getItem(ssKey) === '1') return;
+            sessionStorage.setItem(ssKey, '1');
+        } catch (e) {}
+
+        storedCityLooksUsable().then(function (usable) {
+            if (usable) return;
+
+            function tryIpFallback() {
+                if (!window.EvorraIpLocation || typeof window.EvorraIpLocation.ensureLoaded !== 'function') return;
+                window.EvorraIpLocation.ensureLoaded()
+                    .then(function () {
+                        var loc = window.EvorraIpLocation.get();
+                        if (!loc) return;
+                        if (Number.isFinite(loc.latitude) && Number.isFinite(loc.longitude)) {
+                            reverseGeocodeCoords(loc.latitude, loc.longitude)
+                                .then(function (raw) { mapRawCityToSelection(raw); })
+                                .catch(function () {});
+                            return;
+                        }
+                        if (loc.city) mapRawCityToSelection(loc.city);
+                    })
+                    .catch(function () {});
+            }
+
+            if (!navigator.geolocation) {
+                tryIpFallback();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    reverseGeocodeCoords(pos.coords.latitude, pos.coords.longitude)
+                        .then(function (raw) { mapRawCityToSelection(raw); })
+                        .catch(function () { tryIpFallback(); });
+                },
+                function () {
+                    tryIpFallback();
+                },
+                { enableHighAccuracy: true, timeout: 14000, maximumAge: 120000 }
+            );
+        });
+    }
+
     function bindUi() {
         var closeBtn = document.getElementById('ev-cp-close');
         if (closeBtn) {
@@ -901,8 +955,12 @@
     });
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bindUi);
+        document.addEventListener('DOMContentLoaded', function () {
+            bindUi();
+            autoDetectAccurateLocationOnLoad();
+        });
     } else {
         bindUi();
+        autoDetectAccurateLocationOnLoad();
     }
 })();
