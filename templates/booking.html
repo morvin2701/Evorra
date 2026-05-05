@@ -479,6 +479,11 @@
     let quantity = 1;
     let appliedDiscount = 0;
     let promoData = null;
+    function getAvailableStock(ticketLike) {
+        if (!ticketLike) return 0;
+        if (Number.isFinite(Number(ticketLike.available_qty))) return Number(ticketLike.available_qty);
+        return Number(ticketLike.stock || 0);
+    }
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
         if (eventItem.is_closed === true) return true;
@@ -531,7 +536,7 @@
                     <div class="ticket-opt-row">
                         <div>
                             <h4 class="ticket-opt-title">${t.name}</h4>
-                            <p class="ticket-opt-meta">${t.stock > 0 ? t.stock + ' left' : 'Sold out'}</p>
+                            <p class="ticket-opt-meta">${getAvailableStock(t) > 0 ? getAvailableStock(t) + ' left' : 'Sold out'}</p>
                         </div>
                         <span class="ticket-opt-price">₹${t.price}</span>
                     </div>
@@ -546,6 +551,7 @@
                         id: t.id || `inline-${idx}`,
                         name: t.name || `Ticket ${idx + 1}`,
                         price: Number(t.price || 0),
+                        available_qty: Number(t.available_qty || 0),
                         stock: Number(t.stock || 0),
                         max_per_user: Number(t.max_per_user || 10)
                     };
@@ -557,7 +563,7 @@
                         <div class="ticket-opt-row">
                             <div>
                                 <h4 class="ticket-opt-title">${fallback.name}</h4>
-                                <p class="ticket-opt-meta">${fallback.stock > 0 ? fallback.stock + ' left' : 'Sold out'}</p>
+                                <p class="ticket-opt-meta">${getAvailableStock(fallback) > 0 ? getAvailableStock(fallback) + ' left' : 'Sold out'}</p>
                             </div>
                             <span class="ticket-opt-price">₹${fallback.price}</span>
                         </div>
@@ -573,7 +579,7 @@
     }
 
     function selectTicket(t) {
-        if (t.stock <= 0) return;
+        if (getAvailableStock(t) <= 0) return;
         selectedTicket = t;
         document.querySelectorAll('.ticket-select-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`t-${t.id}`).classList.add('active');
@@ -594,7 +600,7 @@
         const newVal = quantity + delta;
         if (newVal < 1) return;
         if (selectedTicket && newVal > (selectedTicket.max_per_user || 10)) return;
-        if (selectedTicket && newVal > selectedTicket.stock) return;
+        if (selectedTicket && newVal > getAvailableStock(selectedTicket)) return;
         
         quantity = newVal;
         document.getElementById('qty-display').textContent = quantity;

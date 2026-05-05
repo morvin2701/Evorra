@@ -955,7 +955,7 @@
     }
     .auth-social-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: 10px;
     }
     .auth-social-btn {
@@ -984,9 +984,6 @@
     }
     .auth-social-btn--google i {
         color: #ea4335;
-    }
-    .auth-social-btn--apple i {
-        color: #0f172a;
     }
 
     .error-banner {
@@ -1196,9 +1193,6 @@
                             <button type="button" class="auth-social-btn auth-social-btn--google" onclick="handleGoogleAuth()">
                                 <i class="fa-brands fa-google" aria-hidden="true"></i> Google
                             </button>
-                            <button type="button" class="auth-social-btn auth-social-btn--apple" onclick="handleAppleAuth()">
-                                <i class="fa-brands fa-apple" aria-hidden="true"></i> Apple
-                            </button>
                         </div>
 
                         <div class="auth-panel-foot">
@@ -1235,9 +1229,6 @@
                         <div class="auth-social-grid">
                             <button type="button" class="auth-social-btn auth-social-btn--google" onclick="handleGoogleAuth()">
                                 <i class="fa-brands fa-google" aria-hidden="true"></i> Google
-                            </button>
-                            <button type="button" class="auth-social-btn auth-social-btn--apple" onclick="handleAppleAuth()">
-                                <i class="fa-brands fa-apple" aria-hidden="true"></i> Apple
                             </button>
                         </div>
 
@@ -1348,13 +1339,6 @@
     function handleGoogleAuth() {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        signInWithProvider(provider);
-    }
-
-    function handleAppleAuth() {
-        const provider = new firebase.auth.OAuthProvider('apple.com');
-        provider.addScope('email');
-        provider.addScope('name');
         signInWithProvider(provider);
     }
 

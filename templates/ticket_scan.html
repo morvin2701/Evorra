@@ -1065,6 +1065,7 @@
                 scanned_at:      serverNow,
                 last_scanned_by: user.uid
             };
+            const logRef = eventRef.collection('scan_logs').doc(String(targetTicketId));
 
             // ── 4. Write Layer 1: full transaction (ticket + event stats + scan log) ──
             let writeMode = 'full';
@@ -1080,8 +1081,9 @@
                     const prevTotal  = Number((freshEvent.stats || {}).scans_total || 0);
                     txn.update(eventRef, { 'stats.scans_total': prevTotal + quantity });
 
-                    const logRef = eventRef.collection('scan_logs').doc();
-                    txn.set(logRef, {
+                    const priorLogSnap = await txn.get(logRef);
+                    if (priorLogSnap.exists) throw new Error("Ticket already checked in.");
+                    txn.create(logRef, {
                         id:          logRef.id,
                         ticket_id:   preTicket.id || targetTicketId,
                         event_id:    preTicket.event_id,
@@ -1106,7 +1108,6 @@
 
                     // ── Write Layer 3: scan log only (organizer writes to their own event subcollection) ──
                     writeMode = 'log-only';
-                    const logRef = eventRef.collection('scan_logs').doc();
                     await logRef.set({
                         id:          logRef.id,
                         ticket_id:   targetTicketId,
@@ -1128,7 +1129,6 @@
                     await eventRef.update({ 'stats.scans_total': firebase.firestore.FieldValue.increment(quantity) });
                 } catch (_) {}
                 try {
-                    const logRef = eventRef.collection('scan_logs').doc();
                     await logRef.set({
                         id: logRef.id, ticket_id: preTicket.id || targetTicketId,
                         event_id: preTicket.event_id, scanned_by: user.uid,

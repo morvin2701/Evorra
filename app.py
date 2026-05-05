@@ -6,6 +6,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 load_dotenv()
 
@@ -13,6 +15,35 @@ app = Flask(__name__)
 CORS(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['GOOGLE_MAPS_API_KEY'] = (os.getenv('GOOGLE_MAPS_API_KEY') or '').strip()
+app.config['ADMIN_SYNC_TOKEN'] = (os.getenv('ADMIN_SYNC_TOKEN') or '').strip()
+
+
+def _init_firebase_admin():
+    """Initialize Firebase Admin SDK once and return Firestore client."""
+    if not firebase_admin._apps:
+        service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
+        if service_account_path:
+            cred = credentials.Certificate(service_account_path)
+            firebase_admin.initialize_app(cred)
+        else:
+            firebase_admin.initialize_app()
+    return firestore.client()
+
+
+def _extract_bearer_token():
+    auth_header = (request.headers.get('Authorization') or '').strip()
+    if auth_header.lower().startswith('bearer '):
+        return auth_header[7:].strip()
+    return ''
+
+
+def _admin_sync_authorized():
+    """Shared-secret authorization for server maintenance endpoints."""
+    configured = app.config.get('ADMIN_SYNC_TOKEN') or ''
+    if not configured:
+        return False
+    provided = _extract_bearer_token() or (request.headers.get('X-Admin-Token') or '').strip()
+    return bool(provided) and provided == configured
 
 
 @app.context_processor
@@ -94,6 +125,81 @@ def favicon():
 def api_geocode_json():
     """Browser-safe proxy: same-origin fetch avoids CORS and keeps the API key on the server."""
     return _proxy_google_geocode()
+
+
+@app.route('/api/admin/sync-event-metrics', methods=['POST'])
+def sync_event_metrics():
+    """
+    Recompute and persist event metrics from confirmed/used tickets.
+
+    Security:
+      - Requires ADMIN_SYNC_TOKEN in env.
+      - Send via Authorization: Bearer <token> OR X-Admin-Token.
+    Payload (optional):
+      { "event_id": "<id>" } to sync one event only.
+    """
+    if not _admin_sync_authorized():
+        return jsonify({'ok': False, 'error': 'UNAUTHORIZED'}), 401
+
+    try:
+        db = _init_firebase_admin()
+    except Exception as e:
+        return jsonify({'ok': False, 'error': 'FIREBASE_ADMIN_INIT_FAILED', 'detail': str(e)}), 500
+
+    body = request.get_json(silent=True) or {}
+    requested_event_id = str(body.get('event_id') or '').strip()
+    valid_statuses = {'confirmed', 'used'}
+
+    try:
+        if requested_event_id:
+            event_ids = [requested_event_id]
+        else:
+            event_ids = [doc.id for doc in db.collection('events').stream()]
+
+        updated = []
+        for event_id in event_ids:
+            ticket_query = db.collection('tickets').where('event_id', '==', event_id).stream()
+            sold_count = 0
+            revenue_total = 0
+            for tdoc in ticket_query:
+                t = tdoc.to_dict() or {}
+                status = str(t.get('status') or '').lower()
+                if status not in valid_statuses:
+                    continue
+                qty = int(t.get('quantity') or 0)
+                amt = int(t.get('total_amount') or 0)
+                if qty < 0:
+                    qty = 0
+                if amt < 0:
+                    amt = 0
+                sold_count += qty
+                revenue_total += amt
+
+            db.collection('events').document(event_id).set(
+                {
+                    'tickets_sold': sold_count,
+                    'total_revenue': revenue_total,
+                    'updatedAt': firestore.SERVER_TIMESTAMP,
+                },
+                merge=True,
+            )
+            updated.append(
+                {
+                    'event_id': event_id,
+                    'tickets_sold': sold_count,
+                    'total_revenue': revenue_total,
+                }
+            )
+
+        return jsonify(
+            {
+                'ok': True,
+                'synced_events': len(updated),
+                'results': updated,
+            }
+        )
+    except Exception as e:
+        return jsonify({'ok': False, 'error': 'SYNC_FAILED', 'detail': str(e)}), 500
 
 
 @app.route('/')
