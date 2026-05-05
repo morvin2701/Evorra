@@ -16,6 +16,38 @@
         margin: 0 auto;
         padding: 26px 0 118px;
     }
+    .shared-hero {
+        border-radius: 24px;
+        border: 1px solid rgba(220, 38, 38, 0.18);
+        background:
+            radial-gradient(100% 140% at 0% 0%, rgba(220, 38, 38, 0.12) 0%, rgba(220, 38, 38, 0) 58%),
+            radial-gradient(120% 120% at 100% 100%, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0) 62%),
+            linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 22px 46px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.95) inset;
+        padding: 18px 18px 14px;
+        margin-bottom: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .shared-hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 72%);
+        transform: translateX(-120%);
+        opacity: 0;
+        pointer-events: none;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+        .shared-hero:hover::after {
+            opacity: 1;
+            animation: shared-hero-sheen 1.4s ease;
+        }
+    }
+    @keyframes shared-hero-sheen {
+        from { transform: translateX(-120%); }
+        to { transform: translateX(140%); }
+    }
 
     .shared-topbar {
         display: flex;
@@ -70,6 +102,61 @@
         flex-wrap: wrap;
         margin: 8px 0 6px;
     }
+    .shared-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        border: 1px solid #e5e7eb;
+        background:
+            linear-gradient(180deg, #ffffff 0%, #f9fafb 100%),
+            var(--sm-surface);
+        border-radius: 18px;
+        padding: 6px;
+        margin: 4px 0 12px;
+        width: 100%;
+        box-shadow:
+            0 8px 18px rgba(15, 23, 42, 0.06),
+            0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    }
+    .shared-tab-btn {
+        border: 1px solid transparent;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--sm-muted);
+        font-size: 0.88rem;
+        letter-spacing: 0.01em;
+        font-weight: 900;
+        padding: 13px 14px;
+        cursor: pointer;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, transform 0.14s ease;
+    }
+    .shared-tab-btn i {
+        font-size: 0.84rem;
+        opacity: 0.65;
+        transition: opacity 0.2s ease;
+    }
+    .shared-tab-btn:hover {
+        transform: translateY(-0.5px);
+        border-color: #e2e8f0;
+        color: #334155;
+        background: rgba(255, 255, 255, 0.7);
+    }
+    .shared-tab-btn.active {
+        color: var(--sm-primary);
+        border-color: rgba(220, 38, 38, 0.22);
+        background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+        box-shadow:
+            0 0 0 1px rgba(220, 38, 38, 0.1),
+            0 6px 14px rgba(220, 38, 38, 0.13);
+    }
+    .shared-tab-btn.active i {
+        opacity: 1;
+    }
     .shared-filter-btn {
         border: 1px solid var(--sm-border);
         background: var(--sm-surface);
@@ -93,6 +180,35 @@
         background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
         color: var(--sm-primary);
         box-shadow: 0 4px 14px rgba(220, 38, 38, 0.12);
+    }
+    .shared-kpi-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: 6px 0 2px;
+    }
+    .shared-kpi {
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(4px);
+        padding: 10px 11px;
+    }
+    .shared-kpi-label {
+        margin: 0;
+        color: var(--sm-muted);
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 900;
+    }
+    .shared-kpi-value {
+        margin: 5px 0 0;
+        color: var(--sm-text);
+        font-size: 1.08rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        line-height: 1;
     }
 
     .shared-list {
@@ -122,7 +238,20 @@
         opacity: 0;
         transition: opacity 0.25s ease;
     }
+    .shared-card::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.42), rgba(59, 130, 246, 0.36), transparent);
+        opacity: 0;
+        transition: opacity 0.22s ease;
+        pointer-events: none;
+    }
     .shared-card:hover::before {
+        opacity: 1;
+    }
+    .shared-card:hover::after {
         opacity: 1;
     }
     .shared-card:hover {
@@ -193,6 +322,15 @@
         color: var(--sm-muted);
         font-size: 0.8rem;
         font-weight: 600;
+    }
+    .shared-party {
+        margin-top: 8px;
+        color: var(--sm-text);
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+    .shared-party b {
+        color: var(--sm-primary);
     }
 
     .shared-mini {
@@ -266,6 +404,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        flex-wrap: wrap;
     }
     .shared-action-btn {
         border-radius: 12px;
@@ -368,9 +507,13 @@
     }
     @media (max-width: 640px) {
         .shared-shell { width: calc(100% - 20px); padding-top: 18px; }
+        .shared-hero { padding: 14px 12px 12px; border-radius: 20px; }
+        .shared-tabs { width: 100%; }
+        .shared-tab-btn { font-size: 0.8rem; padding: 11px 10px; gap: 6px; }
         .shared-main { grid-template-columns: 92px 1fr; }
         .shared-cover { min-height: 132px; }
         .shared-body { padding: 12px 12px 10px; }
+        .shared-kpi-row { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -378,12 +521,30 @@
 {% block content %}
 <div class="shared-bg">
     <div class="shared-shell">
-        <div class="shared-shell-header">
+        <div class="shared-shell-header shared-hero">
             <div class="shared-topbar">
                 <a href="/my-tickets" class="shared-back" aria-label="Back to my tickets"><i class="fa-solid fa-chevron-left"></i></a>
                 <div class="shared-heading-block">
                     <h1 class="shared-title">Shared tickets</h1>
-                    <p class="shared-sub">Accept or reject transfers. Accepted passes live in My Tickets with your QR.</p>
+                    <p class="shared-sub">Track incoming and outgoing ticket shares with full status visibility and recipient/sender details.</p>
+                </div>
+            </div>
+            <div class="shared-tabs" id="shared-tabs">
+                <button type="button" class="shared-tab-btn active" data-view="with_me"><i class="fa-solid fa-inbox"></i> Shared With Me</button>
+                <button type="button" class="shared-tab-btn" data-view="by_me"><i class="fa-solid fa-paper-plane"></i> Shared By Me</button>
+            </div>
+            <div class="shared-kpi-row">
+                <div class="shared-kpi">
+                    <p class="shared-kpi-label">Total Shares</p>
+                    <p class="shared-kpi-value" id="shared-kpi-total">0</p>
+                </div>
+                <div class="shared-kpi">
+                    <p class="shared-kpi-label">Pending Actions</p>
+                    <p class="shared-kpi-value" id="shared-kpi-pending">0</p>
+                </div>
+                <div class="shared-kpi">
+                    <p class="shared-kpi-label">Completed</p>
+                    <p class="shared-kpi-value" id="shared-kpi-completed">0</p>
                 </div>
             </div>
             <div class="shared-filters" id="shared-filters">
@@ -411,9 +572,45 @@
 {% block scripts %}
 <script>
     let allShared = [];
+    let sharedWithMeRows = [];
+    let sharedByMeRows = [];
     let ticketSharedRows = [];
     let rejectionLogRows = [];
     let activeFilter = 'all';
+    let activeView = 'with_me';
+    const userNameCache = new Map();
+    const userNamePending = new Map();
+
+    function uidShort(uid) {
+        const s = String(uid || '');
+        if (!s) return 'Unknown user';
+        if (s.length <= 8) return s;
+        return `${s.slice(0, 4)}…${s.slice(-3)}`;
+    }
+
+    async function resolveUserName(uid) {
+        const key = String(uid || '').trim();
+        if (!key) return 'Unknown user';
+        if (userNameCache.has(key)) return userNameCache.get(key);
+        if (userNamePending.has(key)) return userNamePending.get(key);
+        const pending = (async () => {
+            try {
+                const snap = await db.collection('users').doc(key).get();
+                const d = snap.exists ? (snap.data() || {}) : {};
+                const name = String(d.display_name || d.displayName || d.name || d.email || uidShort(key));
+                userNameCache.set(key, name);
+                return name;
+            } catch (_) {
+                const fallback = uidShort(key);
+                userNameCache.set(key, fallback);
+                return fallback;
+            } finally {
+                userNamePending.delete(key);
+            }
+        })();
+        userNamePending.set(key, pending);
+        return pending;
+    }
 
     function formatDate(val) {
         if (!val) return 'TBA';
@@ -463,7 +660,8 @@
                 status: 'share_rejected'
             };
         });
-        allShared = [...fromTickets, ...fromRejections];
+        sharedWithMeRows = [...fromTickets, ...fromRejections];
+        allShared = activeView === 'by_me' ? sharedByMeRows : sharedWithMeRows;
     }
 
     function matchesFilter(ticket) {
@@ -472,11 +670,15 @@
     }
 
     function updateFilterCounts() {
-        const counts = { all: allShared.length, pending: 0, accepted: 0, rejected: 0 };
-        allShared.forEach((ticket) => {
+        const sourceRows = activeView === 'by_me' ? sharedByMeRows : sharedWithMeRows;
+        const counts = { all: sourceRows.length, pending: 0, accepted: 0, rejected: 0 };
+        sourceRows.forEach((ticket) => {
             const key = getTicketViewStatus(ticket);
             if (counts[key] !== undefined) counts[key] += 1;
         });
+        document.getElementById('shared-kpi-total').textContent = String(counts.all || 0);
+        document.getElementById('shared-kpi-pending').textContent = String(counts.pending || 0);
+        document.getElementById('shared-kpi-completed').textContent = String((counts.accepted || 0) + (counts.rejected || 0));
         document.querySelectorAll('.shared-filter-btn').forEach((btn) => {
             const key = btn.getAttribute('data-filter') || 'all';
             const base = btn.getAttribute('data-base-label') || key;
@@ -486,6 +688,7 @@
     }
 
     function renderShared() {
+        allShared = activeView === 'by_me' ? sharedByMeRows : sharedWithMeRows;
         const container = document.getElementById('shared-container');
         const loadingEl = document.getElementById('shared-loading');
         if (loadingEl) loadingEl.classList.add('hide');
@@ -496,9 +699,10 @@
             const emptyEl = document.getElementById('shared-empty');
             if (!emptyEl) return;
             emptyEl.classList.remove('hide');
-            const msg = activeFilter === 'all'
-                ? 'When someone shares tickets with you, they will appear here.'
-                : `No ${activeFilter} shared tickets right now.`;
+            const baseMsg = activeView === 'by_me'
+                ? 'Tickets you share with others will appear here.'
+                : 'When someone shares tickets with you, they will appear here.';
+            const msg = activeFilter === 'all' ? baseMsg : `No ${activeFilter} tickets in this view right now.`;
             const p = emptyEl.querySelector('p');
             if (p) p.textContent = msg;
             return;
@@ -513,10 +717,14 @@
                 const isPending = ticketViewStatus === 'pending';
                 const isRejected = ticketViewStatus === 'rejected';
                 const displayId = t.__rowType === 'rejection' ? (t.ticket_id || t.id) : t.id;
+                const counterpartyLabel = activeView === 'by_me' ? 'Shared with' : 'Shared by';
+                const counterpartyName = activeView === 'by_me'
+                    ? String(t.__recipient_name || uidShort(t.shared_recipient_uid || t.user_id || ''))
+                    : String(t.__sender_name || uidShort(t.shared_by || ''));
                 const el = document.createElement('div');
                 el.className = 'shared-card animate-evorra';
                 el.onclick = () => {
-                    if (isPending) {
+                    if (activeView === 'with_me' && isPending) {
                         alert('Accept this ticket first from Shared Tickets to open details.');
                         return;
                     }
@@ -537,6 +745,7 @@
                             <span class="shared-chip ${chipClass}">${chipLabel}</span>
                             <h3 class="shared-name">${t.event_title || eventData.title || 'Untitled Event'}</h3>
                             <p class="shared-meta">${eventData.city || 'District'} • ${eventData.venue || 'Venue'}</p>
+                            <p class="shared-party"><b>${counterpartyLabel}:</b> ${counterpartyName}</p>
                             <div class="shared-mini">
                                 <div class="shared-mini-box"><p class="shared-mini-label">Type</p><p class="shared-mini-value">${t.ticket_type_name || '-'}</p></div>
                                 <div class="shared-mini-box"><p class="shared-mini-label">Qty</p><p class="shared-mini-value">${t.quantity || 1}</p></div>
@@ -547,7 +756,7 @@
                     </div>
                     <div class="shared-foot">
                         <span class="shared-foot-note">Ticket ID: ${displayId}</span>
-                        ${isPending ? `
+                        ${activeView === 'with_me' && isPending ? `
                             <div class="shared-actions">
                                 <button type="button" class="shared-action-btn reject" data-action="reject" data-ticket-id="${t.id}">Reject</button>
                                 <button type="button" class="shared-action-btn accept" data-action="accept" data-ticket-id="${t.id}">Accept</button>
@@ -568,6 +777,17 @@
                 await handleSharedAction(tid, action, btn);
             });
         });
+    }
+
+    async function hydrateCounterpartyNames() {
+        const withRows = sharedWithMeRows.filter((r) => r.shared_by).map(async (r) => {
+            r.__sender_name = await resolveUserName(r.shared_by);
+        });
+        const byRows = sharedByMeRows.map(async (r) => {
+            const recipientUid = String(r.shared_recipient_uid || r.user_id || '').trim();
+            r.__recipient_name = recipientUid ? await resolveUserName(recipientUid) : 'Unknown recipient';
+        });
+        await Promise.all([...withRows, ...byRows]);
     }
 
     async function notifyUser(userId, title, message, refTicketId) {
@@ -735,7 +955,7 @@
                     if (data.shared_by) ticketSharedRows.push(data);
                 });
                 mergeSharedRows();
-                renderShared();
+                hydrateCounterpartyNames().then(renderShared);
             });
 
         unsubShareRejections = shareRejectionsCollection(user.uid).onSnapshot(
@@ -747,12 +967,44 @@
                     rejectionLogRows.push(data);
                 });
                 mergeSharedRows();
-                renderShared();
+                hydrateCounterpartyNames().then(renderShared);
             },
             (err) => {
                 console.error('share_rejections listener error:', err?.code || err?.message || err);
             }
         );
+    });
+
+    let unsubSharedByMe = null;
+    auth.onAuthStateChanged((user) => {
+        if (typeof unsubSharedByMe === 'function') {
+            unsubSharedByMe();
+            unsubSharedByMe = null;
+        }
+        if (!user) return;
+        unsubSharedByMe = db.collection('tickets')
+            .where('shared_by', '==', user.uid)
+            .onSnapshot((snap) => {
+                const rows = [];
+                snap.forEach((doc) => {
+                    const data = doc.data() || {};
+                    data.id = doc.id;
+                    rows.push(data);
+                });
+                sharedByMeRows = rows;
+                mergeSharedRows();
+                hydrateCounterpartyNames().then(renderShared);
+            });
+    });
+
+    document.querySelectorAll('.shared-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const nextView = btn.getAttribute('data-view') || 'with_me';
+            activeView = nextView;
+            document.querySelectorAll('.shared-tab-btn').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderShared();
+        });
     });
 
     document.querySelectorAll('.shared-filter-btn').forEach((btn) => {
