@@ -320,11 +320,66 @@
     function monthLabel(date) {
         return date.toLocaleDateString('en-IN', { month: 'short' });
     }
+    function parseLegacyDateString(val) {
+        const raw = String(val || '').trim();
+        if (!raw) return null;
+        const direct = new Date(raw);
+        if (!Number.isNaN(direct.getTime())) return direct;
+
+        // Handles formats like: "3 May, 05:00 pm" / "3 May 2026, 5:00 PM"
+        const m = raw.match(/^(\d{1,2})\s+([A-Za-z]{3,9})(?:\s*,?\s*(\d{4}))?(?:\s*,?\s*(\d{1,2}):(\d{2})\s*(am|pm))?$/i);
+        if (!m) return null;
+        const day = Number(m[1]);
+        const monthName = m[2].slice(0, 3).toLowerCase();
+        const months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+        const month = months[monthName];
+        if (!Number.isInteger(month)) return null;
+        const now = new Date();
+        const year = m[3] ? Number(m[3]) : now.getFullYear();
+        let hour = m[4] ? Number(m[4]) : 0;
+        const min = m[5] ? Number(m[5]) : 0;
+        const ampm = (m[6] || '').toLowerCase();
+        if (ampm) {
+            if (ampm === 'pm' && hour < 12) hour += 12;
+            if (ampm === 'am' && hour === 12) hour = 0;
+        }
+        const out = new Date(year, month, day, hour, min, 0, 0);
+        return Number.isNaN(out.getTime()) ? null : out;
+    }
     function safeDate(val) {
         if (!val) return null;
         if (val.toDate) return val.toDate();
+        if (val && typeof val === 'object' && Number.isFinite(Number(val.seconds))) {
+            const dFromSeconds = new Date(Number(val.seconds) * 1000);
+            if (!Number.isNaN(dFromSeconds.getTime())) return dFromSeconds;
+        }
+        if (typeof val === 'string') {
+            const legacy = parseLegacyDateString(val);
+            if (legacy) return legacy;
+        }
         const d = new Date(val);
         return Number.isNaN(d.getTime()) ? null : d;
+    }
+    function getEventDateByKeys(event, keys) {
+        if (!event || !Array.isArray(keys)) return null;
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            if (!Object.prototype.hasOwnProperty.call(event, k)) continue;
+            const parsed = safeDate(event[k]);
+            if (parsed) return parsed;
+        }
+        return null;
+    }
+    function resolveEventStartEnd(event) {
+        const start = getEventDateByKeys(event, [
+            'start_time', 'startTime', 'event_start_time', 'eventStartTime',
+            'start_date', 'startDate', 'event_date', 'eventDate', 'date'
+        ]);
+        const end = getEventDateByKeys(event, [
+            'end_time', 'endTime', 'event_end_time', 'eventEndTime',
+            'end_date', 'endDate'
+        ]);
+        return { start: start, end: end };
     }
     function renderRevenueChart(events) {
         const el = document.getElementById('revenue-chart');
@@ -357,16 +412,35 @@
     function getEventLifecycleStatus(event) {
         const rawStatus = String(event.status || '').toLowerCase();
         if (['cancelled', 'canceled'].includes(rawStatus)) return 'cancelled';
+        if (event.is_closed === true) return 'completed';
+        if (['closed', 'completed', 'ended', 'archived'].includes(rawStatus)) return 'completed';
 
         const now = new Date();
-        const startDate = safeDate(event.start_time);
-        const endDate = safeDate(event.end_time || event.endTime);
+        const resolved = resolveEventStartEnd(event);
+        const startDate = resolved.start;
+        const endDate = resolved.end;
+        const hasMultiDayFlag = event.is_multi_day === true || event.multi_day === true || event.isMultiDay === true;
 
         if (endDate && endDate < now) return 'completed';
-        if (startDate && startDate <= now && (!endDate || endDate >= now)) return 'live';
+        if (startDate) {
+            const startDayEnd = new Date(startDate);
+            startDayEnd.setHours(23, 59, 59, 999);
+            // Default behavior for this dashboard: a past start day means completed.
+            // Keep "live" only for explicit multi-day events with a valid future end date.
+            if (now > startDayEnd) {
+                if (!(hasMultiDayFlag && endDate && endDate >= now)) return 'completed';
+            }
+        }
         if (startDate && startDate > now) return 'upcoming';
+        if (startDate && startDate <= now && (!endDate || endDate >= now)) return 'live';
+        if (!startDate && endDate && endDate >= now) return 'upcoming';
 
-        if (event.is_active === true) return 'live';
+        // If event has been unpublished/deactivated and no valid future date remains,
+        // prefer completed/inactive over showing it as live.
+        if (event.is_active === false || event.is_published === false) return 'inactive';
+        // `is_active` is often stale because it was set at publish time.
+        // Do not mark live only from this flag without date/status evidence.
+        if (['live', 'ongoing', 'running'].includes(rawStatus)) return 'live';
         if (event.is_published === false || rawStatus === 'draft') return 'inactive';
         return 'upcoming';
     }
@@ -497,8 +571,8 @@
         const revenue = event.display_revenue || 0;
         const rating = event.rating_average || 0;
         const fillPct = inventory > 0 ? Math.min(100, Math.round((ticketsSold / inventory) * 100)) : (ticketsSold > 0 ? 100 : 0);
-        
-        const startDate = safeDate(event.start_time);
+        const resolved = resolveEventStartEnd(event);
+        const startDate = resolved.start;
         const lifecycle = getEventLifecycleStatus(event);
         const lifecycleLabel = lifecycle.charAt(0).toUpperCase() + lifecycle.slice(1);
         const dateText = startDate ? startDate.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'}) : 'TBA';
