@@ -289,6 +289,11 @@ def notifications():
 def edit_profile():
     return render_template('edit_profile.html')
 
+
+@app.route('/profile/change-password')
+def change_password():
+    return render_template('change_password.html')
+
 if __name__ == '__main__':
     app.run(
         debug=os.getenv('FLASK_DEBUG', '1') == '1',
