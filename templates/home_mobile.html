@@ -806,6 +806,15 @@
             const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
             if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
         }
+        const startRaw = eventItem.start_time || eventItem.startTime;
+        if (startRaw) {
+            const startDate = startRaw.toDate ? startRaw.toDate() : new Date(startRaw);
+            if (!Number.isNaN(startDate.getTime())) {
+                const endOfDay = new Date(startDate);
+                endOfDay.setHours(23, 59, 59, 999);
+                if (Date.now() > endOfDay.getTime()) return true;
+            }
+        }
         return false;
     }
 

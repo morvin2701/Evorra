@@ -325,6 +325,15 @@
             var endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
             if (!isNaN(endDate.getTime()) && endDate < new Date()) return true;
         }
+        var startRaw = e.start_time || e.startTime;
+        if (startRaw) {
+            var startDate = startRaw.toDate ? startRaw.toDate() : new Date(startRaw);
+            if (!isNaN(startDate.getTime())) {
+                var endOfDay = new Date(startDate);
+                endOfDay.setHours(23, 59, 59, 999);
+                if (Date.now() > endOfDay.getTime()) return true;
+            }
+        }
         return false;
     }
 

@@ -218,6 +218,11 @@
         color: #b45309;
         border-color: rgba(245, 158, 11, 0.4);
     }
+    .ticket-bg .status-completed {
+        background: #f1f5f9;
+        color: #334155;
+        border-color: rgba(100, 116, 139, 0.35);
+    }
 
     .pass-header {
         display: flex;
@@ -503,6 +508,20 @@
             0 4px 0 rgba(6, 95, 70, 0.25),
             0 14px 28px rgba(5, 150, 105, 0.35);
     }
+    .td-checked-ring.td-checked-ring--completed {
+        background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 42%, #fed7aa 100%);
+        border-color: rgba(249, 115, 22, 0.36);
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.72) inset,
+            0 18px 40px rgba(249, 115, 22, 0.15),
+            0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    .td-check-icon.td-check-icon--completed {
+        background: linear-gradient(145deg, #f97316, #ea580c);
+        box-shadow:
+            0 4px 0 rgba(154, 52, 18, 0.24),
+            0 14px 28px rgba(234, 88, 12, 0.3);
+    }
     .qr-checked-badge {
         display: inline-flex;
         align-items: center;
@@ -517,6 +536,11 @@
         border: 1px solid rgba(16, 185, 129, 0.32);
         color: #065f46;
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+    .qr-checked-badge.qr-checked-badge--completed {
+        border-color: rgba(249, 115, 22, 0.4);
+        color: #9a3412;
+        background: #fff7ed;
     }
     .qr-checked-title {
         margin: 4px 0 0;
@@ -539,6 +563,13 @@
         box-shadow:
             0 0 0 1px rgba(16, 185, 129, 0.06) inset,
             0 12px 36px rgba(16, 185, 129, 0.1);
+    }
+    .qr-container.qr-container--completed {
+        background: linear-gradient(180deg, #fff7ed 0%, #fffbeb 55%, var(--sm-bg) 100%);
+        border-color: rgba(249, 115, 22, 0.3);
+        box-shadow:
+            0 0 0 1px rgba(249, 115, 22, 0.08) inset,
+            0 12px 36px rgba(249, 115, 22, 0.12);
     }
 
     /* ── QR Locked state — countdown until unlock ── */
@@ -739,6 +770,9 @@
     }
     .ticket-bg #sum-status.sum-status-checked {
         color: #059669 !important;
+    }
+    .ticket-bg #sum-status.sum-status-completed {
+        color: #475569 !important;
     }
     .detail-item {
         display: flex;
@@ -1162,8 +1196,8 @@
                                     <div id="qr-checked-ring" class="td-checked-ring td-checked-ring--pulse">
                                         <span class="td-check-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
                                     </div>
-                                    <span class="qr-checked-badge"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Checked In</span>
-                                    <p class="qr-checked-title">Entry confirmed</p>
+                                    <span id="qr-checked-badge" class="qr-checked-badge"><i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Checked In</span>
+                                    <p id="qr-checked-title" class="qr-checked-title">Entry confirmed</p>
                                     <p id="qr-checked-msg" class="qr-checked-sub">This pass has been scanned at the venue gate. Keep this screen as proof if needed.</p>
                                 </div>
                             </div>
@@ -1336,13 +1370,66 @@
     // when event_snapshot.start_time is an old display string, not a real Timestamp).
     let cachedEventStartMs = null;
 
+    function ticketCreatedMs(ticket) {
+        const c = ticket && ticket.created_time;
+        if (!c) return null;
+        try {
+            const d = c.toDate ? c.toDate() : new Date(c);
+            return Number.isNaN(d.getTime()) ? null : d.getTime();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function parseLegacyDisplayDateMs(raw, preferredYear) {
+        const s = String(raw || '').trim();
+        if (!s) return null;
+        const direct = Date.parse(s);
+        if (!Number.isNaN(direct)) return direct;
+        let m = s.match(/^(\d{1,2})\s+([A-Za-z]+),?\s+(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+        if (!m) {
+            // Handles variants like "Fri, 3 May, 05:00 pm" or "On 3 May at 05:00 pm"
+            m = s.match(/(?:^|,\s*|\s)(\d{1,2})\s+([A-Za-z]+),?\s+(\d{1,2}):(\d{2})\s*(am|pm)\b/i);
+        }
+        if (!m) return null;
+        const day = Number(m[1]);
+        const monTxt = m[2].slice(0, 3).toLowerCase();
+        const hh = Number(m[3]);
+        const mm = Number(m[4]);
+        const ap = m[5].toLowerCase();
+        const monMap = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+        if (!(monTxt in monMap)) return null;
+        const now = new Date();
+        let year = Number.isFinite(Number(preferredYear)) ? Number(preferredYear) : now.getFullYear();
+        let hour24 = hh % 12;
+        if (ap === 'pm') hour24 += 12;
+        let d = new Date(year, monMap[monTxt], day, hour24, mm, 0, 0);
+        if (Number.isNaN(d.getTime())) return null;
+        // If parsed date is too far in future, treat as last year (common legacy strings without year).
+        if (d.getTime() - Date.now() > 180 * 24 * 60 * 60 * 1000) {
+            year -= 1;
+            d = new Date(year, monMap[monTxt], day, hour24, mm, 0, 0);
+        }
+        return Number.isNaN(d.getTime()) ? null : d.getTime();
+    }
+
     function getEventStartMs(ticket) {
-        const st = ticket && ticket.event_snapshot && ticket.event_snapshot.start_time;
-        if (st) {
+        const created = ticketCreatedMs(ticket);
+        const createdYear = created !== null ? new Date(created).getFullYear() : null;
+        const stCandidates = [
+            ticket && ticket.event_snapshot && ticket.event_snapshot.start_time,
+            ticket && ticket.event_start_time,
+            ticket && ticket.start_time,
+        ];
+        for (let i = 0; i < stCandidates.length; i++) {
+            const st = stCandidates[i];
+            if (!st) continue;
             try {
                 const d = st.toDate ? st.toDate() : new Date(st);
                 if (!Number.isNaN(d.getTime())) return d.getTime();
             } catch (e) {}
+            const legacyMs = parseLegacyDisplayDateMs(st, createdYear);
+            if (legacyMs !== null) return legacyMs;
         }
         // Fallback: use the Firestore-fetched value set by resolveEventStartMs()
         return cachedEventStartMs;
@@ -1352,6 +1439,46 @@
         const startMs = getEventStartMs(ticket);
         if (startMs === null) return null;
         return startMs - QR_UNLOCK_HOURS_BEFORE * 60 * 60 * 1000;
+    }
+
+    function getEventEndMs(ticket) {
+        const created = ticketCreatedMs(ticket);
+        const createdYear = created !== null ? new Date(created).getFullYear() : null;
+        const endCandidates = [
+            ticket && ticket.event_snapshot && ticket.event_snapshot.end_time,
+            ticket && ticket.event_end_time,
+            ticket && ticket.end_time,
+        ];
+        for (let i = 0; i < endCandidates.length; i++) {
+            const en = endCandidates[i];
+            if (!en) continue;
+            try {
+                const d = en.toDate ? en.toDate() : new Date(en);
+                if (!Number.isNaN(d.getTime())) return d.getTime();
+            } catch (e) {}
+            const legacyMs = parseLegacyDisplayDateMs(en, createdYear);
+            if (legacyMs !== null) return legacyMs;
+        }
+        const startMs = getEventStartMs(ticket);
+        if (startMs === null) return null;
+        const d = new Date(startMs);
+        d.setHours(23, 59, 59, 999);
+        return d.getTime();
+    }
+
+    function eventIsCompleted(ticket) {
+        const status = String((ticket && ticket.status) || '').toLowerCase();
+        if (['completed', 'ended', 'closed', 'archived'].includes(status)) return true;
+        const startMs = getEventStartMs(ticket);
+        // Product rule: once the event date has passed, ticket is completed.
+        // This intentionally prioritizes start-date day boundary over any end_time drift.
+        if (startMs !== null) {
+            const d = new Date(startMs);
+            d.setHours(23, 59, 59, 999);
+            return Date.now() > d.getTime();
+        }
+        const endMs = getEventEndMs(ticket);
+        return endMs !== null && Date.now() > endMs;
     }
 
     function qrIsUnlocked(ticket) {
@@ -1487,14 +1614,48 @@
         const qrText       = document.getElementById('qr-code-text');
         const caption      = document.getElementById('qr-caption');
         const ring         = document.getElementById('qr-checked-ring');
+        const ringIcon     = ring ? ring.querySelector('.td-check-icon i') : null;
+        const ringIconWrap = ring ? ring.querySelector('.td-check-icon') : null;
+        const checkedBadge = document.getElementById('qr-checked-badge');
+        const checkedTitle = document.getElementById('qr-checked-title');
         const checkedMsg   = document.getElementById('qr-checked-msg');
         const checkedIn    = ticketIsCheckedIn(ticket);
+        const completed    = eventIsCompleted(ticket);
+
+        /* ── 0. COMPLETED: event window ended, no scanner ── */
+        if (completed && !checkedIn) {
+            stopQrCountdown();
+            zone.classList.remove('qr-container--locked');
+            zone.classList.add('qr-container--checked');
+            zone.classList.add('qr-container--completed');
+            if (lockedState) lockedState.classList.add('hide');
+            activeState.classList.add('hide');
+            checkedState.classList.remove('hide');
+            qrImg.removeAttribute('src');
+            qrImg.style.display = 'none';
+            if (qrLoader) qrLoader.style.display = 'none';
+            caption.textContent = 'Event completed';
+            if (checkedBadge) {
+                checkedBadge.innerHTML = '<i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Completed';
+                checkedBadge.classList.add('qr-checked-badge--completed');
+            }
+            if (checkedTitle) checkedTitle.textContent = 'Event completed';
+            checkedMsg.textContent = 'This event has ended. QR scanning is no longer available for this pass.';
+            if (ring) {
+                ring.classList.remove('td-checked-ring--pulse');
+                ring.classList.add('td-checked-ring--completed');
+            }
+            if (ringIconWrap) ringIconWrap.classList.add('td-check-icon--completed');
+            if (ringIcon) ringIcon.className = 'fa-solid fa-flag-checkered';
+            return;
+        }
 
         /* ── 1. CHECKED-IN: entry already used ── */
         if (checkedIn) {
             stopQrCountdown();
             zone.classList.remove('qr-container--locked');
             zone.classList.add('qr-container--checked');
+            zone.classList.remove('qr-container--completed');
             if (lockedState) lockedState.classList.add('hide');
             activeState.classList.add('hide');
             checkedState.classList.remove('hide');
@@ -1502,14 +1663,22 @@
             qrImg.style.display = 'none';
             if (qrLoader) qrLoader.style.display = 'none';
             caption.textContent = 'Entry complete';
+            if (checkedBadge) {
+                checkedBadge.innerHTML = '<i class="fa-solid fa-shield-heart" aria-hidden="true"></i> Checked In';
+                checkedBadge.classList.remove('qr-checked-badge--completed');
+            }
+            if (checkedTitle) checkedTitle.textContent = 'Entry confirmed';
             const when = formatScannedAt(ticket);
             checkedMsg.textContent = when
                 ? 'Scanned ' + when + '. You\u2019re verified at the gate \u2014 enjoy the event.'
                 : 'This pass was scanned at the venue. You\u2019re verified \u2014 enjoy the event.';
             if (ring) {
+                ring.classList.remove('td-checked-ring--completed');
                 ring.classList.toggle('td-checked-ring--pulse',
                     !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
             }
+            if (ringIconWrap) ringIconWrap.classList.remove('td-check-icon--completed');
+            if (ringIcon) ringIcon.className = 'fa-solid fa-check';
             return;
         }
 
@@ -1534,6 +1703,7 @@
         /* ── 3. UNLOCKED: show QR ── */
         stopQrCountdown();
         zone.classList.remove('qr-container--checked');
+        zone.classList.remove('qr-container--completed');
         zone.classList.remove('qr-container--locked');
         if (lockedState) lockedState.classList.add('hide');
         activeState.classList.remove('hide');
@@ -1563,20 +1733,32 @@
         };
         qrImg.src = qrUrl;
     }
-    function applyInstructionsPhase(checkedIn) {
+    function applyInstructionsPhase(checkedIn, completed) {
         const pre = document.getElementById('instructions-qr-phase');
         const post = document.getElementById('instructions-checked-phase');
         if (!pre || !post) return;
-        if (checkedIn) {
+        if (checkedIn || completed) {
             pre.classList.add('hide');
             post.classList.remove('hide');
+            if (completed && !checkedIn) {
+                post.innerHTML = `
+                    <div class="instruction-row">
+                        <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-flag-checkered"></i></div>
+                        <p class="instruction-text">This event is completed. Entry scans are closed for this ticket.</p>
+                    </div>
+                    <div class="instruction-row">
+                        <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-receipt"></i></div>
+                        <p class="instruction-text">Ticket details remain available for records and support reference.</p>
+                    </div>
+                `;
+            }
         } else {
             post.classList.add('hide');
             pre.classList.remove('hide');
         }
     }
 
-    function applyShareUiForCheckIn(checkedIn) {
+    function applyShareUiForCheckIn(checkedIn, completed) {
         const box = document.getElementById('share-box-root');
         const btn = document.getElementById('share-split-btn');
         const email = document.getElementById('share-email');
@@ -1585,7 +1767,7 @@
         const wa = document.getElementById('share-whatsapp-invite-btn');
         const qty = document.getElementById('share-qty');
         if (!box || !btn) return;
-        if (checkedIn) {
+        if (checkedIn || completed) {
             box.classList.add('share-box--locked');
             btn.disabled = true;
             if (email) email.disabled = true;
@@ -1632,12 +1814,20 @@
 
         const eventData = ticket.event_snapshot || {};
         const checkedIn = ticketIsCheckedIn(ticket);
-        const statusUpper = checkedIn ? 'CHECKED IN' : String(ticket.status || 'confirmed').toUpperCase();
 
         document.getElementById('hero-img').src = eventData.cover_image || '';
         document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
         document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
         document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
+        // If event_snapshot.start_time is an old display string (not a real Timestamp),
+        // fetch the real date from the event document so time-locked/completed states are accurate.
+        if (getEventStartMs(ticket) === null && ticket.event_id) {
+            await resolveEventStartMs(ticket.event_id);
+        }
+
+        const completed = eventIsCompleted(ticket);
+        const statusUpper = completed ? 'COMPLETED' : (checkedIn ? 'CHECKED IN' : String(ticket.status || 'confirmed').toUpperCase());
+
         document.getElementById('hero-status').textContent = statusUpper;
         document.getElementById('hero-ticket-id').textContent = ticket.id || ticketId || '—';
         const holderDisplay = (user.displayName || '').trim();
@@ -1646,13 +1836,13 @@
             holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
         document.getElementById('pass-foot-ticket-id').textContent = ticket.id || ticketId || '—';
         const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
-        document.getElementById('hero-status').className = checkedIn    
-            ? 'status-chip status-checked-in'
-            : `status-chip status-${heroStatusSlug}`;
+        document.getElementById('hero-status').className = completed
+            ? 'status-chip status-completed'
+            : (checkedIn ? 'status-chip status-checked-in' : `status-chip status-${heroStatusSlug}`);
 
         const passStatusEl = document.getElementById('pass-status-text');
         passStatusEl.textContent = statusUpper;
-        if (checkedIn) passStatusEl.classList.add('pass-header-status--checked');
+        if (checkedIn && !completed) passStatusEl.classList.add('pass-header-status--checked');
         else passStatusEl.classList.remove('pass-header-status--checked');
 
         document.getElementById('pass-event').textContent = ticket.event_title || eventData.title;
@@ -1660,15 +1850,9 @@
         document.getElementById('pass-qty').textContent = ticket.quantity;
         document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
 
-        // If event_snapshot.start_time is an old display string (not a real Timestamp),
-        // fetch the real date from the event document so the QR lock timer works correctly.
-        if (getEventStartMs(ticket) === null && ticket.event_id) {
-            await resolveEventStartMs(ticket.event_id);
-        }
-
         applyQrAndCheckedInUi(ticket);
-        applyInstructionsPhase(checkedIn);
-        applyShareUiForCheckIn(checkedIn);
+        applyInstructionsPhase(checkedIn, completed);
+        applyShareUiForCheckIn(checkedIn, completed);
 
         document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
         document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
@@ -1678,7 +1862,8 @@
         document.getElementById('sum-qty').textContent = ticket.quantity;
         const sumStatusEl = document.getElementById('sum-status');
         sumStatusEl.textContent = statusUpper;
-        sumStatusEl.classList.toggle('sum-status-checked', checkedIn);
+        sumStatusEl.classList.toggle('sum-status-checked', checkedIn && !completed);
+        sumStatusEl.classList.toggle('sum-status-completed', completed);
         document.getElementById('sum-amount').textContent = `₹${ticket.total_amount}`;
         document.getElementById('sum-payment').textContent = ticket.payment_id || 'N/A';
         document.getElementById('sum-date').textContent = formatDate(ticket.created_time);
