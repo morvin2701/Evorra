@@ -94,8 +94,38 @@
         background: linear-gradient(150deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
         box-shadow: 0 14px 28px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.1);
     }
+    .chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
     .chart-title { color: #fff; font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
-    .chart-sub { color: rgba(255,255,255,0.58); font-size: 0.76rem; margin-bottom: 12px; }
+    .chart-sub { color: rgba(255,255,255,0.58); font-size: 0.76rem; margin-bottom: 0; }
+    .chart-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(8, 16, 30, 0.75);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .chart-switch-btn {
+        min-height: 28px;
+        border-radius: 999px;
+        border: 0;
+        padding: 0 10px;
+        font-size: 0.66rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(236, 245, 255, 0.72);
+        background: transparent;
+        cursor: pointer;
+        transition: color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .chart-switch-btn.is-active {
+        color: #fff;
+        background: linear-gradient(180deg, rgba(112,228,255,0.25), rgba(110,97,255,0.32));
+        box-shadow: 0 6px 14px rgba(95, 157, 255, 0.22);
+    }
     .bar-chart {
         height: 210px; display: grid; grid-template-columns: repeat(6, 1fr); align-items: end; gap: 10px;
         padding: 0 4px;
@@ -128,7 +158,25 @@
     }
     .donut-total { font-size: 1.3rem; font-weight: 900; color: #fff; line-height: 1; }
     .donut-total-sub { color: rgba(255,255,255,0.55); font-size: 0.68rem; margin-top: 4px; }
-    .legend { width: 100%; display: grid; gap: 8px; }
+    .donut-tooltip {
+        position: fixed;
+        z-index: 2147483002;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, -115%);
+        transition: opacity .14s ease;
+        background: rgba(8, 16, 30, 0.96);
+        border: 1px solid rgba(255,255,255,0.16);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.32);
+        color: #fff;
+        border-radius: 10px;
+        padding: 8px 10px;
+        min-width: 145px;
+    }
+    .donut-tooltip.is-visible { opacity: 1; }
+    .donut-tooltip-title { font-size: 0.72rem; font-weight: 900; margin: 0; line-height: 1.3; }
+    .donut-tooltip-meta { margin-top: 4px; font-size: 0.66rem; color: rgba(222, 233, 248, 0.88); }
+    .legend { width: 100%; display: grid; gap: 8px; max-height: 148px; overflow: auto; padding-right: 4px; }
     .legend-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.76rem; color: rgba(255,255,255,0.78); }
     .legend-left { display: flex; align-items: center; gap: 8px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; }
@@ -374,20 +422,28 @@
                 <div id="revenue-chart" class="bar-chart"></div>
             </div>
             <div class="chart-card">
-                <h3 class="chart-title">Event Status Mix</h3>
-                <p class="chart-sub">Published vs inactive events</p>
+                <div class="chart-head">
+                    <div>
+                        <h3 id="mix-chart-title" class="chart-title">Event Status Mix</h3>
+                        <p id="mix-chart-sub" class="chart-sub">How many events are upcoming, live, and completed</p>
+                    </div>
+                    <div class="chart-switch" role="tablist" aria-label="Event mix chart mode">
+                        <button id="mix-mode-status" type="button" class="chart-switch-btn is-active" data-mix-mode="status" role="tab" aria-selected="true">Status</button>
+                        <button id="mix-mode-revenue" type="button" class="chart-switch-btn" data-mix-mode="revenue" role="tab" aria-selected="false">Revenue</button>
+                    </div>
+                </div>
                 <div class="donut-wrap">
                     <div id="status-donut" class="donut" style="--c1:#77D7FF;--c2:#8CF0C6;--c3:#FFC857;--s1:0%;--s2:0%;">
                         <div class="donut-center">
                             <p id="donut-total" class="donut-total">0</p>
-                            <p class="donut-total-sub">Total events</p>
+                            <p id="donut-total-sub" class="donut-total-sub">Total events</p>
                         </div>
                     </div>
-                    <div class="legend">
-                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#77D7FF;"></span>Upcoming</div><span id="legend-published">0</span></div>
-                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#8CF0C6;"></span>Live</div><span id="legend-inactive">0</span></div>
-                        <div class="legend-row"><div class="legend-left"><span class="dot" style="background:#FFC857;"></span>Completed</div><span id="legend-draft">0</span></div>
+                    <div id="donut-tooltip" class="donut-tooltip" aria-hidden="true">
+                        <p id="donut-tooltip-title" class="donut-tooltip-title">—</p>
+                        <p id="donut-tooltip-meta" class="donut-tooltip-meta">—</p>
                     </div>
+                    <div id="mix-legend" class="legend"></div>
                 </div>
             </div>
         </div>
@@ -423,6 +479,11 @@
 <script>
     let eventCancelResolver = null;
     let eventCancelTarget = { id: '', title: '' };
+    let donutMode = 'status';
+    let lastChartEvents = [];
+    let donutHoverSegments = [];
+    let donutHoverTotal = 0;
+    let donutHoverValueFormatter = (v) => String(Math.round(v || 0));
 
     function openEventCancelModal(eventId, eventTitle) {
         eventCancelTarget = { id: String(eventId || ''), title: String(eventTitle || 'Event') };
@@ -580,22 +641,199 @@
         if (event.is_published === false || rawStatus === 'draft') return 'inactive';
         return 'upcoming';
     }
-    function renderStatusDonut(events) {
-        const upcoming = events.filter(e => getEventLifecycleStatus(e) === 'upcoming').length;
-        const live = events.filter(e => getEventLifecycleStatus(e) === 'live').length;
-        const completed = events.filter(e => ['completed', 'cancelled', 'inactive'].includes(getEventLifecycleStatus(e))).length;
-        const total = Math.max(events.length, 1);
-        const p1 = (upcoming / total) * 100;
-        const p2 = p1 + (live / total) * 100;
+    function setDonutFromItems(items) {
         const donut = document.getElementById('status-donut');
-        if (donut) {
-            donut.style.setProperty('--s1', `${p1}%`);
-            donut.style.setProperty('--s2', `${p2}%`);
+        if (!donut) return;
+        const normalized = (Array.isArray(items) ? items : [])
+            .map((item) => ({
+                label: String(item.label || 'Unknown'),
+                value: Math.max(0, Number(item.value || 0)),
+                color: String(item.color || '#77D7FF')
+            }));
+        const total = normalized.reduce((acc, item) => acc + item.value, 0);
+        donutHoverTotal = total;
+        donutHoverSegments = [];
+        if (total <= 0) {
+            donut.style.background = 'conic-gradient(#334155 0 100%)';
+            return;
         }
-        document.getElementById('donut-total').textContent = events.length;
-        document.getElementById('legend-published').textContent = upcoming;
-        document.getElementById('legend-inactive').textContent = live;
-        document.getElementById('legend-draft').textContent = completed;
+        let start = 0;
+        const segments = normalized.map((item) => {
+            const span = (item.value / total) * 100;
+            const end = Math.min(100, start + span);
+            donutHoverSegments.push({
+                label: item.label,
+                value: item.value,
+                color: item.color,
+                start,
+                end
+            });
+            const segment = `${item.color} ${start}% ${end}%`;
+            start = end;
+            return segment;
+        });
+        donut.style.background = `conic-gradient(${segments.join(', ')})`;
+    }
+    function renderLegendRows(items, formatter) {
+        const legend = document.getElementById('mix-legend');
+        if (!legend) return;
+        const rows = (Array.isArray(items) ? items : []).map((item) => {
+            const label = String(item.label || 'Unknown');
+            const color = String(item.color || '#77D7FF');
+            const value = formatter ? formatter(item.value) : String(item.value || 0);
+            return `
+                <div class="legend-row">
+                    <div class="legend-left"><span class="dot" style="background:${color};"></span><span>${label}</span></div>
+                    <span>${value}</span>
+                </div>
+            `;
+        }).join('');
+        legend.innerHTML = rows || `
+            <div class="legend-row">
+                <div class="legend-left"><span class="dot" style="background:#64748B;"></span><span>No data</span></div>
+                <span>0</span>
+            </div>
+        `;
+    }
+    function summarizeEventMix(events) {
+        let upcomingCount = 0;
+        let liveCount = 0;
+        let completedCount = 0;
+        let upcomingRevenue = 0;
+        let liveRevenue = 0;
+        let completedRevenue = 0;
+        events.forEach((e) => {
+            const lifecycle = getEventLifecycleStatus(e);
+            const rev = Number(e.display_revenue || 0);
+            if (lifecycle === 'upcoming') {
+                upcomingCount += 1;
+                upcomingRevenue += rev;
+                return;
+            }
+            if (lifecycle === 'live') {
+                liveCount += 1;
+                liveRevenue += rev;
+                return;
+            }
+            completedCount += 1;
+            completedRevenue += rev;
+        });
+        return {
+            upcomingCount,
+            liveCount,
+            completedCount,
+            upcomingRevenue,
+            liveRevenue,
+            completedRevenue,
+            totalEvents: events.length,
+            totalRevenue: upcomingRevenue + liveRevenue + completedRevenue
+        };
+    }
+    function renderStatusDonut(events) {
+        const summary = summarizeEventMix(events);
+        const statusItems = [
+            { label: 'Upcoming', value: summary.upcomingCount, color: '#77D7FF' },
+            { label: 'Live', value: summary.liveCount, color: '#8CF0C6' },
+            { label: 'Completed', value: summary.completedCount, color: '#FFC857' }
+        ];
+        donutHoverValueFormatter = (v) => String(Math.round(v || 0));
+        setDonutFromItems(statusItems);
+        renderLegendRows(statusItems, (v) => String(Math.round(v || 0)));
+        document.getElementById('mix-chart-title').textContent = 'Event Status Mix';
+        document.getElementById('mix-chart-sub').textContent = 'How many events are upcoming, live, and completed';
+        document.getElementById('donut-total').textContent = summary.totalEvents;
+        document.getElementById('donut-total-sub').textContent = 'Total events';
+    }
+    function renderRevenueDonut(events) {
+        const palette = ['#77D7FF', '#8CF0C6', '#FFC857', '#8E7DFF', '#FB7185', '#34D399', '#F59E0B', '#A78BFA', '#22D3EE', '#F472B6'];
+        const revenueItems = [...events]
+            .map((event, idx) => ({
+                label: String(event.title || event.name || `Event ${idx + 1}`),
+                value: Math.max(0, Number(event.display_revenue || 0)),
+                color: palette[idx % palette.length]
+            }))
+            .sort((a, b) => b.value - a.value);
+        const totalRevenue = revenueItems.reduce((acc, item) => acc + item.value, 0);
+        donutHoverValueFormatter = (v) => `Rs.${Math.round(v || 0).toLocaleString()}`;
+        setDonutFromItems(revenueItems);
+        renderLegendRows(revenueItems, (v) => `Rs.${Math.round(v || 0).toLocaleString()}`);
+        document.getElementById('mix-chart-title').textContent = 'Revenue Mix';
+        document.getElementById('mix-chart-sub').textContent = 'Revenue split event-name wise across all events';
+        document.getElementById('donut-total').textContent = `Rs.${Math.round(totalRevenue).toLocaleString()}`;
+        document.getElementById('donut-total-sub').textContent = 'Total revenue';
+    }
+    function hideDonutTooltip() {
+        const tooltip = document.getElementById('donut-tooltip');
+        if (!tooltip) return;
+        tooltip.classList.remove('is-visible');
+        tooltip.setAttribute('aria-hidden', 'true');
+    }
+    function showDonutTooltip(segment, ratioPct, pointerX, pointerY) {
+        const tooltip = document.getElementById('donut-tooltip');
+        const titleEl = document.getElementById('donut-tooltip-title');
+        const metaEl = document.getElementById('donut-tooltip-meta');
+        if (!tooltip || !titleEl || !metaEl) return;
+        titleEl.textContent = String(segment.label || '—');
+        metaEl.textContent = `${donutHoverValueFormatter(segment.value)} • ${ratioPct.toFixed(1)}%`;
+        tooltip.style.left = `${pointerX}px`;
+        tooltip.style.top = `${pointerY - 8}px`;
+        tooltip.classList.add('is-visible');
+        tooltip.setAttribute('aria-hidden', 'false');
+    }
+    function onDonutPointerMove(evt) {
+        const donut = document.getElementById('status-donut');
+        if (!donut || !donutHoverSegments.length || donutHoverTotal <= 0) {
+            hideDonutTooltip();
+            return;
+        }
+        const rect = donut.getBoundingClientRect();
+        const cx = rect.left + (rect.width / 2);
+        const cy = rect.top + (rect.height / 2);
+        const dx = evt.clientX - cx;
+        const dy = evt.clientY - cy;
+        const radius = Math.sqrt((dx * dx) + (dy * dy));
+        const outerR = rect.width / 2;
+        const innerR = 26;
+        if (radius < innerR || radius > outerR) {
+            hideDonutTooltip();
+            return;
+        }
+        const degrees = (Math.atan2(dy, dx) * 180 / Math.PI + 450) % 360;
+        const pct = (degrees / 360) * 100;
+        const segment = donutHoverSegments.find((s) => pct >= s.start && pct <= s.end) || donutHoverSegments[donutHoverSegments.length - 1];
+        if (!segment) {
+            hideDonutTooltip();
+            return;
+        }
+        const ratioPct = donutHoverTotal > 0 ? ((segment.value / donutHoverTotal) * 100) : 0;
+        showDonutTooltip(segment, ratioPct, evt.clientX, evt.clientY);
+    }
+    function renderMixDonut(events) {
+        if (donutMode === 'revenue') {
+            renderRevenueDonut(events);
+            return;
+        }
+        renderStatusDonut(events);
+    }
+    function initMixChartSwitcher() {
+        document.querySelectorAll('[data-mix-mode]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const mode = String(btn.getAttribute('data-mix-mode') || 'status');
+                donutMode = mode === 'revenue' ? 'revenue' : 'status';
+                document.querySelectorAll('[data-mix-mode]').forEach((b) => {
+                    const active = String(b.getAttribute('data-mix-mode')) === donutMode;
+                    b.classList.toggle('is-active', active);
+                    b.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                renderMixDonut(lastChartEvents);
+            });
+        });
+    }
+    function initDonutHoverTooltip() {
+        const donut = document.getElementById('status-donut');
+        if (!donut) return;
+        donut.addEventListener('mousemove', onDonutPointerMove);
+        donut.addEventListener('mouseleave', hideDonutTooltip);
     }
     async function initDashboard() {
         auth.onAuthStateChanged(async (user) => {
@@ -624,7 +862,8 @@
                         `;
                         updateStats(0, 0, 0, 0);
                         renderRevenueChart([]);
-                        renderStatusDonut([]);
+                        lastChartEvents = [];
+                        renderMixDonut(lastChartEvents);
                         return;
                     }
 
@@ -673,7 +912,8 @@
 
                     updateStats(snapshot.size, totalRevenue, totalTicketsSold, totalAttendees);
                     renderRevenueChart(chartEvents);
-                    renderStatusDonut(chartEvents);
+                    lastChartEvents = chartEvents;
+                    renderMixDonut(lastChartEvents);
                 }, (error) => {
                     console.error("Dashboard listener error:", error);
                     const listContainer = document.getElementById('dashboard-events-list');
@@ -851,6 +1091,8 @@
         container.insertAdjacentHTML('beforeend', cardHtml);
     }
 
+    initMixChartSwitcher();
+    initDonutHoverTooltip();
     initDashboard();
     document.getElementById('ev-cancel-close').addEventListener('click', () => closeEventCancelModal({ confirmed: false, reason: '' }));
     document.querySelectorAll('[data-close-ev-cancel]').forEach((el) => {
