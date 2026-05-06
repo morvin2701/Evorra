@@ -358,6 +358,47 @@
         padding: 18px;
     }
 
+    /* Hard dark-mode consistency layer */
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-bg {
+        background: #020617 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-card {
+        background: #0b1220 !important;
+        border-color: #1f2a3d !important;
+        box-shadow: 0 28px 56px rgba(0, 0, 0, 0.38), 0 12px 28px rgba(0, 0, 0, 0.24) !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-card::after {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 70%) !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-status {
+        background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%) !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-scanner,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-analytics,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-detail-panel {
+        background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%) !important;
+        border-color: #1f2a3d !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-item,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-kpi,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-chart-card,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-recent-item,
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-log-item {
+        background: #0b1220 !important;
+        border-color: #1f2a3d !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-btn.ghost {
+        background: #0f172a !important;
+        border-color: #334155 !important;
+        color: #e2e8f0 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .scan-btn.ghost:hover {
+        background: #1e293b !important;
+        border-color: #475569 !important;
+    }
+
     @media (max-width: 900px) {
         .scan-shell { width: calc(100% - 16px); }
         .scan-kpis { grid-template-columns: 1fr; }

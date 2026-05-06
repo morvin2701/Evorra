@@ -23,6 +23,16 @@
         --studio-bg: var(--sm-bg);
         --studio-border: var(--sm-border);
         --studio-primary-hover: var(--sm-primary-hover);
+        --studio-content-top: #f8fafc;
+        --studio-preview-placeholder-a: #e8ecf1;
+        --studio-preview-placeholder-b: #f1f5f9;
+        --studio-preview-placeholder-icon: #cbd5e1;
+        --studio-input-placeholder: #94a3b8;
+        --studio-input-focus-bg: #ffffff;
+        --studio-strong-border: #cbd5e1;
+        --studio-address-help: #64748b;
+        --studio-intro-title: var(--studio-text);
+        --studio-intro-copy: #64748b;
         --sidebar-width: 280px;
         --preview-width: 380px;
 
@@ -150,7 +160,7 @@
         scrollbar-width: thin;
         scrollbar-color: var(--studio-border) transparent;
         z-index: 10;
-        background: linear-gradient(180deg, #ffffff 0%, var(--studio-bg) 100%);
+        background: linear-gradient(180deg, var(--studio-content-top) 0%, var(--studio-bg) 100%);
         border-left: 1px solid var(--studio-border);
         border-right: 1px solid var(--studio-border);
     }
@@ -164,10 +174,10 @@
         letter-spacing: -0.06em;
         margin-bottom: 12px;
         line-height: 1.12;
-        color: var(--studio-text);
+        color: var(--studio-intro-title);
     }
     .step-intro p {
-        color: var(--studio-muted);
+        color: var(--studio-intro-copy);
         font-size: 1.05rem;
         line-height: 1.5;
         margin: 0;
@@ -211,11 +221,11 @@
         aspect-ratio: 3 / 4;
         max-height: 320px;
         width: 100%;
-        background: linear-gradient(145deg, #e8ecf1 0%, #f1f5f9 100%);
+        background: linear-gradient(145deg, var(--studio-preview-placeholder-a) 0%, var(--studio-preview-placeholder-b) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #cbd5e1;
+        color: var(--studio-preview-placeholder-icon);
         font-size: 3.25rem;
         overflow: hidden;
         position: relative;
@@ -303,10 +313,10 @@
         font-family: inherit;
         box-sizing: border-box;
     }
-    .premium-input::placeholder { color: #94a3b8; }
+    .premium-input::placeholder { color: var(--studio-input-placeholder); }
     .premium-input:focus {
         border-color: rgba(220, 38, 38, 0.45);
-        background: #fff;
+        background: var(--studio-input-focus-bg);
         box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
     }
     textarea.premium-input { resize: vertical; min-height: 120px; }
@@ -347,7 +357,7 @@
     }
     .btn-back-studio:hover {
         background: var(--studio-surface);
-        border-color: #cbd5e1;
+        border-color: var(--studio-strong-border);
     }
 
     .btn-add-studio {
@@ -551,7 +561,55 @@
     }
     .media-inline-remove:hover {
         background: var(--studio-bg);
-        border-color: #cbd5e1;
+        border-color: var(--studio-strong-border);
+    }
+    .studio-address-help {
+        margin: 8px 0 0;
+        font-size: 0.72rem;
+        color: var(--studio-address-help);
+        line-height: 1.4;
+        font-weight: 600;
+    }
+
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .studio-layout {
+        --studio-content-top: #0b1220;
+        --studio-preview-placeholder-a: #0f172a;
+        --studio-preview-placeholder-b: #1e293b;
+        --studio-preview-placeholder-icon: #64748b;
+        --studio-input-focus-bg: #0f172a;
+        --studio-strong-border: #334155;
+        --studio-address-help: #94a3b8;
+        --studio-intro-title: #e2e8f0;
+        --studio-intro-copy: #a8b4c7;
+    }
+    html[data-theme="dark"],
+    body[data-theme="dark"],
+    body.theme-showmates[data-theme="dark"],
+    body.theme-showmates[data-theme="dark"] main {
+        background: #020617 !important;
+        color: #e2e8f0 !important;
+    }
+    html[data-theme="dark"] body:has(.studio-layout),
+    body[data-theme="dark"]:has(.studio-layout),
+    body.theme-showmates[data-theme="dark"]:has(.studio-layout) {
+        background: #020617 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .studio-layout {
+        background:
+            radial-gradient(circle at 18% 12%, rgba(96, 165, 250, 0.08), transparent 42%),
+            radial-gradient(circle at 90% 80%, rgba(15, 23, 42, 0.26), transparent 45%),
+            #020617 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .studio-content {
+        background: linear-gradient(180deg, #0b1220 0%, #020617 100%) !important;
+        border-left-color: #1f2a3d !important;
+        border-right-color: #1f2a3d !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .step-intro h2 {
+        color: #e2e8f0 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .step-intro p {
+        color: #a8b4c7 !important;
     }
 
     .studio-ticket-card {
@@ -849,7 +907,7 @@
                     <div class="input-group-premium">
                         <label>Street address</label>
                         <textarea id="ev-address" placeholder="Building, street &amp; area (e.g. Block A, Sarkhej-Gandhinagar Hwy…)" class="premium-input premium-input--address"></textarea>
-                        <p style="margin:8px 0 0;font-size:0.72rem;color:rgba(255,255,255,0.48);line-height:1.4;font-weight:600;">Used with venue &amp; city to place a map pin automatically — organisers don&apos;t enter coordinates.</p>
+                        <p class="studio-address-help">Used with venue &amp; city to place a map pin automatically — organisers don&apos;t enter coordinates.</p>
                     </div>
                     <div class="grid-2 studio-grid-tight">
                         <div class="studio-date-tile">

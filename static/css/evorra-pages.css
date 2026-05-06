@@ -438,6 +438,76 @@ body.theme-showmates .action-tile-support {
     border-radius: 12px;
 }
 
+/* Ensure profile actions stay dark in dark mode */
+body.theme-showmates[data-theme="dark"] .profile-hero,
+body.theme-showmates[data-theme="dark"] .details-card,
+body.theme-showmates[data-theme="dark"] .actions-card,
+body.theme-showmates[data-theme="dark"] .logout-card,
+body.theme-showmates[data-theme="dark"] .action-tile-support {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+body.theme-showmates[data-theme="dark"] .action-row-title,
+body.theme-showmates[data-theme="dark"] .logout-label {
+    color: var(--sm-text) !important;
+}
+body.theme-showmates[data-theme="dark"] .action-row-desc {
+    color: var(--sm-muted) !important;
+}
+body.theme-showmates[data-theme="dark"] .action-divider {
+    border-top-color: var(--sm-border) !important;
+}
+
+/* Listed pages dark consistency pass */
+body.theme-showmates[data-theme="dark"] .search-field-container,
+body.theme-showmates[data-theme="dark"] .search-result-card,
+body.theme-showmates[data-theme="dark"] .quick-filter-chip,
+body.theme-showmates[data-theme="dark"] .metric-pill,
+body.theme-showmates[data-theme="dark"] .booking-card,
+body.theme-showmates[data-theme="dark"] .payment-card,
+body.theme-showmates[data-theme="dark"] .ticket-card,
+body.theme-showmates[data-theme="dark"] .shared-card,
+body.theme-showmates[data-theme="dark"] .notification-tile,
+body.theme-showmates[data-theme="dark"] .notif-header {
+    background: var(--sm-surface) !important;
+    border-color: var(--sm-border) !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates[data-theme="dark"] .search-field-container input,
+body.theme-showmates[data-theme="dark"] .tickets-search input,
+body.theme-showmates[data-theme="dark"] .quick-filter-chip,
+body.theme-showmates[data-theme="dark"] .tab-chip,
+body.theme-showmates[data-theme="dark"] .shared-filter-btn,
+body.theme-showmates[data-theme="dark"] .summary-box,
+body.theme-showmates[data-theme="dark"] .ticket-select-card,
+body.theme-showmates[data-theme="dark"] .qty-selector,
+body.theme-showmates[data-theme="dark"] .promo-input-group input {
+    background: #0f172a !important;
+    border-color: #243247 !important;
+    color: var(--sm-text) !important;
+}
+
+body.theme-showmates[data-theme="dark"] .search-field-container input::placeholder,
+body.theme-showmates[data-theme="dark"] .tickets-search input::placeholder,
+body.theme-showmates[data-theme="dark"] .quick-filter-chip,
+body.theme-showmates[data-theme="dark"] .result-meta,
+body.theme-showmates[data-theme="dark"] .notif-item-time,
+body.theme-showmates[data-theme="dark"] .notif-item-body,
+body.theme-showmates[data-theme="dark"] .shared-meta,
+body.theme-showmates[data-theme="dark"] .shared-foot-note {
+    color: var(--sm-muted) !important;
+}
+
+body.theme-showmates[data-theme="dark"] #results-count,
+body.theme-showmates[data-theme="dark"] .result-title,
+body.theme-showmates[data-theme="dark"] .ticket-title,
+body.theme-showmates[data-theme="dark"] .shared-name,
+body.theme-showmates[data-theme="dark"] .notif-title {
+    color: var(--sm-text) !important;
+}
+
 body.theme-showmates .interest-chip {
     border-color: var(--sm-border) !important;
     background: var(--sm-bg) !important;
@@ -1452,4 +1522,124 @@ body.theme-showmates .studio-preview-meta {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+/* ── Final theme consistency layer (navbar + notifications + shared surfaces) ── */
+body.theme-showmates[data-theme="light"] {
+    --ev-nav-bg: rgba(255, 255, 255, 0.86);
+    --ev-nav-pill: rgba(255, 255, 255, 0.78);
+    --ev-nav-pill-border: rgba(148, 163, 184, 0.34);
+    --ev-notif-surface: var(--sm-surface);
+    --ev-notif-border: var(--sm-border);
+}
+body.theme-showmates[data-theme="dark"] {
+    --ev-nav-bg: rgba(2, 6, 23, 0.92);
+    --ev-nav-pill: rgba(15, 23, 42, 0.88);
+    --ev-nav-pill-border: rgba(51, 65, 85, 0.84);
+    --ev-notif-surface: var(--sm-surface);
+    --ev-notif-border: var(--sm-border);
+}
+
+body.theme-showmates .top-navbar.sm-navbar-shell,
+body.theme-showmates .sm-topnav {
+    background: var(--ev-nav-bg) !important;
+    border-bottom: 1px solid var(--sm-border) !important;
+}
+body.theme-showmates .nav-links.sm-nav-links-dock,
+body.theme-showmates .sm-nav-location,
+body.theme-showmates .sm-nav-bell,
+body.theme-showmates .sm-nav-user {
+    background: var(--ev-nav-pill) !important;
+    border-color: var(--ev-nav-pill-border) !important;
+}
+body.theme-showmates .nav-link {
+    color: var(--sm-text) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+}
+body.theme-showmates .nav-link:hover {
+    background: rgba(148, 163, 184, 0.18) !important;
+}
+body.theme-showmates .nav-link.active {
+    color: #fff !important;
+    border-color: rgba(96, 165, 250, 0.55) !important;
+    background: linear-gradient(135deg, var(--sm-primary), var(--sm-primary-hover)) !important;
+}
+
+body.theme-showmates .notif-shell,
+body.theme-showmates .notif-header,
+body.theme-showmates .notification-tile,
+body.theme-showmates .notif-menu,
+body.theme-showmates #notif-menu,
+body.theme-showmates .notif-dropdown,
+body.theme-showmates .notif-mark-btn,
+body.theme-showmates .notif-back {
+    background: var(--ev-notif-surface) !important;
+    border-color: var(--ev-notif-border) !important;
+    color: var(--sm-text) !important;
+}
+body.theme-showmates .notif-title,
+body.theme-showmates .notif-item-title {
+    color: var(--sm-text) !important;
+}
+body.theme-showmates .notif-count-label,
+body.theme-showmates .notif-item-time,
+body.theme-showmates .notif-item-body,
+body.theme-showmates .notification-section-title {
+    color: var(--sm-muted) !important;
+}
+body.theme-showmates .notification-tile.unread {
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.08), var(--ev-notif-surface)) !important;
+    border-color: rgba(220, 38, 38, 0.24) !important;
+}
+
+/* ── Ultimate cross-page theme lock (prevents light/dark bleed) ── */
+:is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) {
+    --ev-page-bg-lock: #020617;
+    --ev-surface-lock: #0b1220;
+    --ev-surface-2-lock: #0f172a;
+    --ev-border-lock: #1f2a3d;
+    --ev-border-2-lock: #334155;
+    --ev-text-lock: #e2e8f0;
+    --ev-muted-lock: #94a3b8;
+}
+
+:is(html[data-theme="light"], body[data-theme="light"], body.theme-showmates[data-theme="light"]) {
+    --ev-page-bg-lock: var(--sm-bg);
+    --ev-surface-lock: var(--sm-surface);
+    --ev-surface-2-lock: var(--sm-bg);
+    --ev-border-lock: var(--sm-border);
+    --ev-border-2-lock: #cbd5e1;
+    --ev-text-lock: var(--sm-text);
+    --ev-muted-lock: var(--sm-muted);
+}
+
+:is(html[data-theme], body[data-theme], body.theme-showmates[data-theme]) :is(
+    .tickets-bg, .ticket-bg, .shared-bg, .scan-bg, .home-bg
+) {
+    background: var(--ev-page-bg-lock) !important;
+    color: var(--ev-text-lock) !important;
+}
+
+:is(html[data-theme], body[data-theme], body.theme-showmates[data-theme]) :is(
+    .ticket-card, .shared-card, .scan-card, .hero-card, .content-card, .premium-card, .summary-box,
+    .share-box, .cancel-card, .scan-analytics, .scan-detail-panel, .shared-state, .event-preview-card
+) {
+    background: var(--ev-surface-lock) !important;
+    border-color: var(--ev-border-lock) !important;
+    color: var(--ev-text-lock) !important;
+}
+
+:is(html[data-theme], body[data-theme], body.theme-showmates[data-theme]) :is(
+    input, select, textarea, .share-input, .share-country-select, .premium-input, .studio-date-input
+) {
+    background: var(--ev-surface-2-lock) !important;
+    border-color: var(--ev-border-2-lock) !important;
+    color: var(--ev-text-lock) !important;
+}
+
+:is(html[data-theme], body[data-theme], body.theme-showmates[data-theme]) :is(
+    p, .scan-sub, .shared-sub, .empty-desc, .shared-empty-text, .ticket-foot-left, .scan-recent-meta
+) {
+    color: var(--ev-muted-lock);
 }

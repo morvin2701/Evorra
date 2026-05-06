@@ -3,23 +3,44 @@
   Reference: FlutterFlow Premium UI
 */
 
+/* LIGHT THEME (default) */
 :root {
-    --bg-deep: #08111F; /* New Home Background */
-    --bg-gradient: linear-gradient(135deg, #08111F 0%, #0D1628 50%, #10192E 100%);
-    --primary: #6E61FF; 
-    --primary-alt: #8B7CFF;
-    --secondary: #8CF0C6; /* Mint Green from ref */
-    --accent: #FFC857; /* Gold from ref */
-    --error: #FF6B6B;
-    --text-white: #FFFFFF;
-    --text-muted: rgba(255, 255, 255, 0.48);
-    --card-bg: #FFFFFF;
-    --input-bg: #F6F5FF;
-    --input-border: #E4E2F8;
-    --input-focus: #534AB7;
-    --error-red: #D85A30;
-    --success-green: #10B981;
-    --shadow-purple: rgba(83, 74, 183, 0.18);
+  --sm-bg: #f4f6f9;
+  --sm-surface: #ffffff;
+  --sm-border: #e8ecf1;
+  --sm-text: #0f172a;
+  --sm-muted: #64748b;
+  --sm-primary: #dc2626;
+  --sm-primary-hover: #b91c1c;
+  --sm-secondary: #ea580c;
+  --sm-accent: #fbbf24;
+
+  /* Backward compatibility aliases */
+  --bg-deep: var(--sm-bg);
+  --bg-gradient: linear-gradient(135deg, var(--sm-bg) 0%, var(--sm-bg) 100%);
+  --primary: var(--sm-primary);
+  --primary-alt: var(--sm-primary-hover);
+  --secondary: var(--sm-secondary);
+  --accent: var(--sm-accent);
+  --text-white: var(--sm-text);
+  --text-muted: var(--sm-muted);
+  --card-bg: var(--sm-surface);
+  --input-bg: var(--sm-surface);
+  --input-border: var(--sm-border);
+  --input-focus: var(--sm-primary);
+}
+
+/* DARK THEME */
+[data-theme="dark"] {
+  --sm-bg: #020617;
+  --sm-surface: #0b1220;
+  --sm-border: #1f2a3d;
+  --sm-text: #e2e8f0;
+  --sm-muted: #94a3b8;
+  --sm-primary: #60a5fa;
+  --sm-primary-hover: #3b82f6;
+  --sm-secondary: #fb923c;
+  --sm-accent: #fcd34d;
 }
 
 @keyframes slideUpFade {
@@ -38,9 +59,85 @@
 }
 
 body {
-    background-color: var(--bg-deep);
-    color: var(--text-white);
+    background-color: var(--sm-bg);
+    color: var(--sm-text);
     min-height: 100vh;
+}
+
+/* Profile theme toggle row */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: var(--sm-border);
+  border-radius: 999px;
+  transition: background-color 0.25s ease;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  top: 3px;
+  background-color: var(--sm-surface);
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--sm-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+
+.toggle-switch input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--sm-primary);
+  outline-offset: 2px;
+}
+
+.theme-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--sm-border);
+}
+
+.quick-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-action-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.quick-action-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--sm-text);
 }
 
 /* ── Top Navbar (Website Style) ── */

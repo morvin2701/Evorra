@@ -403,3 +403,73 @@
     margin-bottom: 12px;
     color: rgba(234, 88, 12, 0.35);
 }
+
+/* Dark mode support */
+body[data-theme="dark"] .ev-cp-overlay {
+    background: rgba(2, 6, 23, 0.7);
+}
+body[data-theme="dark"] .ev-cp-sheet {
+    background: #0b1220;
+    color: #e2e8f0;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(51, 65, 85, 0.8);
+}
+body[data-theme="dark"] .ev-cp-head {
+    border-bottom-color: #1f2a3d;
+    background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+}
+body[data-theme="dark"] .ev-cp-title,
+body[data-theme="dark"] .ev-cp-card-name,
+body[data-theme="dark"] .ev-cp-row-title {
+    color: #e2e8f0;
+}
+body[data-theme="dark"] .ev-cp-close {
+    border-color: #334155;
+    background: #0f172a;
+    color: #94a3b8;
+}
+body[data-theme="dark"] .ev-cp-toolbar {
+    border-bottom-color: #1f2a3d;
+    background: #0b1220;
+}
+body[data-theme="dark"] .ev-cp-search {
+    color: #e2e8f0;
+    background: #0f172a;
+    border-color: #334155;
+}
+body[data-theme="dark"] .ev-cp-search::placeholder,
+body[data-theme="dark"] .ev-cp-search-ico,
+body[data-theme="dark"] .ev-cp-sec-label,
+body[data-theme="dark"] .ev-cp-card-meta,
+body[data-theme="dark"] .ev-cp-row-sub,
+body[data-theme="dark"] .ev-cp-empty {
+    color: #94a3b8;
+}
+body[data-theme="dark"] .ev-cp-detect {
+    border-color: rgba(96,165,250,0.6);
+    background: linear-gradient(135deg, rgba(30,58,138,0.45), rgba(37,99,235,0.35));
+    color: #bfdbfe;
+}
+body[data-theme="dark"] .ev-cp-card,
+body[data-theme="dark"] .ev-cp-row {
+    border-color: #1f2a3d;
+    background: #0f172a;
+}
+body[data-theme="dark"] .ev-cp-card:hover,
+body[data-theme="dark"] .ev-cp-row:hover {
+    border-color: rgba(96,165,250,0.58);
+    background: #111827;
+}
+body[data-theme="dark"] .ev-cp-card.ev-cp-card--active,
+body[data-theme="dark"] .ev-cp-row.ev-cp-row--active {
+    border-color: rgba(96,165,250,0.75);
+    background: linear-gradient(145deg, rgba(30,58,138,0.32), rgba(15,23,42,0.95));
+}
+body[data-theme="dark"] .ev-cp-card-ico {
+    background: #111827;
+    border-color: #334155;
+}
+body[data-theme="dark"] .ev-cp-row-ico {
+    background: rgba(59,130,246,0.18);
+    border-color: rgba(96,165,250,0.45);
+    color: #93c5fd;
+}

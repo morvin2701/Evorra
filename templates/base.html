@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('evorra-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        if (document.body) document.body.setAttribute('data-theme', theme);
+      })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Evorra | Experience Everything{% endblock %}</title>
@@ -168,6 +175,34 @@
     <script src="{{ url_for('static', filename='js/ip-location.js') }}"></script>
     <script src="{{ url_for('static', filename='js/city-match.js') }}"></script>
     <script>
+        (function () {
+          function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (document.body) document.body.setAttribute('data-theme', theme);
+          }
+
+          // On load: sync toggle state with saved theme
+          var saved = localStorage.getItem('evorra-theme') || 'light';
+          applyTheme(saved);
+
+          var toggle = document.getElementById('theme-toggle');
+          var icon = document.getElementById('theme-icon');
+
+          if (toggle) {
+            // Set initial checked state
+            toggle.checked = saved === 'dark';
+            if (icon) icon.textContent = saved === 'dark' ? '🌙' : '☀️';
+
+            // Listen for change
+            toggle.addEventListener('change', function () {
+              var theme = toggle.checked ? 'dark' : 'light';
+              applyTheme(theme);
+              localStorage.setItem('evorra-theme', theme);
+              if (icon) icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+            });
+          }
+        })();
+
         window.CLOUDINARY_CLOUD_NAME = "{{ cloudinary_cloud_name|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_PRESET = "{{ cloudinary_upload_preset|default('', true)|e }}";
         window.CLOUDINARY_UPLOAD_URL = "{{ cloudinary_upload_url|default('', true)|e }}";
