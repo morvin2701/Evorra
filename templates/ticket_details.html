@@ -1009,6 +1009,130 @@
         min-height: 44px;
         align-self: stretch;
     }
+    .cancel-card {
+        border-radius: 14px;
+        border: 1px solid rgba(244, 63, 94, 0.24);
+        background: linear-gradient(180deg, #fff 0%, #fff5f7 100%);
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+    }
+    .cancel-card-note {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        font-weight: 600;
+    }
+    .cancel-card-status {
+        margin: 0;
+        color: #475569;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+    .cancel-ticket-btn {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(225, 29, 72, 0.36);
+        border-radius: 12px;
+        background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+        color: #be123c;
+        font-size: 0.83rem;
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .cancel-ticket-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: #e11d48;
+        box-shadow: 0 8px 18px rgba(225, 29, 72, 0.18);
+    }
+    .cancel-ticket-btn:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+    .tp-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483001;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .tp-modal.is-open { opacity: 1; pointer-events: auto; }
+    .tp-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.5);
+        backdrop-filter: blur(3px);
+    }
+    .tp-modal-card {
+        position: relative;
+        width: min(520px, 100%);
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, 0.88);
+        background: #fff;
+        box-shadow: 0 22px 52px rgba(2, 6, 23, 0.32);
+        padding: 16px;
+        transform: translateY(8px) scale(.985);
+        transition: transform .24s cubic-bezier(.22,1,.36,1);
+    }
+    .tp-modal.is-open .tp-modal-card { transform: translateY(0) scale(1); }
+    .tp-modal-title {
+        margin: 0 0 6px;
+        font-size: 1.02rem;
+        color: var(--sm-text);
+        font-weight: 900;
+        letter-spacing: -.02em;
+    }
+    .tp-modal-text {
+        margin: 0;
+        color: #64748b;
+        font-size: .84rem;
+        line-height: 1.5;
+        font-weight: 600;
+    }
+    .tp-modal-input {
+        margin-top: 12px;
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid var(--sm-border);
+        background: #fff;
+        color: var(--sm-text);
+        min-height: 86px;
+        padding: 10px 12px;
+        resize: vertical;
+        outline: none;
+    }
+    .tp-modal-input:focus {
+        border-color: rgba(220, 38, 38, 0.35);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+    }
+    .tp-modal-actions {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .tp-modal-btn {
+        border: 1px solid var(--sm-border);
+        border-radius: 10px;
+        min-height: 40px;
+        padding: 0 14px;
+        font-size: .8rem;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .tp-modal-btn--ghost { background: #fff; color: #475569; }
+    .tp-modal-btn--danger {
+        background: linear-gradient(180deg, #ef4444, #e11d48);
+        border-color: transparent;
+        color: #fff;
+    }
     .transfer-history {
         margin-top: 12px;
         border-top: 1px solid var(--sm-border);
@@ -1249,6 +1373,15 @@
                 </div>
 
                 <div class="ticket-card ticket-block">
+                    <h2 class="section-title">Ticket Cancellation</h2>
+                    <div class="cancel-card">
+                        <p class="cancel-card-note">Cancel is allowed before event start and before check-in. This will disable QR entry for this pass.</p>
+                        <button id="cancel-ticket-btn" class="cancel-ticket-btn" type="button">Cancel This Ticket</button>
+                        <p id="cancel-ticket-status" class="cancel-card-status"></p>
+                    </div>
+                </div>
+
+                <div class="ticket-card ticket-block">
                     <h2 class="section-title">Share Tickets</h2>
                     <div id="share-box-root" class="share-box">
                         <input id="share-email" type="email" class="share-input" placeholder="Recipient Evorra email" autocomplete="email">
@@ -1351,6 +1484,18 @@
         </div>
     </div>
 </div>
+<div id="tp-cancel-modal" class="tp-modal" aria-hidden="true">
+    <div class="tp-modal-backdrop" data-close-cancel-modal></div>
+    <div class="tp-modal-card" role="dialog" aria-modal="true" aria-labelledby="tp-cancel-title">
+        <h3 id="tp-cancel-title" class="tp-modal-title">Cancel ticket</h3>
+        <p class="tp-modal-text">Cancel this ticket now? This action cannot be undone and QR entry will be disabled.</p>
+        <textarea id="tp-cancel-reason" class="tp-modal-input" maxlength="240" placeholder="Optional reason (for support reference)"></textarea>
+        <div class="tp-modal-actions">
+            <button type="button" id="tp-cancel-close" class="tp-modal-btn tp-modal-btn--ghost">Keep Ticket</button>
+            <button type="button" id="tp-cancel-confirm" class="tp-modal-btn tp-modal-btn--danger">Confirm Cancel</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -1362,6 +1507,7 @@
     let lastQrEncodedPayload = '';
     let sharedPendingRedirectIssued = false;
     let unauthorizedRedirectIssued = false;
+    let cancelModalResolver = null;
 
     /** ── QR unlock config ── */
     const QR_UNLOCK_HOURS_BEFORE = 8; // hours before event start
@@ -1586,6 +1732,12 @@
         return String(ticket.status || '').toLowerCase() === 'used';
     }
 
+    function ticketIsCancelled(ticket) {
+        if (!ticket) return false;
+        const s = String(ticket.status || '').toLowerCase();
+        return s === 'cancelled' || s === 'cancelled_by_organizer';
+    }
+
     function formatScannedAt(ticket) {
         const raw = ticket && ticket.scanned_at;
         if (!raw) return '';
@@ -1620,9 +1772,38 @@
         const checkedTitle = document.getElementById('qr-checked-title');
         const checkedMsg   = document.getElementById('qr-checked-msg');
         const checkedIn    = ticketIsCheckedIn(ticket);
+        const cancelled    = ticketIsCancelled(ticket);
         const completed    = eventIsCompleted(ticket);
 
-        /* ── 0. COMPLETED: event window ended, no scanner ── */
+        /* ── 0. CANCELLED: explicitly cancelled pass ── */
+        if (cancelled) {
+            stopQrCountdown();
+            zone.classList.remove('qr-container--locked');
+            zone.classList.add('qr-container--checked');
+            zone.classList.add('qr-container--completed');
+            if (lockedState) lockedState.classList.add('hide');
+            activeState.classList.add('hide');
+            checkedState.classList.remove('hide');
+            qrImg.removeAttribute('src');
+            qrImg.style.display = 'none';
+            if (qrLoader) qrLoader.style.display = 'none';
+            caption.textContent = 'Ticket cancelled';
+            if (checkedBadge) {
+                checkedBadge.innerHTML = '<i class="fa-solid fa-ban" aria-hidden="true"></i> Cancelled';
+                checkedBadge.classList.add('qr-checked-badge--completed');
+            }
+            if (checkedTitle) checkedTitle.textContent = 'Your ticket has been cancelled';
+            checkedMsg.textContent = 'Your ticket has been cancelled. QR entry is disabled for this pass.';
+            if (ring) {
+                ring.classList.remove('td-checked-ring--pulse');
+                ring.classList.add('td-checked-ring--completed');
+            }
+            if (ringIconWrap) ringIconWrap.classList.add('td-check-icon--completed');
+            if (ringIcon) ringIcon.className = 'fa-solid fa-xmark';
+            return;
+        }
+
+        /* ── 1. COMPLETED: event window ended, no scanner ── */
         if (completed && !checkedIn) {
             stopQrCountdown();
             zone.classList.remove('qr-container--locked');
@@ -1650,7 +1831,7 @@
             return;
         }
 
-        /* ── 1. CHECKED-IN: entry already used ── */
+        /* ── 2. CHECKED-IN: entry already used ── */
         if (checkedIn) {
             stopQrCountdown();
             zone.classList.remove('qr-container--locked');
@@ -1682,7 +1863,7 @@
             return;
         }
 
-        /* ── 2. LOCKED: too early, show countdown ── */
+        /* ── 3. LOCKED: too early, show countdown ── */
         if (!qrIsUnlocked(ticket)) {
             stopQrCountdown();
             zone.classList.remove('qr-container--checked');
@@ -1700,7 +1881,7 @@
             return;
         }
 
-        /* ── 3. UNLOCKED: show QR ── */
+        /* ── 4. UNLOCKED: show QR ── */
         stopQrCountdown();
         zone.classList.remove('qr-container--checked');
         zone.classList.remove('qr-container--completed');
@@ -1733,14 +1914,25 @@
         };
         qrImg.src = qrUrl;
     }
-    function applyInstructionsPhase(checkedIn, completed) {
+    function applyInstructionsPhase(checkedIn, completed, cancelled) {
         const pre = document.getElementById('instructions-qr-phase');
         const post = document.getElementById('instructions-checked-phase');
         if (!pre || !post) return;
-        if (checkedIn || completed) {
+        if (checkedIn || completed || cancelled) {
             pre.classList.add('hide');
             post.classList.remove('hide');
-            if (completed && !checkedIn) {
+            if (cancelled) {
+                post.innerHTML = `
+                    <div class="instruction-row">
+                        <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-ban"></i></div>
+                        <p class="instruction-text">Your ticket has been cancelled and can no longer be used for venue entry.</p>
+                    </div>
+                    <div class="instruction-row">
+                        <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-headset"></i></div>
+                        <p class="instruction-text">If this was unexpected, contact support with your pass reference.</p>
+                    </div>
+                `;
+            } else if (completed && !checkedIn) {
                 post.innerHTML = `
                     <div class="instruction-row">
                         <div class="instruction-dot instruction-dot--success"><i class="fa-solid fa-flag-checkered"></i></div>
@@ -1758,7 +1950,7 @@
         }
     }
 
-    function applyShareUiForCheckIn(checkedIn, completed) {
+    function applyShareUiForCheckIn(checkedIn, completed, cancelled) {
         const box = document.getElementById('share-box-root');
         const btn = document.getElementById('share-split-btn');
         const email = document.getElementById('share-email');
@@ -1767,7 +1959,7 @@
         const wa = document.getElementById('share-whatsapp-invite-btn');
         const qty = document.getElementById('share-qty');
         if (!box || !btn) return;
-        if (checkedIn || completed) {
+        if (checkedIn || completed || cancelled) {
             box.classList.add('share-box--locked');
             btn.disabled = true;
             if (email) email.disabled = true;
@@ -1783,6 +1975,111 @@
             if (phoneNational) phoneNational.disabled = false;
             if (wa) wa.disabled = false;
             if (qty) qty.disabled = false;
+        }
+    }
+
+    function canCancelTicket(ticket) {
+        if (!ticket) return false;
+        const status = String(ticket.status || '').toLowerCase();
+        if (status === 'cancelled' || status === 'cancelled_by_organizer') return false;
+        if (status === 'used' || status === 'shared_pending') return false;
+        if (ticket.checked_in === true) return false;
+        if (eventIsCompleted(ticket)) return false;
+        return true;
+    }
+
+    function applyCancelTicketUi(ticket) {
+        const btn = document.getElementById('cancel-ticket-btn');
+        const statusEl = document.getElementById('cancel-ticket-status');
+        if (!btn || !statusEl) return;
+        const status = String((ticket && ticket.status) || '').toLowerCase();
+        if (status === 'cancelled' || status === 'cancelled_by_organizer') {
+            btn.disabled = true;
+            btn.textContent = 'Ticket Cancelled';
+            statusEl.textContent = 'This pass is already cancelled.';
+            return;
+        }
+        if (canCancelTicket(ticket)) {
+            btn.disabled = false;
+            btn.textContent = 'Cancel This Ticket';
+            statusEl.textContent = 'Cancellation is available right now.';
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Cancellation Locked';
+        statusEl.textContent = 'Cancellation is not available for this ticket state.';
+    }
+
+    function openCancelModal(defaultReason) {
+        const modal = document.getElementById('tp-cancel-modal');
+        const reasonInput = document.getElementById('tp-cancel-reason');
+        if (!modal || !reasonInput) return Promise.resolve({ confirmed: false, reason: '' });
+        reasonInput.value = String(defaultReason || '');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        setTimeout(() => reasonInput.focus(), 0);
+        return new Promise((resolve) => { cancelModalResolver = resolve; });
+    }
+
+    function closeCancelModal(payload) {
+        const modal = document.getElementById('tp-cancel-modal');
+        if (modal) {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        if (cancelModalResolver) {
+            const done = cancelModalResolver;
+            cancelModalResolver = null;
+            done(payload || { confirmed: false, reason: '' });
+        }
+    }
+
+    async function cancelTicketClientSide() {
+        const user = auth.currentUser;
+        if (!user) return alert('Please login again.');
+        if (!activeTicket) return alert('Ticket is still loading.');
+        if (!canCancelTicket(activeTicket)) return alert('This ticket cannot be cancelled now.');
+        const btn = document.getElementById('cancel-ticket-btn');
+        const statusEl = document.getElementById('cancel-ticket-status');
+
+        const modalResult = await openCancelModal('');
+        if (!modalResult.confirmed) return;
+        const reason = String(modalResult.reason || '').trim();
+        btn.disabled = true;
+        btn.textContent = 'Cancelling...';
+        statusEl.textContent = 'Submitting cancellation...';
+        try {
+            await db.collection('tickets').doc(ticketId).update({
+                status: 'cancelled',
+                cancelled_at: firebase.firestore.FieldValue.serverTimestamp(),
+                cancellation_reason: reason || null,
+                updated_time: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            try {
+                const notifRef = db.collection('notifications').doc();
+                await notifRef.set({
+                    id: notifRef.id,
+                    user_id: user.uid,
+                    title: 'Ticket cancelled',
+                    message: `${activeTicket?.event_title || 'Your event ticket'} has been cancelled successfully.`,
+                    type: 'ticket_cancellation',
+                    ref_ticket_id: ticketId,
+                    ref_event_id: String(activeTicket?.event_id || ''),
+                    action_target: '/my-tickets',
+                    is_read: false,
+                    is_archived: false,
+                    created_time: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (notifErr) {
+                console.warn('Ticket cancellation notification skipped:', notifErr?.code || notifErr?.message || notifErr);
+            }
+            statusEl.textContent = 'Ticket cancelled successfully.';
+            btn.textContent = 'Ticket Cancelled';
+        } catch (e) {
+            console.error('cancelTicketClientSide:', e);
+            statusEl.textContent = 'Unable to cancel right now. Please try again.';
+            btn.disabled = false;
+            btn.textContent = 'Cancel This Ticket';
         }
     }
 
@@ -1814,6 +2111,7 @@
 
         const eventData = ticket.event_snapshot || {};
         const checkedIn = ticketIsCheckedIn(ticket);
+        const cancelled = ticketIsCancelled(ticket);
 
         document.getElementById('hero-img').src = eventData.cover_image || '';
         document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
@@ -1826,7 +2124,7 @@
         }
 
         const completed = eventIsCompleted(ticket);
-        const statusUpper = completed ? 'COMPLETED' : (checkedIn ? 'CHECKED IN' : String(ticket.status || 'confirmed').toUpperCase());
+        const statusUpper = cancelled ? 'CANCELLED' : (completed ? 'COMPLETED' : (checkedIn ? 'CHECKED IN' : String(ticket.status || 'confirmed').toUpperCase()));
 
         document.getElementById('hero-status').textContent = statusUpper;
         document.getElementById('hero-ticket-id').textContent = ticket.id || ticketId || '—';
@@ -1836,9 +2134,11 @@
             holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
         document.getElementById('pass-foot-ticket-id').textContent = ticket.id || ticketId || '—';
         const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
-        document.getElementById('hero-status').className = completed
+        document.getElementById('hero-status').className = cancelled
+            ? 'status-chip status-cancelled'
+            : (completed
             ? 'status-chip status-completed'
-            : (checkedIn ? 'status-chip status-checked-in' : `status-chip status-${heroStatusSlug}`);
+            : (checkedIn ? 'status-chip status-checked-in' : `status-chip status-${heroStatusSlug}`));
 
         const passStatusEl = document.getElementById('pass-status-text');
         passStatusEl.textContent = statusUpper;
@@ -1851,8 +2151,8 @@
         document.getElementById('pass-amount').textContent = `₹${ticket.total_amount}`;
 
         applyQrAndCheckedInUi(ticket);
-        applyInstructionsPhase(checkedIn, completed);
-        applyShareUiForCheckIn(checkedIn, completed);
+        applyInstructionsPhase(checkedIn, completed, cancelled);
+        applyShareUiForCheckIn(checkedIn, completed, cancelled);
 
         document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
         document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
@@ -1878,6 +2178,7 @@
                 ? `Available to split: ${qty} tickets. Share any quantity up to ${qty}.`
                 : `You have 1 ticket. You can transfer it fully to another registered account.`;
 
+        applyCancelTicketUi(ticket);
         await loadTransferHistory();
     }
 
@@ -2352,5 +2653,14 @@
     });
     document.getElementById('share-split-btn').addEventListener('click', splitAndShareTicket);
     document.getElementById('share-whatsapp-invite-btn').addEventListener('click', openShareWhatsAppPrefill);
+    document.getElementById('cancel-ticket-btn').addEventListener('click', cancelTicketClientSide);
+    document.getElementById('tp-cancel-close').addEventListener('click', () => closeCancelModal({ confirmed: false, reason: '' }));
+    document.querySelectorAll('[data-close-cancel-modal]').forEach((el) => {
+        el.addEventListener('click', () => closeCancelModal({ confirmed: false, reason: '' }));
+    });
+    document.getElementById('tp-cancel-confirm').addEventListener('click', () => {
+        const reason = String(document.getElementById('tp-cancel-reason').value || '').trim();
+        closeCancelModal({ confirmed: true, reason });
+    });
 </script>
 {% endblock %}
