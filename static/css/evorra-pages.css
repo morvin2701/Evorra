@@ -1639,7 +1639,7 @@ body.theme-showmates .notification-tile.unread {
 }
 
 :is(html[data-theme], body[data-theme], body.theme-showmates[data-theme]) :is(
-    p, .scan-sub, .shared-sub, .empty-desc, .shared-empty-text, .ticket-foot-left, .scan-recent-meta
+    .scan-sub, .shared-sub, .empty-desc, .shared-empty-text, .ticket-foot-left, .scan-recent-meta
 ) {
     color: var(--ev-muted-lock);
 }

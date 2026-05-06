@@ -37,18 +37,32 @@
         align-items: center;
     }
     .spotlight-link { text-decoration: none; margin-top: 16px; display: block; }
+    .profile-shell {
+        --spot-bg: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
+        --spot-border: rgba(255,255,255,0.14);
+        --spot-text: #fff;
+        --spot-sub: rgba(255,255,255,0.92);
+        --spot-msg: rgba(255,255,255,0.9);
+        --spot-icon-bg: rgba(255,255,255,0.2);
+        --spot-arrow-bg: rgba(0,0,0,0.15);
+        --spot-shadow: 0 14px 30px rgba(15,23,42,0.14);
+        --spot-icon-color: #ffffff;
+        --spot-arrow-color: #ffffff;
+        --spot-arrow-border: rgba(255,255,255,0.28);
+    }
     .spotlight-card {
         border-radius: 20px; padding: 16px;
         display: grid; grid-template-columns: 68px 1fr auto; gap: 14px; align-items: center;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
-        color: #fff;
+        border: 1px solid var(--spot-border);
+        background: var(--spot-bg);
+        color: var(--spot-text);
+        box-shadow: var(--spot-shadow);
     }
-    .spot-icon { width: 68px; height: 68px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
-    .spot-sub { font-size: 0.85rem; font-weight: 700; }
+    .spot-icon { width: 68px; height: 68px; background: var(--spot-icon-bg); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--spot-icon-color); }
+    .spot-sub { font-size: 0.85rem; font-weight: 700; color: var(--spot-sub) !important; }
     .spot-count { font-size: 2.1rem; font-weight: 900; margin: 3px 0; line-height: 1; }
-    .spot-msg { font-size: 0.8rem; color: rgba(255,255,255,0.9); }
-    .spot-arrow { padding: 10px; background: rgba(0,0,0,0.15); border-radius: 12px; }
+    .spot-msg { font-size: 0.8rem; color: var(--spot-msg) !important; }
+    .spot-arrow { padding: 10px; background: var(--spot-arrow-bg); border-radius: 12px; color: var(--spot-arrow-color); border: 1px solid var(--spot-arrow-border); }
     .details-card, .actions-card {
         border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
         background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
@@ -93,6 +107,34 @@
         .profile-hero { grid-template-columns: 78px 1fr; padding: 16px; }
         .profile-avatar { width: 78px; height: 78px; }
         .profile-name { font-size: 1.2rem; }
+    }
+
+    /* Theme-specific spotlight tuning */
+    :is(html[data-theme="light"], body[data-theme="light"], body.theme-showmates[data-theme="light"]) .profile-shell {
+        --spot-bg: linear-gradient(135deg, #fecaca 0%, #fdba74 52%, #fb923c 100%);
+        --spot-border: rgba(251, 113, 133, 0.24);
+        --spot-text: #ffffff;
+        --spot-sub: rgba(255, 255, 255, 0.95);
+        --spot-msg: rgba(255, 255, 255, 0.9);
+        --spot-icon-bg: rgba(255,255,255,0.8);
+        --spot-arrow-bg: rgba(255,255,255,0.72);
+        --spot-icon-color: #ef4444;
+        --spot-arrow-color: #ffffff;
+        --spot-arrow-border: rgba(255,255,255,0.35);
+        --spot-shadow: 0 12px 28px rgba(15,23,42,0.09);
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .profile-shell {
+        --spot-bg: linear-gradient(135deg, rgba(96,83,255,0.42), rgba(13,178,235,0.3));
+        --spot-border: rgba(148,163,184,0.3);
+        --spot-text: #f8fafc;
+        --spot-sub: rgba(241,245,249,0.9);
+        --spot-msg: rgba(226,232,240,0.86);
+        --spot-icon-bg: rgba(255,255,255,0.18);
+        --spot-arrow-bg: rgba(2,6,23,0.26);
+        --spot-icon-color: #f8fafc;
+        --spot-arrow-color: #f8fafc;
+        --spot-arrow-border: rgba(148,163,184,0.3);
+        --spot-shadow: 0 16px 34px rgba(0,0,0,0.3);
     }
 </style>
 {% endblock %}
