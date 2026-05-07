@@ -302,6 +302,33 @@
         font-weight: 700;
         line-height: 1.35;
     }
+    .edit-inline-action {
+        margin-top: 8px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .edit-link-btn {
+        border: none;
+        background: transparent;
+        padding: 0;
+        color: rgba(220, 38, 38, 0.95);
+        font-weight: 800;
+        font-size: 0.78rem;
+        cursor: pointer;
+        letter-spacing: 0.01em;
+        text-decoration: none;
+    }
+    .edit-link-btn:hover {
+        text-decoration: underline;
+    }
+    .edit-link-hint {
+        font-size: 0.76rem;
+        color: #64748b;
+        font-weight: 700;
+    }
 
     .edit-role-stack {
         display: grid;
@@ -582,6 +609,12 @@
                             <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
                             <input type="text" id="edit-address" name="address_display_name" placeholder="Full address from location lookup" autocomplete="street-address">
                         </div>
+                        <div class="edit-inline-action">
+                            <button type="button" class="edit-link-btn" id="addr-refresh">
+                                Use current location
+                            </button>
+                            <span class="edit-link-hint">This fills the address from the reverse lookup.</span>
+                        </div>
                         <p id="err-address" class="field-error hide"></p>
                     </div>
                 </section>
@@ -741,16 +774,14 @@
                     (data.address && String(data.address).trim()) ||
                     '';
                 document.getElementById('edit-address').value = storedAddress;
-                if (!storedAddress) {
-                    const latLon = extractLatLonFromProfile(data);
-                    if (latLon) {
-                        const ok = await autofillAddressFromCoordinates(latLon.lat, latLon.lon, prefCity);
-                        if (!ok && prefCity) {
-                            autofillAddressFromCity(prefCity).catch(function () {});
-                        }
-                    } else if (prefCity) {
+                const latLon = extractLatLonFromProfile(data);
+                if (latLon) {
+                    const ok = await autofillAddressFromCoordinates(latLon.lat, latLon.lon, prefCity);
+                    if (!ok && !storedAddress && prefCity) {
                         autofillAddressFromCity(prefCity).catch(function () {});
                     }
+                } else if (!storedAddress && prefCity) {
+                    autofillAddressFromCity(prefCity).catch(function () {});
                 }
 
                 if (data.role) setRole(data.role);
@@ -864,7 +895,6 @@
         if (geocodeAddressRequestInFlight) return false;
         const addrInput = document.getElementById('edit-address');
         if (!addrInput) return false;
-        if (String(addrInput.value || '').trim()) return true;
         geocodeAddressRequestInFlight = true;
         try {
             const result = await fetchDisplayNameFromCoordinates(lat, lon);
@@ -872,6 +902,24 @@
         } finally {
             geocodeAddressRequestInFlight = false;
         }
+    }
+
+    function getBrowserCoordinates() {
+        return new Promise(function (resolve, reject) {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'));
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+                },
+                function (err) {
+                    reject(err || new Error('Failed to fetch location'));
+                },
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+            );
+        });
     }
 
     async function saveProfile() {
@@ -964,6 +1012,22 @@
         const addr = document.getElementById('edit-address').value.trim();
         if (city && !addr) {
             autofillAddressFromCity(city).catch(function () {});
+        }
+    });
+    document.getElementById('addr-refresh').addEventListener('click', async function () {
+        try {
+            const addrInput = document.getElementById('edit-address');
+            if (addrInput) addrInput.value = '';
+            const coords = await getBrowserCoordinates();
+            const cityFallback = document.getElementById('edit-city').value.trim();
+            const ok = await autofillAddressFromCoordinates(coords.lat, coords.lon, cityFallback);
+            if (!ok && cityFallback) await autofillAddressFromCity(cityFallback);
+        } catch (e) {
+            console.warn(e);
+            var errBanner = document.getElementById('status-banner');
+            errBanner.textContent = 'Could not access your location. Please allow location permission and try again.';
+            errBanner.className = 'status-banner error';
+            errBanner.classList.remove('hide');
         }
     });
 
