@@ -464,6 +464,33 @@
             grid-template-columns: 1fr;
         }
     }
+
+    /* Hard dark-mode consistency for edit profile surfaces */
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .edit-root {
+        background: #020617 !important;
+        color: #e2e8f0 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) :is(
+        .edit-banner, .edit-card, .role-card, .edit-back, .edit-country-well, .edit-input-well
+    ) {
+        background: #0b1220 !important;
+        border-color: #1f2a3d !important;
+        color: #e2e8f0 !important;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3) !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) :is(
+        .edit-kicker, .edit-sub, .edit-banner-desc, .edit-field-label, .role-card-desc
+    ) {
+        color: #94a3b8 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) :is(
+        .edit-title, .edit-banner-title, .role-card-title
+    ) {
+        color: #e2e8f0 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .edit-input-well input {
+        color: #e2e8f0 !important;
+    }
 </style>
 {% endblock %}
 
@@ -549,6 +576,14 @@
                         </div>
                         <p id="err-city" class="field-error hide"></p>
                     </div>
+                    <div class="edit-field">
+                        <label class="edit-field-label" for="edit-address">Address (Display Name)</label>
+                        <div class="edit-input-well">
+                            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+                            <input type="text" id="edit-address" name="address_display_name" placeholder="Full address from location lookup" autocomplete="street-address">
+                        </div>
+                        <p id="err-address" class="field-error hide"></p>
+                    </div>
                 </section>
             </div>
 
@@ -591,6 +626,7 @@
 {% block scripts %}
 <script>
     let selectedRole = 'attendee';
+    let geocodeAddressRequestInFlight = false;
 
     const PROFILE_DIAL_PREFIXES = ['880', '971', '977', '966', '27', '60', '65', '86', '81', '82', '92', '94', '49', '33', '61', '64', '44', '91', '1'].sort(function (a, b) {
         return b.length - a.length;
@@ -699,12 +735,143 @@
                         ? String(data.cities.split(',')[0] || '').trim()
                         : '');
                 document.getElementById('edit-city').value = prefCity;
+                const storedAddress =
+                    (data.address_display_name && String(data.address_display_name).trim()) ||
+                    (data.location_display_name && String(data.location_display_name).trim()) ||
+                    (data.address && String(data.address).trim()) ||
+                    '';
+                document.getElementById('edit-address').value = storedAddress;
+                if (!storedAddress) {
+                    const latLon = extractLatLonFromProfile(data);
+                    if (latLon) {
+                        const ok = await autofillAddressFromCoordinates(latLon.lat, latLon.lon, prefCity);
+                        if (!ok && prefCity) {
+                            autofillAddressFromCity(prefCity).catch(function () {});
+                        }
+                    } else if (prefCity) {
+                        autofillAddressFromCity(prefCity).catch(function () {});
+                    }
+                }
 
                 if (data.role) setRole(data.role);
             } catch (e) {
                 console.error(e);
             }
         });
+    }
+
+    async function fetchDisplayNameFromLocationQuery(query) {
+        const q = String(query || '').trim();
+        if (!q) return null;
+        try {
+            const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({
+                q: q,
+                format: 'json',
+                addressdetails: '1',
+                limit: '1'
+            }).toString();
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: { Accept: 'application/json' }
+            });
+            if (!res.ok) return null;
+            const list = await res.json();
+            if (!Array.isArray(list) || !list.length) return null;
+            return list[0] || null;
+        } catch (e) {
+            console.warn('Address lookup failed:', e);
+            return null;
+        }
+    }
+
+    async function fetchDisplayNameFromCoordinates(lat, lon) {
+        var latNum = Number(lat);
+        var lonNum = Number(lon);
+        if (!Number.isFinite(latNum) || !Number.isFinite(lonNum)) return null;
+        try {
+            const url = 'https://nominatim.openstreetmap.org/reverse?' + new URLSearchParams({
+                lat: String(latNum),
+                lon: String(lonNum),
+                format: 'json',
+                addressdetails: '1'
+            }).toString();
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: { Accept: 'application/json' }
+            });
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data || null;
+        } catch (e) {
+            console.warn('Reverse address lookup failed:', e);
+            return null;
+        }
+    }
+
+    function extractLatLonFromProfile(data) {
+        if (!data || typeof data !== 'object') return null;
+        if (data.location && typeof data.location === 'object') {
+            const lat = Number(data.location.latitude);
+            const lon = Number(data.location.longitude);
+            if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat: lat, lon: lon };
+        }
+        const lat = Number(data.latitude);
+        const lon = Number(data.longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat: lat, lon: lon };
+        return null;
+    }
+
+    function applyNominatimAddressResult(result, cityFallback) {
+        if (!result || typeof result !== 'object') return false;
+        const addrInput = document.getElementById('edit-address');
+        const cityInput = document.getElementById('edit-city');
+        if (!addrInput || !cityInput) return false;
+        if (result.display_name) {
+            addrInput.value = String(result.display_name).trim();
+        }
+        const a = result.address || {};
+        if (!cityInput.value.trim()) {
+            cityInput.value = String(
+                a.state_district ||
+                a.city ||
+                a.town ||
+                a.village ||
+                a.county ||
+                cityFallback ||
+                ''
+            ).trim();
+        }
+        return !!addrInput.value.trim();
+    }
+
+    async function autofillAddressFromCity(cityRaw) {
+        if (geocodeAddressRequestInFlight) return;
+        const city = String(cityRaw || '').trim();
+        const addrInput = document.getElementById('edit-address');
+        if (!city || !addrInput) return;
+        const existing = String(addrInput.value || '').trim();
+        if (existing) return;
+        geocodeAddressRequestInFlight = true;
+        try {
+            const result = await fetchDisplayNameFromLocationQuery(city + ', India');
+            applyNominatimAddressResult(result, city);
+        } finally {
+            geocodeAddressRequestInFlight = false;
+        }
+    }
+
+    async function autofillAddressFromCoordinates(lat, lon, cityFallback) {
+        if (geocodeAddressRequestInFlight) return false;
+        const addrInput = document.getElementById('edit-address');
+        if (!addrInput) return false;
+        if (String(addrInput.value || '').trim()) return true;
+        geocodeAddressRequestInFlight = true;
+        try {
+            const result = await fetchDisplayNameFromCoordinates(lat, lon);
+            return applyNominatimAddressResult(result, cityFallback);
+        } finally {
+            geocodeAddressRequestInFlight = false;
+        }
     }
 
     async function saveProfile() {
@@ -716,6 +883,7 @@
         const dial = document.getElementById('edit-phone-country').value;
         const national = document.getElementById('edit-phone-national').value;
         const city = document.getElementById('edit-city').value.trim();
+        const addressDisplayName = document.getElementById('edit-address').value.trim();
         const phones = buildPhoneForSave(dial, national);
 
         var ok = true;
@@ -737,6 +905,11 @@
             ok = false;
         } else document.getElementById('err-city').classList.add('hide');
 
+        if (!addressDisplayName && city) {
+            await autofillAddressFromCity(city);
+        }
+
+        const finalAddressDisplayName = document.getElementById('edit-address').value.trim();
         if (!ok) return;
 
         var btn = document.getElementById('save-btn');
@@ -753,6 +926,7 @@
                     phone_number: phones.phone_number,
                     phone_normalized: phones.phone_normalized,
                     city: city,
+                    address_display_name: finalAddressDisplayName,
                     role: selectedRole,
                     updated_time: firebase.firestore.FieldValue.serverTimestamp()
                 },
@@ -784,6 +958,13 @@
     document.getElementById('save-btn').addEventListener('click', function (e) {
         e.preventDefault();
         saveProfile();
+    });
+    document.getElementById('edit-city').addEventListener('blur', function () {
+        const city = document.getElementById('edit-city').value.trim();
+        const addr = document.getElementById('edit-address').value.trim();
+        if (city && !addr) {
+            autofillAddressFromCity(city).catch(function () {});
+        }
     });
 
     wireRoleCards();
