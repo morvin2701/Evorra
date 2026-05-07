@@ -686,6 +686,70 @@
         font-weight: 700;
         color: var(--studio-text);
     }
+    .studio-days-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 16px 0 10px;
+    }
+    .studio-days-title {
+        margin: 0;
+        font-size: 0.74rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--studio-muted);
+    }
+    .studio-day-add-btn {
+        border: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+        color: var(--studio-text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .studio-day-add-btn:hover {
+        border-color: var(--studio-strong-border);
+    }
+    .studio-days-list {
+        display: grid;
+        gap: 10px;
+    }
+    .studio-day-row {
+        display: grid;
+        grid-template-columns: 88px 1fr 1fr auto;
+        gap: 8px;
+        align-items: end;
+        padding: 10px;
+        border: 1px solid var(--studio-border);
+        border-radius: 12px;
+        background: var(--studio-bg);
+    }
+    .studio-day-badge {
+        font-size: 0.68rem;
+        font-weight: 900;
+        color: var(--studio-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+    .studio-day-remove {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+        color: var(--studio-muted);
+        cursor: pointer;
+        font-size: 0.78rem;
+    }
+    .studio-day-remove:hover {
+        color: var(--studio-text);
+        border-color: var(--studio-strong-border);
+    }
 
     .studio-cover-ok { font-size: 2.5rem !important; color: var(--studio-accent) !important; margin-bottom: 0 !important; }
     .studio-cover-change-text { margin-top: 6px; color: var(--studio-text); font-size: 0.95rem; font-weight: 700; }
@@ -757,6 +821,9 @@
         .studio-step-actions--end { align-items: stretch; }
         .studio-step-actions .btn-next-studio { width: 100%; text-align: center; }
         .btn-publish-studio { margin-left: 0; width: 100%; }
+        .studio-day-row {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
@@ -921,6 +988,11 @@
                             <span id="ev-end-text" class="studio-date-value">Select</span>
                         </div>
                     </div>
+                    <div class="studio-days-head">
+                        <p class="studio-days-title">Additional Event Days (Optional)</p>
+                        <button type="button" class="studio-day-add-btn" onclick="addEventDayRow()"><i class="fa-solid fa-plus"></i> Add Day</button>
+                    </div>
+                    <div id="event-days-list" class="studio-days-list"></div>
                 </div>
                 <div class="studio-step-actions">
                     <button type="button" class="btn-back-studio" onclick="prevStep(2)">Back</button>
@@ -1041,6 +1113,70 @@
     window.nextStep = function(step) { jumpToStep(step); };
     window.prevStep = function(step) { jumpToStep(step); };
 
+    function collectEventDays() {
+        const out = [];
+        const primaryStart = document.getElementById('ev-start').value;
+        const primaryEnd = document.getElementById('ev-end').value;
+        if (primaryStart && primaryEnd) {
+            out.push({ start: primaryStart, end: primaryEnd });
+        }
+        document.querySelectorAll('.studio-day-row').forEach((row) => {
+            const s = row.querySelector('.studio-day-start')?.value || '';
+            const e = row.querySelector('.studio-day-end')?.value || '';
+            if (s && e) out.push({ start: s, end: e });
+        });
+        const normalized = out
+            .map((d) => {
+                const startDate = new Date(d.start);
+                const endDate = new Date(d.end);
+                if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return null;
+                if (endDate <= startDate) return null;
+                return {
+                    day_index: 0,
+                    start_at: startDate.toISOString(),
+                    end_at: endDate.toISOString(),
+                    date_label: startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    weekday: startDate.toLocaleDateString('en-IN', { weekday: 'short' })
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => new Date(a.start_at).getTime() - new Date(b.start_at).getTime())
+            .map((d, idx) => ({ ...d, day_index: idx + 1 }));
+        return normalized;
+    }
+
+    window.addEventDayRow = function() {
+        const list = document.getElementById('event-days-list');
+        if (!list) return;
+        if (list.children.length >= 30) {
+            alert("You can add up to 30 days.");
+            return;
+        }
+        const idx = list.children.length + 2;
+        const row = document.createElement('div');
+        row.className = 'studio-day-row';
+        row.innerHTML = `
+            <div class="studio-day-badge">Day ${idx}</div>
+            <div>
+                <label class="studio-date-label" style="margin-bottom:6px;"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> START</label>
+                <input type="datetime-local" class="studio-date-input studio-day-start">
+            </div>
+            <div>
+                <label class="studio-date-label" style="margin-bottom:6px;"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> END</label>
+                <input type="datetime-local" class="studio-date-input studio-day-end">
+            </div>
+            <button type="button" class="studio-day-remove" aria-label="Remove day"><i class="fa-solid fa-trash"></i></button>
+        `;
+        row.querySelector('.studio-day-remove').addEventListener('click', function() {
+            row.remove();
+            Array.from(list.children).forEach((child, i) => {
+                const badge = child.querySelector('.studio-day-badge');
+                if (badge) badge.textContent = `Day ${i + 2}`;
+            });
+        });
+        list.appendChild(row);
+    };
+
     function validateStep(step) {
         if (step === 1) {
             if (!document.getElementById('ev-title').value.trim()) { alert("Please enter event title"); return false; }
@@ -1057,6 +1193,11 @@
             }
             if (!document.getElementById('ev-start').value) { alert("Please select start time"); return false; }
             if (!document.getElementById('ev-end').value) { alert("Please select end time"); return false; }
+            const days = collectEventDays();
+            if (!days.length) {
+                alert("Please provide at least one valid event day.");
+                return false;
+            }
         }
         return true;
     }
@@ -1334,13 +1475,10 @@
             const city = document.getElementById('ev-city').value.trim();
             const state = document.getElementById('ev-state').value.trim();
             const address = document.getElementById('ev-address').value.trim();
-            const startInput = document.getElementById('ev-start').value;
-            const endInput = document.getElementById('ev-end').value;
-
-            const startDate = new Date(startInput);
-            const endDate = new Date(endInput);
-            if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) throw new Error("Please provide valid event dates.");
-            if (endDate <= startDate) throw new Error("End time must be after start time.");
+            const eventDays = collectEventDays();
+            if (!eventDays.length) throw new Error("Please provide at least one valid event day.");
+            const startDate = new Date(eventDays[0].start_at);
+            const endDate = new Date(eventDays[eventDays.length - 1].end_at);
 
             const coverFile = document.getElementById('cover-input').files[0];
             if (!coverFile) throw new Error("Please upload a cover image.");
@@ -1372,6 +1510,8 @@
                 city,
                 start_time: startDate,
                 end_time: endDate,
+                event_days: eventDays,
+                event_day_count: eventDays.length,
                 cover_image: fallbackCover,
                 price_start: minPrice,
                 ticket_inventory: totalInventory,

@@ -2150,7 +2150,7 @@
         document.getElementById('hero-img').src = eventData.cover_image || '';
         document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
         document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
-        document.getElementById('hero-time').textContent = formatDate(eventData.start_time);
+        document.getElementById('hero-time').textContent = formatEventDayDisplay(ticket, eventData);
         // If event_snapshot.start_time is an old display string (not a real Timestamp),
         // fetch the real date from the event document so time-locked/completed states are accurate.
         if (getEventStartMs(ticket) === null && ticket.event_id) {
@@ -2188,7 +2188,7 @@
         applyInstructionsPhase(checkedIn, completed, cancelled);
         applyShareUiForCheckIn(checkedIn, completed, cancelled);
 
-        document.getElementById('detail-time').textContent = formatDate(eventData.start_time);
+        document.getElementById('detail-time').textContent = formatEventDayDisplay(ticket, eventData);
         document.getElementById('detail-venue').textContent = `${eventData.venue} • ${eventData.city}`;
 
         document.getElementById('sum-id').textContent = ticket.id;
@@ -2652,6 +2652,16 @@
         if (!val) return 'TBA';
         const date = val.toDate ? val.toDate() : new Date(val);
         return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatEventDayDisplay(ticket, eventData) {
+        const selected = (ticket && ticket.selected_day) || (eventData && eventData.selected_day) || null;
+        if (selected && selected.start_at) {
+            const base = formatDate(selected.start_at);
+            const idx = Number(selected.day_index || 0);
+            return idx > 0 ? `Day ${idx} · ${base}` : base;
+        }
+        return formatDate(eventData && eventData.start_time);
     }
 
     window.addEventListener('pagehide', function () { stopQrCountdown(); });

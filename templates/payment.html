@@ -284,6 +284,12 @@
         padding: 14px 16px;
         font-weight: 600;
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .quick-note {
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+    }
 
     @media (min-width: 860px) {
         .payment-layout { grid-template-columns: minmax(0, 1fr) 380px; }
@@ -339,6 +345,10 @@
                         <div class="summary-row">
                             <span class="sum-label">Quantity</span>
                             <span id="ticket-qty" class="sum-val">1</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="sum-label">Event Day</span>
+                            <span id="ticket-day" class="sum-val">-</span>
                         </div>
                         <div class="summary-row summary-row--last">
                             <span class="sum-label">Unit Price</span>
@@ -398,8 +408,15 @@
         eventId: sessionStorage.getItem('booking_event_id'),
         ticketId: sessionStorage.getItem('booking_ticket_id'),
         qty: parseInt(sessionStorage.getItem('booking_qty')),
-        total: parseInt(sessionStorage.getItem('booking_total'))
+        total: parseInt(sessionStorage.getItem('booking_total')),
+        selectedDay: null
     };
+    try {
+        const raw = sessionStorage.getItem('booking_selected_day');
+        bookingData.selectedDay = raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        bookingData.selectedDay = null;
+    }
     function getAvailableStock(ticketLike) {
         if (!ticketLike) return 0;
         if (Number.isFinite(Number(ticketLike.available_qty))) return Number(ticketLike.available_qty);
@@ -445,7 +462,9 @@
             document.getElementById('event-img').src = event.cover_image;
             document.getElementById('event-title').textContent = event.title;
             document.getElementById('event-location').textContent = `${event.venue_name} • ${event.city}`;
-            document.getElementById('event-time').textContent = formatDate(event.start_time);
+            const selectedDay = normalizeSelectedDay(bookingData.selectedDay, event);
+            bookingData.selectedDay = selectedDay;
+            document.getElementById('event-time').textContent = selectedDay ? formatDate(selectedDay.start_at) : formatDate(event.start_time);
 
             let ticketCollection = 'ticketTypes';
             let ticketSnap = await db.collection('events').doc(bookingData.eventId).collection(ticketCollection).doc(bookingData.ticketId).get();
@@ -474,6 +493,7 @@
 
             document.getElementById('ticket-name').textContent = ticket.name;
             document.getElementById('ticket-qty').textContent = bookingData.qty;
+            document.getElementById('ticket-day').textContent = selectedDay ? `Day ${selectedDay.day_index} · ${selectedDay.date_label}` : 'General';
             document.getElementById('ticket-unit').textContent = `₹${ticket.price}`;
             
             document.getElementById('sum-subtotal').textContent = `₹${subtotal}`;
@@ -520,6 +540,13 @@
                 scanned_at: null,
                 last_scanned_by: null,
                 payment_id: paymentId,
+                selected_day: bookingData.selectedDay ? {
+                    day_index: bookingData.selectedDay.day_index,
+                    start_at: bookingData.selectedDay.start_at,
+                    end_at: bookingData.selectedDay.end_at,
+                    date_label: bookingData.selectedDay.date_label,
+                    weekday: bookingData.selectedDay.weekday
+                } : null,
                 created_time: firebase.firestore.FieldValue.serverTimestamp(),
                 event_snapshot: {
                     title: document.getElementById('event-title').textContent,
@@ -527,8 +554,15 @@
                     city: document.getElementById('event-location').textContent.split(' • ')[1].trim(),
                     venue: document.getElementById('event-location').textContent.split(' • ')[0].trim(),
                     // Store real Firestore Timestamp so QR lock timer works correctly
-                    start_time: (eData && eData.start_time) || document.getElementById('event-time').textContent,
-                    end_time: (eData && eData.end_time) || null
+                    start_time: (bookingData.selectedDay && bookingData.selectedDay.start_at) || (eData && eData.start_time) || document.getElementById('event-time').textContent,
+                    end_time: (bookingData.selectedDay && bookingData.selectedDay.end_at) || (eData && eData.end_time) || null,
+                    selected_day: bookingData.selectedDay ? {
+                        day_index: bookingData.selectedDay.day_index,
+                        start_at: bookingData.selectedDay.start_at,
+                        end_at: bookingData.selectedDay.end_at,
+                        date_label: bookingData.selectedDay.date_label,
+                        weekday: bookingData.selectedDay.weekday
+                    } : null
                 }
             });
 
@@ -616,6 +650,30 @@
         if (!val) return 'TBA';
         const date = val.toDate ? val.toDate() : new Date(val);
         return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function normalizeSelectedDay(day, eventData) {
+        if (day && day.start_at && day.end_at) {
+            return {
+                day_index: Number(day.day_index || 1),
+                start_at: day.start_at,
+                end_at: day.end_at,
+                date_label: day.date_label || formatDate(day.start_at).split(',')[0],
+                weekday: day.weekday || ''
+            };
+        }
+        const days = Array.isArray(eventData && eventData.event_days) ? eventData.event_days : [];
+        if (days.length) {
+            const d = days[0];
+            return {
+                day_index: Number(d.day_index || 1),
+                start_at: d.start_at || d.start_time,
+                end_at: d.end_at || d.end_time,
+                date_label: d.date_label || formatDate(d.start_at || d.start_time).split(',')[0],
+                weekday: d.weekday || ''
+            };
+        }
+        return null;
     }
 
     loadPaymentDetails();

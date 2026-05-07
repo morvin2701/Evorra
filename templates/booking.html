@@ -129,6 +129,58 @@
         color: var(--sm-text);
         letter-spacing: -0.03em;
     }
+    .day-select-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+        gap: 10px;
+    }
+    .day-select-card {
+        border-radius: 14px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-bg);
+        padding: 12px 12px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .day-select-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+    }
+    .day-select-card.active {
+        border-color: rgba(220, 38, 38, 0.45);
+        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12) inset;
+        background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+    }
+    .day-select-title {
+        margin: 0;
+        font-size: 0.88rem;
+        font-weight: 900;
+        color: var(--sm-text);
+    }
+    .day-select-meta {
+        margin: 6px 0 0;
+        font-size: 0.72rem;
+        color: var(--sm-muted);
+        font-weight: 700;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-card {
+        background: #0b1220 !important;
+        border-color: #1f2a3d !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-card:hover {
+        border-color: #334155 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-card.active {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+        border-color: rgba(96, 165, 250, 0.6) !important;
+        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.22) inset, 0 8px 20px rgba(15, 23, 42, 0.35) !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-title {
+        color: #e2e8f0 !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-meta {
+        color: #94a3b8 !important;
+    }
     #ticket-list { display: grid; gap: 12px; }
     .ticket-select-card {
         border-radius: 16px;
@@ -360,6 +412,12 @@
         padding: 14px 16px;
         font-weight: 600;
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .quick-note {
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+    }
 
     @media (min-width: 860px) {
         .booking-layout { grid-template-columns: minmax(0, 1fr) 380px; }
@@ -394,6 +452,10 @@
                         <p id="event-location" class="booking-sub">Venue • City</p>
                         <p id="event-time" class="booking-time">Date TBA</p>
                     </div>
+                </div>
+                <div class="booking-card booking-block">
+                    <h2 class="booking-section-title">Select Event Day</h2>
+                    <div id="day-list" class="day-select-list"></div>
                 </div>
 
                 <div class="booking-card booking-block">
@@ -479,6 +541,8 @@
     let quantity = 1;
     let appliedDiscount = 0;
     let promoData = null;
+    let eventDays = [];
+    let selectedDay = null;
     function getAvailableStock(ticketLike) {
         if (!ticketLike) return 0;
         if (Number.isFinite(Number(ticketLike.available_qty))) return Number(ticketLike.available_qty);
@@ -516,7 +580,13 @@
             document.getElementById('event-img').src = event.cover_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30';
             document.getElementById('event-title').textContent = event.title || 'Untitled Event';
             document.getElementById('event-location').textContent = `${event.venue_name || event.venue || 'Venue'} • ${event.city || 'District'}`;
-            document.getElementById('event-time').textContent = formatDate(event.start_time);
+            eventDays = normalizeEventDays(event);
+            renderDayOptions();
+            if (eventDays.length) {
+                selectEventDay(eventDays[0].day_index);
+            } else {
+                document.getElementById('event-time').textContent = formatDate(event.start_time);
+            }
 
             let ticketSnap = await db.collection('events').doc(eventId).collection('ticketTypes').get();
             if (ticketSnap.empty) {
@@ -594,6 +664,78 @@
         document.getElementById('promo-code').value = '';
 
         updateSummary();
+    }
+
+    function normalizeEventDays(eventItem) {
+        const raw = Array.isArray(eventItem && eventItem.event_days) ? eventItem.event_days : [];
+        const out = raw
+            .map((d, idx) => {
+                const s = d && (d.start_at || d.start_time || d.start);
+                const e = d && (d.end_at || d.end_time || d.end);
+                const start = toDateSafe(s);
+                const end = toDateSafe(e);
+                if (!start || !end || end <= start) return null;
+                return {
+                    day_index: Number(d.day_index || idx + 1),
+                    start_at: start,
+                    end_at: end,
+                    date_label: d.date_label || start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+                    weekday: d.weekday || start.toLocaleDateString('en-IN', { weekday: 'short' })
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.start_at.getTime() - b.start_at.getTime())
+            .map((d, idx) => ({ ...d, day_index: idx + 1 }));
+
+        if (out.length) return out;
+        const start = toDateSafe(eventItem && eventItem.start_time);
+        const end = toDateSafe(eventItem && eventItem.end_time);
+        if (!start || !end || end <= start) return [];
+        return [{
+            day_index: 1,
+            start_at: start,
+            end_at: end,
+            date_label: start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            weekday: start.toLocaleDateString('en-IN', { weekday: 'short' })
+        }];
+    }
+
+    function toDateSafe(val) {
+        if (!val) return null;
+        const d = val.toDate ? val.toDate() : new Date(val);
+        if (Number.isNaN(d.getTime())) return null;
+        return d;
+    }
+
+    function renderDayOptions() {
+        const holder = document.getElementById('day-list');
+        if (!holder) return;
+        holder.innerHTML = '';
+        if (!eventDays.length) {
+            holder.innerHTML = '<p class="day-select-meta">No day schedule published for this event.</p>';
+            return;
+        }
+        eventDays.forEach((d) => {
+            const card = document.createElement('div');
+            card.className = 'day-select-card';
+            card.id = `d-${d.day_index}`;
+            card.innerHTML = `
+                <p class="day-select-title">Day ${d.day_index}</p>
+                <p class="day-select-meta">${escapeHtml(d.weekday)} · ${escapeHtml(d.date_label)}</p>
+            `;
+            card.onclick = () => selectEventDay(d.day_index);
+            holder.appendChild(card);
+        });
+    }
+
+    function selectEventDay(dayIndex) {
+        const day = eventDays.find((d) => Number(d.day_index) === Number(dayIndex));
+        if (!day) return;
+        selectedDay = day;
+        document.querySelectorAll('.day-select-card').forEach((c) => c.classList.remove('active'));
+        const active = document.getElementById(`d-${day.day_index}`);
+        if (active) active.classList.add('active');
+        document.getElementById('event-time').textContent = formatDate(day.start_at);
     }
 
     function updateQty(delta) {
@@ -678,6 +820,17 @@
         sessionStorage.setItem('booking_event_id', eventId);
         sessionStorage.setItem('booking_ticket_id', selectedTicket.id);
         sessionStorage.setItem('booking_qty', quantity);
+        if (selectedDay) {
+            sessionStorage.setItem('booking_selected_day', JSON.stringify({
+                day_index: selectedDay.day_index,
+                start_at: selectedDay.start_at.toISOString(),
+                end_at: selectedDay.end_at.toISOString(),
+                date_label: selectedDay.date_label,
+                weekday: selectedDay.weekday
+            }));
+        } else {
+            sessionStorage.removeItem('booking_selected_day');
+        }
         const totalDigits = document.getElementById('sum-total').textContent.replace(/[^\d]/g, '');
         sessionStorage.setItem('booking_total', Math.round(Number(totalDigits || 0)));
 
@@ -688,6 +841,15 @@
         if (!val) return 'TBA';
         const date = val.toDate ? val.toDate() : new Date(val);
         return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     loadBookingData();
