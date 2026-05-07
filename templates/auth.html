@@ -259,6 +259,13 @@
             var(--sm-bg);
         overflow: hidden;
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .auth-form-column {
+        background:
+            linear-gradient(180deg, rgba(15, 23, 42, 0.72) 0%, transparent 28%),
+            radial-gradient(ellipse 70% 45% at 90% 15%, rgba(96, 165, 250, 0.12) 0%, transparent 45%),
+            linear-gradient(95deg, rgba(2, 6, 23, 0.72) 0%, #020617 18%),
+            #020617 !important;
+    }
 
     .auth-stage {
         width: 100%;
@@ -325,6 +332,11 @@
             0 0 0 1px rgba(255, 255, 255, 0.75) inset,
             0 6px 22px rgba(15, 23, 42, 0.07);
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .auth-switch {
+        border-color: #334155 !important;
+        background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%) !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32) !important;
+    }
     .switch-btn {
         border: none;
         border-radius: 12px;
@@ -338,6 +350,9 @@
         font-family: inherit;
         transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
     }
+    .switch-btn:not(.active) {
+        color: #64748b;
+    }
     .switch-btn.active {
         color: var(--sm-primary);
         background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
@@ -345,9 +360,23 @@
             0 0 0 1px rgba(220, 38, 38, 0.14),
             0 8px 24px rgba(220, 38, 38, 0.14);
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .switch-btn {
+        color: #a9b6ca !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .switch-btn.active {
+        color: #bfdbfe !important;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(59, 130, 246, 0.18) 100%) !important;
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.35), 0 8px 24px rgba(37, 99, 235, 0.25) !important;
+    }
     .switch-btn:not(.active):hover {
-        color: var(--sm-text);
-        background: rgba(255, 255, 255, 0.7);
+        color: #334155;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35) inset;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .switch-btn:not(.active):hover {
+        color: #e2e8f0 !important;
+        background: rgba(30, 41, 59, 0.92) !important;
+        box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.58) inset !important;
     }
 
     .auth-panel {
@@ -362,6 +391,11 @@
         position: relative;
         overflow: hidden;
         transition: box-shadow 0.35s ease, border-color 0.25s ease;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .auth-panel {
+        background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%) !important;
+        border-color: #1f2a3d !important;
+        box-shadow: 0 18px 46px rgba(0, 0, 0, 0.36) !important;
     }
     .auth-form-scroll:hover .auth-panel {
         border-color: #e2e8f0;
@@ -985,6 +1019,22 @@
     .auth-social-btn--google i {
         color: #ea4335;
     }
+    .auth-social-btn--google {
+        color: #0f172a !important;
+        border-color: #cbd5e1;
+        background: #ffffff !important;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
+    .auth-social-btn--google:hover {
+        color: #020617 !important;
+        border-color: #94a3b8;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .auth-social-btn--google {
+        color: #0f172a !important;
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+    }
 
     .error-banner {
         background: rgba(220, 38, 38, 0.08);
@@ -1128,7 +1178,7 @@
 
             <div class="auth-hero-content">
                 <p class="auth-hero-eyebrow">Experience everything</p>
-                <h2 class="auth-hero-title">Your district for live events</h2>
+                <h2 class="auth-hero-title">Discover. Book. Experience.</h2>
                 <p class="auth-hero-lead">Book in seconds, show your QR at the door, and keep every pass in one place.</p>
                 <ul class="auth-hero-list">
                     <li><i class="fa-solid fa-check" aria-hidden="true"></i> Secure checkout &amp; instant confirmation</li>
@@ -1142,12 +1192,12 @@
             <div class="auth-stage">
                 <div class="auth-topbar">
                     <div class="auth-switch" role="tablist" aria-label="Sign up or sign in">
-                        <button type="button" id="switch-signup" class="switch-btn active" role="tab" aria-selected="true" onclick="toggleView('signup')">Create account</button>
-                        <button type="button" id="switch-login" class="switch-btn" role="tab" aria-selected="false" onclick="toggleView('login')">Sign in</button>
+                        <button type="button" id="switch-signup" class="switch-btn" role="tab" aria-selected="false" onclick="toggleView('signup')">Create account</button>
+                        <button type="button" id="switch-login" class="switch-btn active" role="tab" aria-selected="true" onclick="toggleView('login')">Sign in</button>
                     </div>
                 </div>
 
-                <div id="signup-view" class="form-view active animate-evorra">
+                <div id="signup-view" class="form-view animate-evorra">
                     <div class="auth-form-scroll">
                     <div class="auth-panel">
                         <p class="auth-kicker">New here</p>
@@ -1202,7 +1252,7 @@
                     </div>
                 </div>
 
-                <div id="login-view" class="form-view animate-evorra">
+                <div id="login-view" class="form-view active animate-evorra">
                     <div class="auth-form-scroll">
                     <div class="auth-panel">
                         <p class="auth-kicker">Welcome back</p>
@@ -1292,6 +1342,7 @@
     }
 
     initPasswordToggles();
+    toggleView('login');
 
     async function ensureUserDoc(user, preferredName) {
         if (!user) return;
