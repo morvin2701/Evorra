@@ -1112,19 +1112,23 @@
             let writeMode = 'full';
             try {
                 await db.runTransaction(async (txn) => {
-                    // Re-read inside txn for optimistic concurrency
-                    const freshTicket = (await txn.get(ticketRef)).data() || {};
+                    // Firestore: ALL txn.get() calls MUST run before ANY writes.
+                    const ticketSnap = await txn.get(ticketRef);
+                    const eventSnap = await txn.get(eventRef);
+                    const priorLogSnap = await txn.get(logRef);
+
+                    const freshTicket = ticketSnap.data() || {};
+                    if (!ticketSnap.exists) throw new Error("Ticket not found.");
                     if (freshTicket.checked_in === true) throw new Error("Ticket already checked in.");
+                    if (priorLogSnap.exists) throw new Error("Ticket already checked in.");
+
+                    const freshEvent = eventSnap.data() || {};
+                    const prevTotal = Number((freshEvent.stats || {}).scans_total || 0);
 
                     txn.update(ticketRef, scanFields);
-
-                    const freshEvent = (await txn.get(eventRef)).data() || {};
-                    const prevTotal  = Number((freshEvent.stats || {}).scans_total || 0);
                     txn.update(eventRef, { 'stats.scans_total': prevTotal + quantity });
-
-                    const priorLogSnap = await txn.get(logRef);
-                    if (priorLogSnap.exists) throw new Error("Ticket already checked in.");
-                    txn.create(logRef, {
+                    // Firestore web Transaction has set/update/delete — no txn.create()
+                    txn.set(logRef, {
                         id:          logRef.id,
                         ticket_id:   preTicket.id || targetTicketId,
                         event_id:    preTicket.event_id,

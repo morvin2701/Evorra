@@ -796,20 +796,57 @@
         toggleMobileSmartPanels(trendingPool.length > 0, nearPool.length > 0, forYouPool.length > 0);
     }
 
+    function parseEventDateMaybe(raw) {
+        if (raw == null || raw === '') return null;
+        try {
+            const d = raw.toDate ? raw.toDate() : new Date(raw);
+            const t = d.getTime();
+            return Number.isNaN(t) ? null : d;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function getEffectiveEventEndDate(eventItem) {
+        if (!eventItem) return null;
+        const rawDays = Array.isArray(eventItem.event_days) ? eventItem.event_days : [];
+        if (rawDays.length > 0) {
+            let best = null;
+            let bestMs = -Infinity;
+            for (let i = 0; i < rawDays.length; i++) {
+                const day = rawDays[i];
+                const endRaw = day && (day.end_at != null ? day.end_at : (day.end_time != null ? day.end_time : day.end));
+                const d = parseEventDateMaybe(endRaw);
+                if (d && d.getTime() > bestMs) {
+                    bestMs = d.getTime();
+                    best = d;
+                }
+            }
+            if (best) return best;
+        }
+        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime);
+    }
+
+    function isMultiDayScheduleEvent(eventItem) {
+        if (!eventItem) return false;
+        const n = Number(eventItem.event_day_count || 0);
+        const raw = Array.isArray(eventItem.event_days) ? eventItem.event_days : [];
+        return n > 1 || raw.length > 1;
+    }
+
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
         if (eventItem.is_closed === true) return true;
         const status = String(eventItem.status || '').toLowerCase();
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
-        const endRaw = eventItem.end_time || eventItem.endTime;
-        if (endRaw) {
-            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
-            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
-        }
+
+        const effectiveEnd = getEffectiveEventEndDate(eventItem);
+        if (effectiveEnd && effectiveEnd.getTime() < Date.now()) return true;
+
         const startRaw = eventItem.start_time || eventItem.startTime;
-        if (startRaw) {
-            const startDate = startRaw.toDate ? startRaw.toDate() : new Date(startRaw);
-            if (!Number.isNaN(startDate.getTime())) {
+        if (!isMultiDayScheduleEvent(eventItem) && !effectiveEnd && startRaw) {
+            const startDate = parseEventDateMaybe(startRaw);
+            if (startDate) {
                 const endOfDay = new Date(startDate);
                 endOfDay.setHours(23, 59, 59, 999);
                 if (Date.now() > endOfDay.getTime()) return true;
