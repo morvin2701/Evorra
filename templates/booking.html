@@ -175,6 +175,19 @@
         border-color: rgba(96, 165, 250, 0.6) !important;
         box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.22) inset, 0 8px 20px rgba(15, 23, 42, 0.35) !important;
     }
+    .day-select-card.completed {
+        opacity: 0.55;
+        cursor: not-allowed;
+        background: #f1f5f9 !important;
+        border-color: #e2e8f0 !important;
+        pointer-events: none;
+        filter: grayscale(0.8);
+    }
+    .day-select-card.completed .day-select-title::after {
+        content: " (Past)";
+        font-size: 0.7rem;
+        color: #ef4444;
+    }
     :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .day-select-title {
         color: #e2e8f0 !important;
     }
@@ -548,16 +561,74 @@
         if (Number.isFinite(Number(ticketLike.available_qty))) return Number(ticketLike.available_qty);
         return Number(ticketLike.stock || 0);
     }
+    function parseEventDateMaybe(raw) {
+        if (raw == null || raw === '') return null;
+        if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
+        try {
+            if (typeof raw.toDate === 'function') {
+                const d = raw.toDate();
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            const secs = raw.seconds ?? raw._seconds;
+            if (typeof secs === 'number') {
+                const d = new Date(secs * 1000);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            if (typeof raw === 'number') {
+                const d = new Date(raw);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            const d = new Date(raw);
+            const t = d.getTime();
+            return Number.isNaN(t) ? null : d;
+        } catch (_) { return null; }
+    }
+
+    function getEffectiveEventEndDate(eventItem) {
+        if (!eventItem) return null;
+        const rawDays = Array.isArray(eventItem.event_days) ? eventItem.event_days : [];
+        if (rawDays.length > 0) {
+            let best = null;
+            let bestMs = -Infinity;
+            for (let i = 0; i < rawDays.length; i++) {
+                const day = rawDays[i];
+                const endRaw = day && (day.end_at != null ? day.end_at : (day.end_time != null ? day.end_time : day.end));
+                const d = parseEventDateMaybe(endRaw);
+                if (d && d.getTime() > bestMs) {
+                    bestMs = d.getTime();
+                    best = d;
+                }
+            }
+            if (best) return best;
+        }
+        // ✅ start_time fallback HATAYA — sirf actual end fields use karo
+        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime || eventItem.date || null);
+    }
+
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
         if (eventItem.is_closed === true) return true;
         const status = String(eventItem.status || '').toLowerCase();
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
         if (eventItem.is_published === false) return true;
-        const endRaw = eventItem.end_time || eventItem.endTime;
-        if (endRaw) {
-            const endDate = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
-            if (!Number.isNaN(endDate.getTime()) && endDate < new Date()) return true;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
+
+        const effectiveEnd = getEffectiveEventEndDate(eventItem);
+
+        if (effectiveEnd && effectiveEnd.getTime() > 0) {
+            if (effectiveEnd.getTime() < todayMs) return true;
+        } else {
+            const startDate = parseEventDateMaybe(
+                eventItem.start_time || eventItem.startTime || eventItem.date || null
+            );
+            if (startDate && startDate.getTime() > 0) {
+                const startDay = new Date(startDate.getTime());
+                startDay.setHours(0, 0, 0, 0);
+                if (startDay.getTime() < todayMs) return true;
+            }
         }
         return false;
     }
@@ -645,6 +716,16 @@
 
             if (tickets.length > 0) selectTicket(tickets[0]);
 
+            // Auto-select first available day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const firstAvailable = eventDays.find(d => d.end_at >= today);
+            if (firstAvailable) {
+                selectEventDay(firstAvailable.day_index);
+            } else if (eventDays.length) {
+                selectEventDay(eventDays[0].day_index);
+            }
+
         } catch (e) { console.error(e); }
     }
 
@@ -715,15 +796,19 @@
             holder.innerHTML = '<p class="day-select-meta">No day schedule published for this event.</p>';
             return;
         }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         eventDays.forEach((d) => {
+            const isPast = d.end_at < today;
             const card = document.createElement('div');
-            card.className = 'day-select-card';
+            card.className = `day-select-card ${isPast ? 'completed' : ''}`;
             card.id = `d-${d.day_index}`;
             card.innerHTML = `
                 <p class="day-select-title">Day ${d.day_index}</p>
                 <p class="day-select-meta">${escapeHtml(d.weekday)} · ${escapeHtml(d.date_label)}</p>
             `;
-            card.onclick = () => selectEventDay(d.day_index);
+            if (!isPast) card.onclick = () => selectEventDay(d.day_index);
             holder.appendChild(card);
         });
     }

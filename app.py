@@ -1,10 +1,11 @@
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for
 from flask_cors import CORS
 import json
 import os
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -28,6 +29,66 @@ def _init_firebase_admin():
         else:
             firebase_admin.initialize_app()
     return firestore.client()
+
+
+def _is_event_expired(data: dict) -> bool:
+    """Return True if the event's effective end date is before today (midnight local).
+
+    Checks (in order): event_days[].end_at, end_time, date, start_time.
+    Uses UTC midnight as the comparison threshold so that an event whose last
+    day is *today* is still considered active.
+    """
+    if not data:
+        return True
+    status = str(data.get('status') or '').lower()
+    if status in {'closed', 'cancelled', 'completed', 'ended', 'archived'}:
+        return True
+    if data.get('is_closed') is True:
+        return True
+
+    today_utc = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+
+    def _to_dt(val):
+        """Convert Firestore Timestamp, datetime, or str to an aware datetime."""
+        if val is None:
+            return None
+        if hasattr(val, 'tzinfo'):  # already a datetime
+            return val if val.tzinfo else val.replace(tzinfo=timezone.utc)
+        # Firestore Timestamp from Admin SDK has .timestamp() and .ToDatetime()
+        if hasattr(val, 'timestamp_pb') or hasattr(val, 'seconds'):
+            try:
+                return datetime.fromtimestamp(val.timestamp(), tz=timezone.utc)
+            except Exception:
+                pass
+        try:
+            dt = datetime.fromisoformat(str(val))
+            return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        except Exception:
+            pass
+        return None
+
+    # Check multi-day event_days
+    event_days = data.get('event_days') or []
+    if isinstance(event_days, list) and event_days:
+        best = None
+        for day in event_days:
+            if not isinstance(day, dict):
+                continue
+            raw = day.get('end_at') or day.get('end_time') or day.get('end')
+            dt = _to_dt(raw)
+            if dt and (best is None or dt > best):
+                best = dt
+        if best:
+            return best < today_utc
+
+    # Fallback chain: end_time -> date -> start_time
+    for field in ('end_time', 'endTime', 'date', 'start_time', 'startTime'):
+        raw = data.get(field)
+        dt = _to_dt(raw)
+        if dt:
+            return dt < today_utc
+
+    return False  # No date found – do not block
 
 
 def _extract_bearer_token():
@@ -225,14 +286,41 @@ def explore():
 
 @app.route('/event/<event_id>')
 def event_details(event_id):
+    try:
+        db = _init_firebase_admin()
+        doc = db.collection('events').document(event_id).get()
+        if doc.exists:
+            data = doc.to_dict() or {}
+            if _is_event_expired(data):
+                return redirect(url_for('explore'))
+    except Exception:
+        pass  # On error, still render the page; JS will handle it
     return render_template('event_details.html', event_id=event_id)
 
 @app.route('/book/<event_id>')
 def book_ticket(event_id):
+    try:
+        db = _init_firebase_admin()
+        doc = db.collection('events').document(event_id).get()
+        if doc.exists:
+            data = doc.to_dict() or {}
+            if _is_event_expired(data):
+                return redirect(url_for('event_details', event_id=event_id))
+    except Exception:
+        pass
     return render_template('booking.html', event_id=event_id)
 
 @app.route('/payment/<event_id>')
 def payment(event_id):
+    try:
+        db = _init_firebase_admin()
+        doc = db.collection('events').document(event_id).get()
+        if doc.exists:
+            data = doc.to_dict() or {}
+            if _is_event_expired(data):
+                return redirect(url_for('event_details', event_id=event_id))
+    except Exception:
+        pass
     return render_template('payment.html', event_id=event_id)
 
 @app.route('/payment_success')

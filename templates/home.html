@@ -1631,13 +1631,25 @@
     }
     function parseEventDateMaybe(raw) {
         if (raw == null || raw === '') return null;
+        if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
         try {
-            const d = raw.toDate ? raw.toDate() : new Date(raw);
+            if (typeof raw.toDate === 'function') {
+                const d = raw.toDate();
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            const secs = raw.seconds ?? raw._seconds;
+            if (typeof secs === 'number') {
+                const d = new Date(secs * 1000);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            if (typeof raw === 'number') {
+                const d = new Date(raw);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            const d = new Date(raw);
             const t = d.getTime();
             return Number.isNaN(t) ? null : d;
-        } catch (_) {
-            return null;
-        }
+        } catch (_) { return null; }
     }
 
     /** Last moment the event is still running (multi-day: max of event_days[].end_at). */
@@ -1658,7 +1670,8 @@
             }
             if (best) return best;
         }
-        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime);
+        // ✅ start_time fallback HATAYA — sirf actual end fields use karo
+        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime || eventItem.date || null);
     }
 
     function isMultiDayScheduleEvent(eventItem) {
@@ -1671,22 +1684,25 @@
     function isEventClosed(eventItem) {
         if (!eventItem) return true;
         if (eventItem.is_closed === true) return true;
-
         const status = String(eventItem.status || '').toLowerCase();
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
 
-        const effectiveEnd = getEffectiveEventEndDate(eventItem);
-        if (effectiveEnd && effectiveEnd.getTime() < Date.now()) return true;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
 
-        // Single-day fallback: if no end date on doc, treat as "same calendar day as start"
-        // Do NOT apply after day 1 for multi-day festivals (would hide days 2–3).
-        const startRaw = eventItem.start_time || eventItem.startTime;
-        if (!isMultiDayScheduleEvent(eventItem) && !effectiveEnd && startRaw) {
-            const startDate = parseEventDateMaybe(startRaw);
-            if (startDate) {
-                const endOfDay = new Date(startDate);
-                endOfDay.setHours(23, 59, 59, 999);
-                if (Date.now() > endOfDay.getTime()) return true;
+        const effectiveEnd = getEffectiveEventEndDate(eventItem);
+
+        if (effectiveEnd && effectiveEnd.getTime() > 0) {
+            if (effectiveEnd.getTime() < todayMs) return true;
+        } else {
+            const startDate = parseEventDateMaybe(
+                eventItem.start_time || eventItem.startTime || eventItem.date || null
+            );
+            if (startDate && startDate.getTime() > 0) {
+                const startDay = new Date(startDate.getTime());
+                startDay.setHours(0, 0, 0, 0);
+                if (startDay.getTime() < todayMs) return true;
             }
         }
         return false;

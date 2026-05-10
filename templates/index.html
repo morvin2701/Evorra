@@ -178,24 +178,109 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        function parseEventDateMaybe(raw) {
+            if (raw == null || raw === '') return null;
+            if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
+            try {
+                if (typeof raw.toDate === 'function') {
+                    const d = raw.toDate();
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+                const secs = raw.seconds ?? raw._seconds;
+                if (typeof secs === 'number') {
+                    const d = new Date(secs * 1000);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+                if (typeof raw === 'number') {
+                    const d = new Date(raw);
+                    return Number.isNaN(d.getTime()) ? null : d;
+                }
+                const d = new Date(raw);
+                const t = d.getTime();
+                return Number.isNaN(t) ? null : d;
+            } catch (_) { return null; }
+        }
+
+        function getEffectiveEventEndDate(ev) {
+            if (!ev) return null;
+            const rawDays = Array.isArray(ev.event_days) ? ev.event_days : [];
+            if (rawDays.length > 0) {
+                let best = null;
+                let bestMs = -Infinity;
+                rawDays.forEach(day => {
+                    const endRaw = day && (day.end_at || day.end_time || day.end);
+                    const d = parseEventDateMaybe(endRaw);
+                    if (d && d.getTime() > bestMs) {
+                        bestMs = d.getTime();
+                        best = d;
+                    }
+                });
+                if (best) return best;
+            }
+            // ✅ start_time fallback HATAYA
+            return parseEventDateMaybe(ev.end_time || ev.endTime || ev.date || null);
+        }
+
+        function isEventClosed(ev) {
+            if (!ev) return true;
+            if (ev.is_closed === true) return true;
+            const status = String(ev.status || '').toLowerCase();
+            if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayMs = today.getTime();
+
+            const effectiveEnd = getEffectiveEventEndDate(ev);
+            
+            if (effectiveEnd && effectiveEnd.getTime() > 0) {
+                if (effectiveEnd.getTime() < todayMs) return true;
+            } else {
+                const startDate = parseEventDateMaybe(ev.start_time || ev.startTime || ev.date || null);
+                if (startDate && startDate.getTime() > 0) {
+                    const startDay = new Date(startDate.getTime());
+                    startDay.setHours(0, 0, 0, 0);
+                    if (startDay.getTime() < todayMs) return true;
+                }
+            }
+            return false;
+        }
+
         async function loadEvents() {
             const eventGrid = document.getElementById('featured-events');
             try {
-                const snapshot = await db.collection('events').limit(6).get();
+                const snapshot = await db.collection('events').get();
                 if (snapshot.empty) return;
 
-                eventGrid.innerHTML = '';
+                const events = [];
                 snapshot.forEach(doc => {
-                    const data = doc.data();
+                    const data = { id: doc.id, ...doc.data() };
+                    if (data.is_published !== false && !isEventClosed(data)) {
+                        events.push(data);
+                    }
+                });
+
+                // Limit to 6 most relevant/featured
+                const display = events.slice(0, 6);
+                if (display.length === 0) {
+                    eventGrid.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; width: 100%;">No live events available right now. Check back soon!</p>';
+                    return;
+                }
+
+                eventGrid.innerHTML = '';
+                display.forEach(data => {
+                    const eventDate = data.start_time || data.startTime || data.date;
+                    const dateStr = eventDate ? (eventDate.toDate ? eventDate.toDate().toLocaleDateString() : new Date(eventDate).toLocaleDateString()) : 'Coming Soon';
+                    
                     const card = `
-                        <div class="event-card glass animate-fade">
-                            <img src="${data.cover_image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'}" alt="${data.name}" class="event-img">
+                        <div class="event-card glass animate-fade" onclick="location.href='/event/${data.id}'">
+                            <img src="${data.cover_image || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'}" alt="${data.name || data.title}" class="event-img">
                             <div class="event-info">
-                                <span class="event-tag">${data.category || 'Experience'}</span>
-                                <h3 class="event-title">${data.name || 'Untitled Event'}</h3>
+                                <span class="event-tag">${data.category_name || data.category || 'Experience'}</span>
+                                <h3 class="event-title">${data.title || data.name || 'Untitled Event'}</h3>
                                 <div class="event-meta">
-                                    <span>${data.date ? (data.date.toDate ? data.date.toDate().toLocaleDateString() : new Date(data.date).toLocaleDateString()) : 'Coming Soon'}</span>
-                                    <span style="color: var(--accent)">$${data.min_price || '0'} onwards</span>
+                                    <span>${dateStr}</span>
+                                    <span style="color: var(--accent)">₹${data.price_start || data.min_price || '0'} onwards</span>
                                 </div>
                             </div>
                         </div>

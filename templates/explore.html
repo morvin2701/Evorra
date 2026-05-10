@@ -8,8 +8,17 @@
         background: transparent;
         min-height: 100vh;
     }
-    .explore-wrap { padding-top: 26px; padding-bottom: 120px; }
-    .explore-shell { width: min(1260px, calc(100% - 40px)); margin: 0 auto; }
+
+    .explore-wrap {
+        padding-top: 26px;
+        padding-bottom: 120px;
+    }
+
+    .explore-shell {
+        width: min(1260px, calc(100% - 40px));
+        margin: 0 auto;
+    }
+
     .explore-topbar {
         display: flex;
         align-items: center;
@@ -17,15 +26,32 @@
         margin-bottom: 18px;
         gap: 12px;
     }
-    .explore-title-row { display: flex; align-items: center; gap: 13px; }
-    .explore-back {
-        width: 40px; height: 40px; border-radius: 12px;
-        display: inline-flex; align-items: center; justify-content: center;
-        text-decoration: none; color: #fff;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.05);
+
+    .explore-title-row {
+        display: flex;
+        align-items: center;
+        gap: 13px;
     }
-    .explore-heading { font-size: 1.72rem; font-weight: 900; letter-spacing: -0.02em; }
+
+    .explore-back {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .explore-heading {
+        font-size: 1.72rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+    }
+
     .filter-btn {
         width: auto;
         padding: 10px 20px;
@@ -37,84 +63,247 @@
         color: var(--sm-primary);
         box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
     }
+
     .filter-btn:hover {
         border-color: rgba(220, 38, 38, 0.4);
         transform: translateY(-1px);
         box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
     }
+
     .search-field-container {
-        display: grid; grid-template-columns: 22px 1fr 20px; align-items: center;
-        gap: 10px; padding: 0 14px; height: 56px; border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.13);
-        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        display: grid;
+        grid-template-columns: 22px 1fr 20px;
+        align-items: center;
+        gap: 10px;
+        padding: 0 14px;
+        height: 56px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
         margin-bottom: 14px;
     }
+
     .search-field-container input {
-        background: transparent; border: none; color: #fff; font-size: 0.92rem;
-        width: 100%; outline: none;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 0.92rem;
+        width: 100%;
+        outline: none;
     }
-    .search-field-container input::placeholder { color: rgba(255,255,255,0.5); }
-    #category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 14px; margin-bottom: 10px; scrollbar-width: none; }
-    #category-scroll::-webkit-scrollbar { display: none; }
+
+    .search-field-container input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    #category-scroll {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 14px;
+        margin-bottom: 10px;
+        scrollbar-width: none;
+    }
+
+    #category-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
     .quick-filter-chip {
-        flex-shrink: 0; padding: 9px 13px; border-radius: 999px;
-        border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
-        color: rgba(234,243,255,0.84); font-size: 0.78rem; font-weight: 700; cursor: pointer;
+        flex-shrink: 0;
+        padding: 9px 13px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(234, 243, 255, 0.84);
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
     }
+
     .quick-filter-chip.active {
-        color: #fff; border-color: rgba(87,228,255,0.56);
-        background: linear-gradient(145deg, rgba(35,198,243,0.32), rgba(127,95,255,0.3));
+        color: #fff;
+        border-color: rgba(87, 228, 255, 0.56);
+        background: linear-gradient(145deg, rgba(35, 198, 243, 0.32), rgba(127, 95, 255, 0.3));
     }
-    .results-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 14px; }
-    .results-head-main { flex: 1; min-width: 0; }
-    #results-count { font-size: 1.25rem; font-weight: 900; color: #fff; margin: 0; }
-    .results-sort-hint {
-        margin: 6px 0 0;
-        font-size: 0.76rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.52);
-        line-height: 1.35;
-        max-width: 520px;
+
+    .results-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        gap: 14px;
     }
-    #clear-all-filters { background: none; border: none; color: #8E7DFF; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-    #results-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+
+    .results-head-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    #results-count {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+    }
+
+    #clear-all-filters {
+        background: none;
+        border: none;
+        color: #8E7DFF;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    #results-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        gap: 14px;
+    }
+
     .search-result-card {
-        border-radius: 18px; overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
-        cursor: pointer; transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+        cursor: pointer;
+        transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
     }
-    .search-result-card:hover { transform: translateY(-3px); border-color: rgba(98,226,255,0.45); box-shadow: 0 18px 28px rgba(0,0,0,0.26); }
-    .search-result-card.closed { opacity: 0.8; filter: grayscale(0.2); }
+
+    .search-result-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(98, 226, 255, 0.45);
+        box-shadow: 0 18px 28px rgba(0, 0, 0, 0.26);
+    }
+
+    .search-result-card.closed {
+        opacity: 0.8;
+        filter: grayscale(0.2);
+    }
+
     .result-image-wrap {
         position: relative;
         aspect-ratio: 3 / 4;
         overflow: hidden;
         background: #0f172a;
     }
-    .result-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .result-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
     .result-badge {
-        position: absolute; top: 12px; left: 12px; border-radius: 999px; padding: 6px 10px;
-        background: rgba(108, 92, 231, 0.9); color: #fff; font-size: 0.66rem; font-weight: 800; text-transform: uppercase;
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: rgba(108, 92, 231, 0.9);
+        color: #fff;
+        font-size: 0.66rem;
+        font-weight: 800;
+        text-transform: uppercase;
     }
-    .result-badge.right { left: auto; right: 12px; background: rgba(34, 197, 155, 0.92); }
-    .result-badge.closed { left: auto; right: 12px; background: rgba(255, 82, 112, 0.88); }
-    .result-body { padding: 14px; }
-    .result-title { color: #fff; font-size: 1.02rem; font-weight: 900; line-height: 1.25; margin-bottom: 8px; }
-    .result-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; opacity: 0.74; font-size: 0.75rem; color: #fff; }
-    .metric-row { display: flex; gap: 10px; }
-    .metric-pill { flex: 1; border-radius: 12px; padding: 8px 10px; border: 1px solid rgba(255,255,255,0.1); }
-    .metric-pill .label { font-size: 0.64rem; opacity: 0.78; text-transform: uppercase; letter-spacing: 0.06em; }
-    .metric-pill .value { margin-top: 2px; font-size: 0.8rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .metric-pill.price { background: rgba(140, 240, 198, 0.1); color: #8CF0C6; }
-    .metric-pill.type { background: rgba(142, 125, 255, 0.1); color: #8E7DFF; }
+
+    .result-badge.right {
+        left: auto;
+        right: 12px;
+        background: rgba(34, 197, 155, 0.92);
+    }
+
+    .result-badge.closed {
+        left: auto;
+        right: 12px;
+        background: rgba(255, 82, 112, 0.88);
+    }
+
+    .result-body {
+        padding: 14px;
+    }
+
+    .result-title {
+        color: #fff;
+        font-size: 1.02rem;
+        font-weight: 900;
+        line-height: 1.25;
+        margin-bottom: 8px;
+    }
+
+    .result-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 12px;
+        opacity: 0.74;
+        font-size: 0.75rem;
+        color: #fff;
+    }
+
+    .metric-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .metric-pill {
+        flex: 1;
+        border-radius: 12px;
+        padding: 8px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .metric-pill .label {
+        font-size: 0.64rem;
+        opacity: 0.78;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .metric-pill .value {
+        margin-top: 2px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .metric-pill.price {
+        background: rgba(140, 240, 198, 0.1);
+        color: #8CF0C6;
+    }
+
+    .metric-pill.type {
+        background: rgba(142, 125, 255, 0.1);
+        color: #8E7DFF;
+    }
+
     .explore-toast {
-        position: fixed; top: 14px; left: 50%; transform: translate(-50%, -10px);
-        z-index: 1205; background: rgba(14, 22, 39, 0.94); border: 1px solid rgba(255,255,255,0.14);
-        color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 0.82rem; font-weight: 600;
-        opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+        position: fixed;
+        top: 14px;
+        left: 50%;
+        transform: translate(-50%, -10px);
+        z-index: 1205;
+        background: rgba(14, 22, 39, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #fff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease, transform .2s ease;
     }
-    .explore-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .explore-toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
     .filter-overlay {
         position: fixed;
         inset: 0;
@@ -130,10 +319,12 @@
         pointer-events: none;
         transition: opacity 0.24s ease;
     }
+
     .filter-overlay.is-open {
         opacity: 1;
         pointer-events: auto;
     }
+
     .filter-sheet {
         width: min(740px, 100%);
         max-height: calc(100dvh - 112px);
@@ -149,12 +340,14 @@
         transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow .32s ease;
         overflow: hidden;
     }
+
     .filter-overlay.is-open .filter-sheet {
         transform: translateY(0) scale(1);
         box-shadow:
             0 0 0 1px rgba(255, 255, 255, 0.85) inset,
             0 34px 90px rgba(15, 23, 42, 0.34);
     }
+
     .filter-sheet-head {
         display: flex;
         align-items: center;
@@ -163,6 +356,7 @@
         padding: 18px 24px;
         border-bottom: 1px solid var(--sm-border);
     }
+
     .filter-title {
         margin: 0;
         font-size: clamp(1.2rem, 2.2vw, 1.45rem);
@@ -170,12 +364,14 @@
         letter-spacing: -0.02em;
         color: var(--sm-text);
     }
+
     .filter-subtitle {
         margin: 5px 0 0;
         font-size: 0.82rem;
         color: var(--sm-muted);
         font-weight: 650;
     }
+
     .filter-close-btn {
         width: 42px;
         height: 42px;
@@ -189,11 +385,13 @@
         cursor: pointer;
         transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
+
     .filter-close-btn:hover {
         transform: translateY(-1px);
         border-color: rgba(220, 38, 38, 0.28);
         background: #fff5f5;
     }
+
     .filter-sheet-body {
         max-height: min(58vh, 560px);
         overflow: auto;
@@ -201,6 +399,7 @@
         display: grid;
         gap: 14px;
     }
+
     .filter-group {
         border: 1px solid var(--sm-border);
         border-radius: 16px;
@@ -208,6 +407,7 @@
         padding: 16px;
         box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
     }
+
     .filter-label {
         margin: 0 0 10px;
         color: var(--sm-muted);
@@ -216,11 +416,13 @@
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
+
     .filter-row-2 {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
     }
+
     .filter-input {
         width: 100%;
         height: 46px;
@@ -234,14 +436,17 @@
         outline: none;
         transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
     }
+
     .filter-input::placeholder {
         color: #94a3b8;
     }
+
     .filter-input:focus {
         border-color: rgba(220, 38, 38, 0.34);
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
         background: #fff;
     }
+
     .filter-check-row {
         display: flex;
         align-items: center;
@@ -249,16 +454,19 @@
         padding: 12px 2px;
         border-top: 1px dashed rgba(148, 163, 184, 0.3);
     }
+
     .filter-check-row:first-child {
         border-top: none;
         padding-top: 2px;
     }
+
     .filter-check-row span {
         color: var(--sm-text);
         font-weight: 700;
         font-size: 0.88rem;
         letter-spacing: 0.01em;
     }
+
     .filter-toggle {
         appearance: none;
         -webkit-appearance: none;
@@ -271,6 +479,7 @@
         cursor: pointer;
         transition: border-color .2s ease, background .2s ease;
     }
+
     .filter-toggle::before {
         content: "";
         position: absolute;
@@ -281,16 +490,19 @@
         border-radius: 999px;
         background: #94a3b8;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
-        transition: transform .24s cubic-bezier(.22,1,.36,1), background .2s ease;
+        transition: transform .24s cubic-bezier(.22, 1, .36, 1), background .2s ease;
     }
+
     .filter-toggle:checked {
         border-color: rgba(220, 38, 38, 0.45);
         background: rgba(220, 38, 38, 0.16);
     }
+
     .filter-toggle:checked::before {
         transform: translateX(20px);
         background: #fff;
     }
+
     .filter-sheet-foot {
         padding: 16px 24px 20px;
         border-top: 1px solid var(--sm-border);
@@ -298,11 +510,13 @@
         display: grid;
         gap: 10px;
     }
+
     .filter-actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
+
     .filter-reset-btn,
     .filter-apply-btn {
         height: 52px;
@@ -313,34 +527,54 @@
         cursor: pointer;
         transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
+
     .filter-reset-btn {
         color: var(--sm-text);
         border-color: var(--sm-border);
         background: #fff;
     }
+
     .filter-reset-btn:hover,
     .filter-apply-btn:hover {
         transform: translateY(-1px);
     }
+
     .filter-reset-btn:active,
     .filter-apply-btn:active {
         transform: translateY(0);
     }
+
     .filter-apply-btn {
         color: #fff;
         border-color: rgba(220, 38, 38, 0.45);
         background: linear-gradient(120deg, #dc2626, #f97316);
         box-shadow: 0 12px 26px rgba(220, 38, 38, 0.24);
     }
+
     .filter-overlay.is-open .filter-group {
         animation: filterGroupIn .28s ease both;
     }
-    .filter-overlay.is-open .filter-group:nth-child(2) { animation-delay: .04s; }
-    .filter-overlay.is-open .filter-group:nth-child(3) { animation-delay: .08s; }
-    @keyframes filterGroupIn {
-        from { opacity: 0; transform: translateY(6px); }
-        to { opacity: 1; transform: translateY(0); }
+
+    .filter-overlay.is-open .filter-group:nth-child(2) {
+        animation-delay: .04s;
     }
+
+    .filter-overlay.is-open .filter-group:nth-child(3) {
+        animation-delay: .08s;
+    }
+
+    @keyframes filterGroupIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     html.filter-open,
     body.filter-open {
         overflow: hidden !important;
@@ -348,19 +582,34 @@
         overscroll-behavior: none;
         touch-action: none;
     }
+
     body.filter-open .home-bg.explore-wrap {
         overscroll-behavior: none;
     }
-    .flex-1 { flex: 1; }
+
+    .flex-1 {
+        flex: 1;
+    }
+
     @media (max-width: 640px) {
-        .explore-shell { width: calc(100% - 20px); }
-        .explore-heading { font-size: 1.4rem; }
-        #results-list { grid-template-columns: 1fr; }
+        .explore-shell {
+            width: calc(100% - 20px);
+        }
+
+        .explore-heading {
+            font-size: 1.4rem;
+        }
+
+        #results-list {
+            grid-template-columns: 1fr;
+        }
+
         .filter-overlay {
             align-items: center;
             justify-content: center;
             padding: 24px 12px !important;
         }
+
         .filter-sheet {
             width: 100%;
             max-height: calc(100dvh - 48px);
@@ -368,12 +617,27 @@
             border-bottom: 1px solid var(--sm-border);
             transform: translateY(16px) scale(0.98);
         }
-        .filter-overlay.is-open .filter-sheet { transform: translateY(0) scale(1); }
-        .filter-sheet-body { padding: 14px; max-height: min(68vh, 620px); gap: 12px; }
+
+        .filter-overlay.is-open .filter-sheet {
+            transform: translateY(0) scale(1);
+        }
+
+        .filter-sheet-body {
+            padding: 14px;
+            max-height: min(68vh, 620px);
+            gap: 12px;
+        }
+
         .filter-sheet-head,
-        .filter-sheet-foot { padding-left: 14px; padding-right: 14px; }
+        .filter-sheet-foot {
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
         .filter-row-2,
-        .filter-actions { grid-template-columns: 1fr; }
+        .filter-actions {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}
@@ -393,12 +657,15 @@
         <!-- Search Input -->
         <div class="search-field-container">
             <i class="fa-solid fa-search"></i>
-            <input type="text" id="search-input" placeholder="Search events, cities, organizers..." oninput="handleSearch()">
-            <i id="clear-search" class="fa-solid fa-circle-xmark hide" style="color: rgba(255,255,255,0.3); cursor: pointer;" onclick="clearSearch()"></i>
+            <input type="text" id="search-input" placeholder="Search events, cities, organizers..."
+                oninput="handleSearch()">
+            <i id="clear-search" class="fa-solid fa-circle-xmark hide"
+                style="color: rgba(255,255,255,0.3); cursor: pointer;" onclick="clearSearch()"></i>
         </div>
 
         <!-- Dynamic Category Chips -->
-        <div id="category-scroll" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;">
+        <div id="category-scroll"
+            style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;">
             <div class="quick-filter-chip active" onclick="setCategory('all', this)">All</div>
             <!-- More dynamic chips -->
         </div>
@@ -407,7 +674,6 @@
         <div class="results-head">
             <div class="results-head-main">
                 <h2 id="results-count">Results</h2>
-                <p id="results-sort-hint" class="results-sort-hint" aria-live="polite"></p>
             </div>
             <button type="button" id="clear-all-filters" class="hide" onclick="clearAllFilters()">Clear All</button>
         </div>
@@ -493,8 +759,26 @@
     };
     function parseEventDateMaybe(raw) {
         if (raw == null || raw === '') return null;
+        if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
         try {
-            const d = raw.toDate ? raw.toDate() : new Date(raw);
+            // 1. Firestore Timestamp object from JS SDK (has .toDate())
+            if (typeof raw.toDate === 'function') {
+                const d = raw.toDate();
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            // 2. Serialised Firestore Timestamp: { seconds: N, nanoseconds: M }
+            const secs = raw.seconds ?? raw._seconds;
+            if (typeof secs === 'number') {
+                const d = new Date(secs * 1000);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            // 3. Numeric ms timestamp
+            if (typeof raw === 'number') {
+                const d = new Date(raw);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+            // 4. ISO string or other parseable value
+            const d = new Date(raw);
             const t = d.getTime();
             return Number.isNaN(t) ? null : d;
         } catch (_) {
@@ -520,7 +804,8 @@
             }
             if (best) return best;
         }
-        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime);
+        // ✅ start_time fallback HATAYA — sirf actual end fields use karo
+        return parseEventDateMaybe(eventItem.end_time || eventItem.endTime || eventItem.date || null);
     }
 
     function isMultiDayScheduleEvent(eventItem) {
@@ -536,27 +821,46 @@
         const status = String(eventItem.status || '').toLowerCase();
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
 
-        const effectiveEnd = getEffectiveEventEndDate(eventItem);
-        if (effectiveEnd && effectiveEnd.getTime() < Date.now()) return true;
+        // Today at Midnight (00:00:00)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
 
-        const startRaw = eventItem.start_time || eventItem.startTime;
-        if (!isMultiDayScheduleEvent(eventItem) && !effectiveEnd && startRaw) {
-            const startDate = parseEventDateMaybe(startRaw);
-            if (startDate) {
-                const endOfDay = new Date(startDate);
-                endOfDay.setHours(23, 59, 59, 999);
-                if (Date.now() > endOfDay.getTime()) return true;
+        const effectiveEnd = getEffectiveEventEndDate(eventItem);
+        if (effectiveEnd && effectiveEnd.getTime() > 0) {
+            // End time exists: Expired if end is before today
+            if (effectiveEnd.getTime() < todayMs) return true;
+        } else {
+            // No end time: Fallback to start_time
+            const startDate = parseEventDateMaybe(
+                eventItem.start_time || eventItem.startTime || eventItem.date || null
+            );
+            if (startDate && startDate.getTime() > 0) {
+                const startDay = new Date(startDate.getTime());
+                startDay.setHours(0, 0, 0, 0);
+                // Start date is before today -> expired
+                if (startDay.getTime() < todayMs) return true;
             }
         }
         return false;
     }
+
+    function isDayExpired(day) {
+        if (!day) return true;
+        const endRaw = day.end_at || day.endAt || day.date || day.end_time || day.end;
+        const d = parseEventDateMaybe(endRaw);
+        if (!d) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return d < today;
+    }
     /** Start time ms; missing → +Infinity so they sort last among open events. */
     function getEventStartMs(ev) {
-        const raw = ev && ev.start_time;
-        if (!raw) return Number.POSITIVE_INFINITY;
-        const d = raw.toDate ? raw.toDate() : new Date(raw);
-        const t = d.getTime();
-        return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+        if (!ev) return Number.POSITIVE_INFINITY;
+        const raw = ev.start_time || ev.startTime || ev.date;
+        const d = parseEventDateMaybe(raw);
+        const t = d ? d.getTime() : null;
+        return (t && !Number.isNaN(t)) ? t : Number.POSITIVE_INFINITY;
     }
     /** Happening within the gate window: started, not ended, not closed (multi-day OK). */
     function isEventOngoing(ev, nowMs) {
@@ -564,19 +868,13 @@
         const startMs = getEventStartMs(ev);
         if (!Number.isFinite(startMs)) return false;
         if (startMs > nowMs) return false;
-        const endRaw = ev.end_time || ev.endTime;
-        const windowHours = Number(ev.same_day_hours || ev.event_hours || 0);
-        if (!endRaw) {
-            const cap = Number.isFinite(windowHours) && windowHours > 0 ? windowHours * 3600000 : 36 * 3600000;
-            return nowMs - startMs <= cap;
+        
+        const endDate = getEffectiveEventEndDate(ev);
+        if (!endDate) {
+            const windowHours = Number(ev.same_day_hours || ev.event_hours || 24);
+            return (nowMs - startMs) <= (windowHours * 3600000);
         }
-        const endD = endRaw.toDate ? endRaw.toDate() : new Date(endRaw);
-        const endT = endD.getTime();
-        if (Number.isNaN(endT)) {
-            const cap = Number.isFinite(windowHours) && windowHours > 0 ? windowHours * 3600000 : 36 * 3600000;
-            return nowMs - startMs <= cap;
-        }
-        return endT >= nowMs;
+        return endDate.getTime() >= nowMs;
     }
     function haversineKm(lat1, lng1, lat2, lng2) {
         const R = 6371;
@@ -654,40 +952,6 @@
             return getEventStartMs(a) - getEventStartMs(b);
         });
     }
-    function updateExploreSortHint(resultCount) {
-        const hint = document.getElementById('results-sort-hint');
-        if (!hint) return;
-        if (!resultCount) {
-            hint.textContent = '';
-            return;
-        }
-        const profileCityTrim = String(exploreUserCity || '').trim();
-        const filterCityTrim = String(activeFilters.city || '').trim();
-
-        let line = `${resultCount} results · `;
-        if (exploreGeoState === 'granted' && exploreUserCoords) {
-            line +=
-                'Near you (device location): events with venue pins closest first · others use city match · live next · soonest upcoming. ';
-        } else {
-            line += 'City-based area priority (enable location for distance sorting). ';
-            if (exploreGeoState === 'denied') {
-                line += 'Location unavailable — using your Profile city · ';
-            } else if (exploreGeoState === 'unsupported' || exploreGeoState === 'unavailable') {
-                line += 'Browser location not available — ';
-            }
-        }
-        if (profileCityTrim && filterCityTrim) {
-            line += `Profile ${profileCityTrim} + filter “${filterCityTrim}” for area boosts.`;
-        } else if (profileCityTrim) {
-            line += `Profile city: ${profileCityTrim}.`;
-        } else if (filterCityTrim) {
-            line += `Filter city: ${filterCityTrim}.`;
-        } else if (!(exploreGeoState === 'granted' && exploreUserCoords)) {
-            line += 'Add your city in Profile for smarter area boosts.';
-        }
-
-        hint.textContent = line.trim();
-    }
 
     /** Try device geolocation once; fallback is profile city sorting (already loaded elsewhere). */
     function requestExploreDeviceLocation() {
@@ -738,8 +1002,8 @@
         // Listen for all events
         db.collection('events').onSnapshot(snap => {
             allEvents = snap.docs
-                .map(doc => ({id: doc.id, ...doc.data()}))
-                .filter(ev => ev.is_published !== false);
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(ev => ev.is_published !== false && !isEventClosed(ev));
             renderCategories();
             handleSearch();
         });
@@ -772,16 +1036,16 @@
     function handleSearch() {
         searchQuery = document.getElementById('search-input').value.toLowerCase();
         document.getElementById('clear-search').classList.toggle('hide', searchQuery === '');
-        
+
         const filtered = allEvents.filter(ev => {
-            const matchesQuery = !searchQuery || 
-                safeLower(ev.title).includes(searchQuery) || 
+            const matchesQuery = !searchQuery ||
+                safeLower(ev.title).includes(searchQuery) ||
                 safeLower(ev.venue_name || ev.venue).includes(searchQuery) ||
                 safeLower(ev.city).includes(searchQuery) ||
                 safeLower(ev.organizer_name).includes(searchQuery);
-            
+
             const matchesCategory = currentCategory === 'all' || ev.category_name === currentCategory;
-            
+
             const priceStart = Number(ev.price_start || 0);
             const matchesPrice = priceStart >= activeFilters.minPrice && priceStart <= activeFilters.maxPrice;
             const matchesCity = !activeFilters.city || safeLower(ev.city).includes(safeLower(activeFilters.city));
@@ -798,8 +1062,7 @@
     function renderResults(events) {
         const list = document.getElementById('results-list');
         document.getElementById('results-count').textContent = `${events.length} results`;
-        updateExploreSortHint(events.length);
-        
+
         if (events.length === 0) {
             list.innerHTML = `
                 <div class="summary-box" style="text-align: center; padding: 40px;">
@@ -814,7 +1077,7 @@
         list.innerHTML = '';
         events.forEach(ev => {
             const eventDate = ev.start_time
-                ? new Date(ev.start_time.toDate ? ev.start_time.toDate() : ev.start_time).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'})
+                ? new Date(ev.start_time.toDate ? ev.start_time.toDate() : ev.start_time).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
                 : 'TBA';
             const card = `
                 <div class="search-result-card animate-evorra" onclick="openEventFromExplore('${ev.id}', false)">
@@ -872,7 +1135,7 @@
         activeFilters.city = document.getElementById('f-city').value;
         activeFilters.featured = document.getElementById('f-featured').checked;
         activeFilters.online = document.getElementById('f-online').checked;
-        
+
         document.getElementById('clear-all-filters').classList.remove('hide');
         toggleFilters();
         handleSearch();

@@ -138,11 +138,12 @@
         text-transform: uppercase;
     }
     .hero-quick-value {
-        margin: 0;
+        margin: 4px 0 0;
         color: var(--sm-text);
-        font-weight: 800;
-        font-size: 0.84rem;
-        line-height: 1.35;
+        font-weight: 900;
+        font-size: 1.15rem;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
         word-break: break-word;
     }
     .hero-quick-value.td-id-mono {
@@ -2162,10 +2163,21 @@
 
         document.getElementById('hero-status').textContent = statusUpper;
         document.getElementById('hero-ticket-id').textContent = ticket.id || ticketId || '—';
+        
+        // Prioritize name from ticket/snapshot before falling back to current user profile
+        const nameFromTicket = ticket.user_name || 
+                               ticket.name || 
+                               ticket.buyer_name || 
+                               ticket.user_full_name ||
+                               eventData.user_name || 
+                               eventData.name || 
+                               eventData.buyer_name;
+
         const holderDisplay = (user.displayName || '').trim();
         const holderFromEmailLocal = (String(user.email || '').split('@')[0] || '').replace(/\./g, ' ').trim();
-        document.getElementById('hero-holder-name').textContent =
-            holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
+        const fallbackName = holderDisplay || holderFromEmailLocal || String(user.email || '').trim() || 'Signed-in guest';
+        
+        document.getElementById('hero-holder-name').textContent = nameFromTicket || fallbackName;
         document.getElementById('pass-foot-ticket-id').textContent = ticket.id || ticketId || '—';
         const heroStatusSlug = String(ticket.status || 'confirmed').toLowerCase().replace(/\s+/g, '_');
         document.getElementById('hero-status').className = cancelled

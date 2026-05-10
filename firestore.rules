@@ -220,6 +220,16 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /entries/{entryId} {
+      allow read: if signedIn()
+        && resource.data.event_id is string
+        && isEventOrganizer(resource.data.event_id);
+      allow create: if signedIn()
+        && request.resource.data.event_id is string
+        && isEventOrganizer(request.resource.data.event_id);
+      allow update, delete: if false;
+    }
+
     match /qr_validations/{scanId} {
       allow read: if signedIn()
         && resource.data.event_id is string
