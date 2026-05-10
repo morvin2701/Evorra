@@ -820,25 +820,25 @@
         if (eventItem.is_closed === true) return true;
         const status = String(eventItem.status || '').toLowerCase();
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
+        if (eventItem.is_published === false) return true;
 
-        // Today at Midnight (00:00:00)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayMs = today.getTime();
 
         const effectiveEnd = getEffectiveEventEndDate(eventItem);
+
         if (effectiveEnd && effectiveEnd.getTime() > 0) {
-            // End time exists: Expired if end is before today
+            // Strict comparison: if end day has passed, it's closed.
             if (effectiveEnd.getTime() < todayMs) return true;
         } else {
-            // No end time: Fallback to start_time
+            // Fallback to start_time: if start day has passed, it's closed.
             const startDate = parseEventDateMaybe(
                 eventItem.start_time || eventItem.startTime || eventItem.date || null
             );
             if (startDate && startDate.getTime() > 0) {
                 const startDay = new Date(startDate.getTime());
                 startDay.setHours(0, 0, 0, 0);
-                // Start date is before today -> expired
                 if (startDay.getTime() < todayMs) return true;
             }
         }
@@ -868,7 +868,7 @@
         const startMs = getEventStartMs(ev);
         if (!Number.isFinite(startMs)) return false;
         if (startMs > nowMs) return false;
-        
+
         const endDate = getEffectiveEventEndDate(ev);
         if (!endDate) {
             const windowHours = Number(ev.same_day_hours || ev.event_hours || 24);

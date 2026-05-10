@@ -10,6 +10,7 @@
         min-height: 100vh;
         padding-bottom: 96px;
     }
+
     .detail-shell {
         width: min(1160px, calc(100% - 28px));
         margin: 0 auto;
@@ -22,6 +23,7 @@
         max-width: 100%;
         margin: 0 auto;
     }
+
     .hero-carousel {
         position: relative;
         width: 100%;
@@ -33,6 +35,7 @@
         border: 1px solid var(--sm-border);
         box-shadow: 0 24px 56px rgba(15, 23, 42, 0.12);
     }
+
     .hero-img {
         width: 100%;
         height: 100%;
@@ -42,17 +45,17 @@
         inset: 0;
         transition: opacity 0.55s ease;
     }
+
     .hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-            180deg,
-            rgba(15, 23, 42, 0.35) 0%,
-            rgba(15, 23, 42, 0.08) 45%,
-            rgba(15, 23, 42, 0.55) 100%
-        );
+        background: linear-gradient(180deg,
+                rgba(15, 23, 42, 0.35) 0%,
+                rgba(15, 23, 42, 0.08) 45%,
+                rgba(15, 23, 42, 0.55) 100%);
         pointer-events: none;
     }
+
     .floating-back {
         --ev-back-bg: rgba(255, 255, 255, 0.96);
         --ev-back-border: rgba(51, 65, 85, 0.36);
@@ -78,6 +81,7 @@
         -webkit-backdrop-filter: blur(10px) saturate(1.08);
         transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
     }
+
     .floating-back i {
         font-size: 1.18rem;
         font-weight: 900;
@@ -88,19 +92,23 @@
         -webkit-text-stroke: 0.35px currentColor;
         transform: translateX(-1px);
     }
+
     .floating-back:hover {
         transform: translateY(-2px);
         border-color: var(--ev-back-hover-border);
         background: var(--ev-back-hover-bg);
         box-shadow: 0 14px 34px rgba(15, 23, 42, 0.2);
     }
+
     .floating-back:active {
         transform: translateY(0);
     }
+
     .floating-back:focus-visible {
         outline: 2px solid var(--sm-primary);
         outline-offset: 2px;
     }
+
     body.theme-showmates[data-theme="dark"] .floating-back {
         --ev-back-bg: rgba(15, 23, 42, 0.86);
         --ev-back-border: rgba(100, 116, 139, 0.86);
@@ -109,6 +117,7 @@
         --ev-back-hover-border: rgba(96, 165, 250, 0.58);
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.42);
     }
+
     body.theme-showmates[data-theme="dark"] .floating-back i,
     body.theme-showmates[data-theme="dark"] .floating-back .fa-chevron-left {
         color: #000000 !important;
@@ -116,9 +125,11 @@
         filter: none !important;
         text-shadow: none !important;
     }
+
     body.theme-showmates[data-theme="dark"] .floating-back:hover {
         box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
     }
+
     body.theme-showmates[data-theme="light"] .floating-back {
         --ev-back-bg: rgba(255, 255, 255, 0.96);
         --ev-back-border: rgba(51, 65, 85, 0.38);
@@ -126,6 +137,7 @@
         --ev-back-hover-bg: #ffffff;
         --ev-back-hover-border: rgba(220, 38, 38, 0.44);
     }
+
     .media-counter {
         position: absolute;
         right: 18px;
@@ -154,14 +166,23 @@
             0 0 0 1px rgba(255, 255, 255, 0.75) inset,
             0 28px 56px rgba(15, 23, 42, 0.1);
     }
+
     @media (prefers-reduced-motion: no-preference) {
         .detail-head {
             animation: ed-head-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
     }
+
     @keyframes ed-head-in {
-        from { opacity: 0; transform: translateY(18px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .detail-pill {
@@ -176,6 +197,7 @@
         border: 1px solid rgba(220, 38, 38, 0.22);
         background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
     }
+
     .detail-title {
         margin: 14px 0 10px;
         font-size: clamp(1.75rem, 4vw, 2.55rem);
@@ -184,6 +206,7 @@
         color: var(--sm-text);
         font-weight: 900;
     }
+
     .rating-row {
         display: inline-flex;
         align-items: center;
@@ -193,17 +216,25 @@
         margin-bottom: 16px;
         font-size: 0.92rem;
     }
+
     .rating-star-icon {
         color: #f59e0b;
         font-size: 1rem;
     }
-    .detail-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
     .detail-tile-label {
         margin: 0;
         color: var(--sm-muted);
         font-size: 0.74rem;
         font-weight: 800;
     }
+
     .detail-tile-value {
         margin: 4px 0 0;
         font-weight: 800;
@@ -211,6 +242,7 @@
         color: var(--sm-text);
         line-height: 1.35;
     }
+
     .info-tile {
         display: flex;
         gap: 14px;
@@ -221,10 +253,12 @@
         background: var(--sm-bg);
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
     .info-tile:hover {
         border-color: #e2e8f0;
         box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
     }
+
     .info-tile-icon {
         width: 44px;
         height: 44px;
@@ -245,6 +279,7 @@
         gap: 18px;
         margin-top: 20px;
     }
+
     .detail-card {
         border-radius: 24px;
         border: 1px solid var(--sm-border);
@@ -254,6 +289,7 @@
         position: relative;
         overflow: hidden;
     }
+
     .detail-card::before {
         content: "";
         position: absolute;
@@ -264,19 +300,41 @@
         background: radial-gradient(ellipse at 100% 0%, rgba(220, 38, 38, 0.06), transparent 70%);
         pointer-events: none;
     }
+
     @media (prefers-reduced-motion: no-preference) {
-        .detail-main > .detail-card,
-        .detail-sidebar-col > .detail-card {
+
+        .detail-main>.detail-card,
+        .detail-sidebar-col>.detail-card {
             animation: ed-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
-        .detail-main > .detail-card:nth-child(1) { animation-delay: 0.04s; }
-        .detail-sidebar-col > .detail-card:nth-child(1) { animation-delay: 0.08s; }
-        .detail-sidebar-col > .detail-card:nth-child(2) { animation-delay: 0.12s; }
-        .detail-sidebar-col > .detail-card:nth-child(3) { animation-delay: 0.16s; }
+
+        .detail-main>.detail-card:nth-child(1) {
+            animation-delay: 0.04s;
+        }
+
+        .detail-sidebar-col>.detail-card:nth-child(1) {
+            animation-delay: 0.08s;
+        }
+
+        .detail-sidebar-col>.detail-card:nth-child(2) {
+            animation-delay: 0.12s;
+        }
+
+        .detail-sidebar-col>.detail-card:nth-child(3) {
+            animation-delay: 0.16s;
+        }
     }
+
     @keyframes ed-card-in {
-        from { opacity: 0; transform: translateY(12px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .section-title {
@@ -288,6 +346,7 @@
         position: relative;
         z-index: 1;
     }
+
     .desc-text {
         margin: 0;
         color: var(--sm-muted);
@@ -296,7 +355,10 @@
         position: relative;
         z-index: 1;
     }
-    .detail-section-spaced { margin-top: 24px; }
+
+    .detail-section-spaced {
+        margin-top: 24px;
+    }
 
     .teaser-card {
         width: 100%;
@@ -310,10 +372,12 @@
         position: relative;
         z-index: 1;
     }
+
     .teaser-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
     }
+
     .teaser-thumb {
         width: 100%;
         aspect-ratio: 16 / 9;
@@ -323,6 +387,7 @@
         border: 1px solid var(--sm-border);
         background: var(--sm-bg);
     }
+
     .teaser-thumb::after {
         content: "";
         position: absolute;
@@ -330,12 +395,14 @@
         background: linear-gradient(180deg, transparent 40%, rgba(15, 23, 42, 0.55) 100%);
         pointer-events: none;
     }
+
     .teaser-thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
+
     .teaser-play-center {
         position: absolute;
         inset: 0;
@@ -346,6 +413,7 @@
         align-items: center;
         gap: 12px;
     }
+
     .teaser-play-circle {
         width: 72px;
         height: 72px;
@@ -357,11 +425,13 @@
         justify-content: center;
         box-shadow: 0 12px 36px rgba(15, 23, 42, 0.2);
     }
+
     .teaser-play-circle i {
         color: var(--sm-primary);
         font-size: 1.35rem;
         margin-left: 4px;
     }
+
     .teaser-play-label {
         margin: 0;
         color: #fff;
@@ -375,6 +445,7 @@
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 10px;
     }
+
     .gallery-thumb {
         border-radius: 14px;
         border: 1px solid var(--sm-border);
@@ -383,11 +454,19 @@
         aspect-ratio: 16 / 9;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .gallery-thumb:hover {
         transform: scale(1.02);
         box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
     }
-    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
     .section-title-hint {
         display: block;
         margin-top: 6px;
@@ -410,24 +489,31 @@
         background: var(--sm-bg);
         margin-bottom: 10px;
     }
-    .agenda-card { align-items: center; }
+
+    .agenda-card {
+        align-items: center;
+    }
+
     .ticket-row-title {
         margin: 0;
         font-size: 1.05rem;
         font-weight: 900;
         color: var(--sm-text);
     }
+
     .ticket-row-note {
         margin: 6px 0 0;
         font-size: 0.8rem;
         color: var(--sm-muted);
     }
+
     .ticket-row-price {
         color: var(--sm-primary);
         font-weight: 900;
         font-size: 1.2rem;
         white-space: nowrap;
     }
+
     .detail-empty-msg {
         margin: 0;
         color: var(--sm-muted);
@@ -440,17 +526,20 @@
         font-weight: 900;
         color: var(--sm-text);
     }
+
     .agenda-meta {
         margin: 4px 0 0;
         font-size: 0.82rem;
         color: var(--sm-muted);
     }
+
     .agenda-desc {
         margin: 8px 0 0;
         font-size: 0.82rem;
         color: var(--sm-muted);
         line-height: 1.45;
     }
+
     .agenda-icon {
         width: 42px;
         height: 42px;
@@ -471,15 +560,18 @@
         padding: 16px;
         margin-bottom: 10px;
     }
+
     .review-stars {
         display: flex;
         gap: 4px;
         flex-wrap: wrap;
     }
+
     .review-star-icon {
         color: #f59e0b;
         font-size: 0.72rem;
     }
+
     .review-text {
         margin: 10px 0 0;
         font-size: 0.9rem;
@@ -487,7 +579,10 @@
         line-height: 1.5;
     }
 
-    .detail-sidebar-col { display: grid; gap: 16px; }
+    .detail-sidebar-col {
+        display: grid;
+        gap: 16px;
+    }
 
     .social-share-strip {
         margin-top: 16px;
@@ -496,6 +591,7 @@
         gap: 10px;
         align-items: center;
     }
+
     .share-action-btn {
         flex: 1;
         min-width: min(160px, 100%);
@@ -514,17 +610,22 @@
         gap: 8px;
         transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
+
     .share-action-btn:hover {
         transform: translateY(-2px);
         border-color: rgba(220, 38, 38, 0.28);
         box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
     }
+
     .share-action-btn.wa {
         border-color: rgba(37, 211, 102, 0.4);
         background: linear-gradient(145deg, rgba(220, 253, 231, 0.9), rgba(209, 250, 229, 0.65));
         color: #065f46;
     }
-    .share-action-btn.wa i { font-size: 1.12rem; }
+
+    .share-action-btn.wa i {
+        font-size: 1.12rem;
+    }
 
     .verified-strip {
         margin-top: 12px;
@@ -539,7 +640,10 @@
         font-weight: 900;
         color: #047857;
     }
-    .verified-strip .fa-circle-check { color: #059669; }
+
+    .verified-strip .fa-circle-check {
+        color: #059669;
+    }
 
     .booking-inline {
         position: relative;
@@ -555,6 +659,7 @@
         padding: 14px 14px 14px 16px;
         overflow: hidden;
     }
+
     .booking-inline::before {
         content: "";
         position: absolute;
@@ -564,17 +669,39 @@
         transform: translateX(-100%);
         animation: ed-dock-sweep 5s ease-in-out infinite;
     }
+
     @keyframes ed-dock-sweep {
-        0%, 45% { transform: translateX(-100%); opacity: 0; }
-        60% { opacity: 1; }
-        100% { transform: translateX(100%); opacity: 0; }
+
+        0%,
+        45% {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        60% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(100%);
+            opacity: 0;
+        }
     }
+
     @media (prefers-reduced-motion: reduce) {
-        .booking-inline::before { animation: none; }
+        .booking-inline::before {
+            animation: none;
+        }
+
         .detail-head,
         .detail-card,
-        .booking-inline.animate-up { animation: none !important; }
-        .dock-cta::after { animation: none !important; }
+        .booking-inline.animate-up {
+            animation: none !important;
+        }
+
+        .dock-cta::after {
+            animation: none !important;
+        }
     }
 
     .dock-left {
@@ -586,6 +713,7 @@
         position: relative;
         z-index: 1;
     }
+
     .dock-icon {
         width: 44px;
         height: 44px;
@@ -599,6 +727,7 @@
         flex-shrink: 0;
         font-size: 1.05rem;
     }
+
     .dock-meta {
         color: var(--sm-muted);
         font-size: 0.68rem;
@@ -607,6 +736,7 @@
         text-transform: uppercase;
         margin: 0 0 4px;
     }
+
     .dock-price {
         color: var(--sm-text);
         font-size: 1.55rem;
@@ -615,6 +745,7 @@
         margin: 0;
         letter-spacing: -0.03em;
     }
+
     .dock-cta {
         position: relative;
         width: auto;
@@ -630,6 +761,7 @@
         z-index: 1;
         overflow: hidden;
     }
+
     .dock-cta::after {
         content: "";
         position: absolute;
@@ -640,41 +772,93 @@
         background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.25), transparent);
         animation: ed-cta-shine 3.5s ease-in-out infinite;
     }
+
     @keyframes ed-cta-shine {
-        0%, 60% { left: -40%; opacity: 0; }
-        75% { opacity: 0.7; }
-        100% { left: 120%; opacity: 0; }
+
+        0%,
+        60% {
+            left: -40%;
+            opacity: 0;
+        }
+
+        75% {
+            opacity: 0.7;
+        }
+
+        100% {
+            left: 120%;
+            opacity: 0;
+        }
     }
+
     .booking-inline.animate-up {
         animation: ed-dock-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
     }
+
     @keyframes ed-dock-up {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     @media (min-width: 900px) {
-        .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .detail-main { grid-template-columns: 1.3fr 0.72fr; }
+        .detail-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .detail-main {
+            grid-template-columns: 1.3fr 0.72fr;
+        }
     }
+
     @media (max-width: 768px) {
-        .hero-carousel-wrap { max-width: 100%; }
+        .hero-carousel-wrap {
+            max-width: 100%;
+        }
+
         .hero-carousel {
             max-height: min(48vh, 320px);
             min-height: 180px;
             border-radius: 0 0 22px 22px;
         }
-        .detail-head { margin-top: -40px; padding: 20px 16px; border-radius: 22px; }
-        .detail-card { padding: 18px; border-radius: 20px; }
+
+        .detail-head {
+            margin-top: -40px;
+            padding: 20px 16px;
+            border-radius: 22px;
+        }
+
+        .detail-card {
+            padding: 18px;
+            border-radius: 20px;
+        }
+
         .booking-inline {
             border-radius: 18px;
             padding: 12px;
             gap: 10px;
             flex-wrap: wrap;
         }
-        .dock-icon { width: 40px; height: 40px; }
-        .dock-meta { font-size: 0.62rem; }
-        .dock-price { font-size: 1.28rem; }
+
+        .dock-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .dock-meta {
+            font-size: 0.62rem;
+        }
+
+        .dock-price {
+            font-size: 1.28rem;
+        }
+
         .dock-cta {
             min-width: 100%;
             padding: 13px 18px;
@@ -740,7 +924,8 @@
                 Verified organizer on Evorra
             </div>
             <div class="social-share-strip">
-                <button type="button" class="share-action-btn wa" onclick="shareEventWhatsApp()" aria-label="Share on WhatsApp">
+                <button type="button" class="share-action-btn wa" onclick="shareEventWhatsApp()"
+                    aria-label="Share on WhatsApp">
                     <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp
                 </button>
                 <button type="button" class="share-action-btn" onclick="copyEventLink()" aria-label="Copy link">
@@ -773,7 +958,8 @@
                 </div>
 
                 <div id="gallery-section" class="hide detail-section-spaced">
-                    <h2 class="section-title">Gallery <span class="section-title-hint">Landscape shots — 16:9 looks best on this strip</span></h2>
+                    <h2 class="section-title">Gallery <span class="section-title-hint">Landscape shots — 16:9 looks best
+                            on this strip</span></h2>
                     <div id="gallery-strip" class="gallery-strip">
                         <!-- Gallery Thumbnails -->
                     </div>
@@ -931,6 +1117,7 @@
                 bookBtn.style.opacity = '0.6';
                 bookBtn.style.pointerEvents = 'none';
                 bookBtn.removeAttribute('onclick');
+                bookBtn.href = 'javascript:void(0)';
             }
 
             const verRow = document.getElementById('verified-organizer-row');
@@ -1018,44 +1205,95 @@
     }
 
     async function loadTickets() {
-        let snap = await db.collection('events').doc(eventId).collection('ticketTypes').get();
         const list = document.getElementById('tickets-list');
+        const todayMidnight = new Date();
+        todayMidnight.setHours(0, 0, 0, 0);
+        const todayMs = todayMidnight.getTime();
+
+        let snap = await db.collection('events').doc(eventId).collection('ticketTypes').get();
         if (snap.empty) {
             snap = await db.collection('events').doc(eventId).collection('ticket_types').get();
         }
+
         if (snap.empty) {
             const eventDoc = await db.collection('events').doc(eventId).get();
             const inlineTickets = eventDoc.exists ? (eventDoc.data().ticket_types || []) : [];
             if (inlineTickets.length) {
+                let ticketsHtml = '';
                 inlineTickets.forEach(t => {
-                    list.innerHTML += `
-                        <div class="ticket-type-row animate-evorra">
-                            <div>
-                                <h4 class="ticket-row-title">${t.name || 'Ticket'}</h4>
-                                <p class="ticket-row-note">Limited availability</p>
-                            </div>
-                            <span class="ticket-row-price">₹${t.price || 0}</span>
-                        </div>
-                    `;
+                    const rawDate = t.date || t.day_date || t.event_date || t.day || null;
+                    let isPastDay = false;
+                    if (rawDate) {
+                        const d = parseEventDateMaybe(rawDate);
+                        if (d && d.getTime() < todayMs) isPastDay = true;
+                    }
+
+                    if (isPastDay) {
+                        ticketsHtml += `
+                            <div class="ticket-type-row" style="opacity:0.5; pointer-events:none;">
+                                <div>
+                                    <p class="ticket-row-title">${t.name || 'Ticket'}</p>
+                                    <p class="ticket-row-note" style="color:#ef4444; margin-top:4px;">
+                                        This day has passed
+                                    </p>
+                                </div>
+                                <span style="color:#94a3b8; font-weight:800; font-size:0.85rem;">
+                                    Completed
+                                </span>
+                            </div>`;
+                    } else {
+                        ticketsHtml += `
+                            <div class="ticket-type-row animate-evorra">
+                                <div>
+                                    <h4 class="ticket-row-title">${t.name || 'Ticket'}</h4>
+                                    <p class="ticket-row-note">Limited availability</p>
+                                </div>
+                                <span class="ticket-row-price">₹${t.price || 0}</span>
+                            </div>`;
+                    }
                 });
+                list.innerHTML = ticketsHtml;
                 return;
             }
             list.innerHTML = `<div class="info-tile"><p class="detail-empty-msg">No ticket information available.</p></div>`;
             return;
         }
-        list.innerHTML = '';
+
+        let ticketsHtml = '';
         snap.forEach(doc => {
             const t = doc.data();
-            list.innerHTML += `
-                <div class="ticket-type-row animate-evorra">
-                    <div>
-                        <h4 class="ticket-row-title">${t.name}</h4>
-                        <p class="ticket-row-note">Limited availability</p>
-                    </div>
-                    <span class="ticket-row-price">₹${t.price}</span>
-                </div>
-            `;
+            const rawDate = t.date || t.day_date || t.event_date || t.day || null;
+            let isPastDay = false;
+            if (rawDate) {
+                const d = parseEventDateMaybe(rawDate);
+                if (d && d.getTime() < todayMs) isPastDay = true;
+            }
+
+            if (isPastDay) {
+                ticketsHtml += `
+                    <div class="ticket-type-row" style="opacity:0.5; pointer-events:none;">
+                        <div>
+                            <p class="ticket-row-title">${t.name || 'Ticket'}</p>
+                            <p class="ticket-row-note" style="color:#ef4444; margin-top:4px;">
+                                This day has passed
+                            </p>
+                        </div>
+                        <span style="color:#94a3b8; font-weight:800; font-size:0.85rem;">
+                            Completed
+                        </span>
+                    </div>`;
+            } else {
+                ticketsHtml += `
+                    <div class="ticket-type-row animate-evorra">
+                        <div>
+                            <h4 class="ticket-row-title">${t.name}</h4>
+                            <p class="ticket-row-note">Limited availability</p>
+                        </div>
+                        <span class="ticket-row-price">₹${t.price}</span>
+                    </div>`;
+            }
         });
+        list.innerHTML = ticketsHtml;
     }
 
     async function loadAgenda() {
@@ -1148,7 +1386,7 @@
         if (navigator.share) {
             try {
                 await navigator.share({ title, text: `Join me at ${title}`, url });
-            } catch (_) {}
+            } catch (_) { }
         } else {
             copyEventLink();
         }

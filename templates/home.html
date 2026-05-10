@@ -1958,12 +1958,14 @@
 
     async function loadData() {
         try {
-            const eventSnap = await db.collection('events').get();
+            const eventSnap = await db.collection('events').where('is_published', '==', true).get();
             const events = [];
             eventSnap.forEach(doc => {
                 const data = doc.data();
                 data.id = doc.id;
-                events.push(data);
+                if (!isEventClosed(data)) {
+                    events.push(data);
+                }
             });
             const enriched = enrichEventsWithDistance(events);
             allEventsCache = enriched;

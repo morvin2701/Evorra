@@ -248,14 +248,14 @@
 
         async function loadEvents() {
             const eventGrid = document.getElementById('featured-events');
-            try {
-                const snapshot = await db.collection('events').get();
-                if (snapshot.empty) return;
+            if (!eventGrid) return;
 
+            try {
+                const snap = await db.collection('events').where('is_published', '==', true).get();
                 const events = [];
-                snapshot.forEach(doc => {
+                snap.forEach(doc => {
                     const data = { id: doc.id, ...doc.data() };
-                    if (data.is_published !== false && !isEventClosed(data)) {
+                    if (!isEventClosed(data)) {
                         events.push(data);
                     }
                 });
