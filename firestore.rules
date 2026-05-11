@@ -14,7 +14,10 @@ service cloud.firestore {
     function isEventOrganizer(eventId) {
       return signedIn()
         && exists(/databases/$(database)/documents/events/$(eventId))
-        && get(/databases/$(database)/documents/events/$(eventId)).data.organizer_id == request.auth.uid;
+        && (
+          get(/databases/$(database)/documents/events/$(eventId)).data.organizer_id == request.auth.uid
+          || get(/databases/$(database)/documents/events/$(eventId)).data.created_by == request.auth.uid
+        );
     }
 
     function ticketDoc(ticketId) {
@@ -64,7 +67,10 @@ service cloud.firestore {
       return request.resource.data.type == 'ticket_share'
         && request.resource.data.user_id is string
         && notifTicketRefOk()
-        && notifTicketData().shared_by == request.auth.uid;
+        && (
+          notifTicketData().shared_by == request.auth.uid
+          || notifTicketData().user_id == request.auth.uid
+        );
     }
 
     function canCreateTicketShareUpdateNotif() {
@@ -98,45 +104,29 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if true;
       allow create: if signedIn()
-        && request.resource.data.organizer_id == request.auth.uid;
-      allow update, delete: if isEventOrganizer(eventId);
+        && (request.resource.data.organizer_id == request.auth.uid || request.resource.data.created_by == request.auth.uid);
+      allow update: if signedIn() && (
+        isEventOrganizer(eventId)
+        || request.resource.data.keys().hasAny(['tickets_sold', 'total_revenue', 'updatedAt'])
+      );
+      allow delete: if isEventOrganizer(eventId);
 
-      // Legacy path remains temporarily writable for atomic buyer seat decrements
-      // while older events are still on ticketTypes.
       match /ticketTypes/{ticketTypeId} {
         allow read: if true;
+        allow update: if signedIn() && (
+          isEventOrganizer(eventId)
+          || request.resource.data.keys().hasAny(['available_qty', 'stock', 'total_sold', 'updatedAt'])
+        );
         allow create, delete: if false;
-        allow update: if isEventOrganizer(eventId)
-          || (
-            signedIn()
-            && (
-              (
-                request.resource.data.keys().hasAll(['stock'])
-                && request.resource.data.stock is int
-                && request.resource.data.stock >= 0
-                && request.resource.data.stock < resource.data.stock
-              )
-              || (
-                request.resource.data.keys().hasAll(['available_qty'])
-                && request.resource.data.available_qty is int
-                && request.resource.data.available_qty >= 0
-                && request.resource.data.available_qty < resource.data.available_qty
-              )
-            )
-          );
       }
 
       match /ticket_types/{ticketTypeId} {
         allow read: if true;
         allow create, delete: if isEventOrganizer(eventId);
-        allow update: if isEventOrganizer(eventId)
-          || (
-            signedIn()
-            && request.resource.data.keys().hasAll(['available_qty'])
-            && request.resource.data.available_qty is int
-            && request.resource.data.available_qty >= 0
-            && request.resource.data.available_qty < resource.data.available_qty
-          );
+        allow update: if signedIn() && (
+          isEventOrganizer(eventId)
+          || request.resource.data.keys().hasAny(['available_qty', 'total_sold', 'updatedAt'])
+        );
       }
 
       match /agenda/{agendaId} {

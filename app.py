@@ -8,7 +8,7 @@ import urllib.request
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, messaging
 
 load_dotenv()
 
@@ -105,6 +105,47 @@ def _admin_sync_authorized():
         return False
     provided = _extract_bearer_token() or (request.headers.get('X-Admin-Token') or '').strip()
     return bool(provided) and provided == configured
+
+
+def send_fcm_notification(token, title, body, data=None):
+    """Send a push notification to a specific device token."""
+    try:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            data=data or {},
+            token=token,
+        )
+        response = messaging.send(message)
+        print(f'Successfully sent message: {response}')
+        return True
+    except Exception as e:
+        print(f'Error sending FCM message: {e}')
+        return False
+
+
+@app.route('/api/send-push', methods=['POST'])
+def api_send_push():
+    """
+    Endpoint to manually trigger a push notification.
+    Payload: { "token": "...", "title": "...", "body": "...", "data": {} }
+    """
+    if not _admin_sync_authorized():
+        return jsonify({'ok': False, 'error': 'UNAUTHORIZED'}), 401
+    
+    body = request.get_json(silent=True) or {}
+    token = body.get('token')
+    title = body.get('title', 'Evorra Update')
+    msg_body = body.get('body', 'You have a new update.')
+    data = body.get('data', {})
+
+    if not token:
+        return jsonify({'ok': False, 'error': 'MISSING_TOKEN'}), 400
+
+    success = send_fcm_notification(token, title, msg_body, data)
+    return jsonify({'ok': success})
 
 
 @app.context_processor
