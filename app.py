@@ -22,12 +22,29 @@ app.config['ADMIN_SYNC_TOKEN'] = (os.getenv('ADMIN_SYNC_TOKEN') or '').strip()
 def _init_firebase_admin():
     """Initialize Firebase Admin SDK once and return Firestore client."""
     if not firebase_admin._apps:
+        # Check for JSON string (Vercel/Production)
+        service_account_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+        if service_account_json:
+            try:
+                import json
+                cred_dict = json.loads(service_account_json)
+                cred = credentials.Certificate(cred_dict)
+                firebase_admin.initialize_app(cred)
+                return firestore.client()
+            except Exception as e:
+                print(f"[Firebase] Error loading JSON from env: {e}")
+
+        # Fallback to file path (Local)
         service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
-        if service_account_path:
+        if service_account_path and os.path.exists(service_account_path):
             cred = credentials.Certificate(service_account_path)
             firebase_admin.initialize_app(cred)
         else:
-            firebase_admin.initialize_app()
+            # Last resort: Default credentials
+            try:
+                firebase_admin.initialize_app()
+            except:
+                pass
     return firestore.client()
 
 
