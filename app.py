@@ -46,7 +46,8 @@ def _init_firebase_admin():
                 
                 raw_json = raw_json.replace('\\n', '\n')
                 
-                cred_dict = json.loads(raw_json)
+                # Use strict=False to allow control characters like newlines inside strings
+                cred_dict = json.loads(raw_json, strict=False)
                 cred = credentials.Certificate(cred_dict)
                 firebase_admin.initialize_app(cred)
                 return firestore.client()
