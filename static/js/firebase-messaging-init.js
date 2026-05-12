@@ -107,7 +107,7 @@ onMessage(messaging, (payload) => {
                 body: payload.notification.body || '',
                 icon: '/static/favicon.svg',
                 badge: '/static/favicon.svg',
-                tag: 'foreground-push'
+                tag: 'foreground-push-' + Date.now() // Unique tag to prevent stacking
             });
         }).catch(err => {
             console.error("[FCM] ServiceWorker not ready for notification:", err);
