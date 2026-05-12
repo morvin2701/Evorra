@@ -52,8 +52,9 @@ def _init_firebase_admin():
             except Exception as e:
                 # Log to Vercel console
                 print(f"[Firebase] JSON Parse Error: {e}")
-                # We don't want to show the whole JSON in the UI for security, 
-                # but we'll flag it.
+                service_account_json_debug = f"{service_account_json[:10]}...{service_account_json[-5:]}" if service_account_json else "NONE"
+                # Flag the error for the UI
+                error_info = f"INVALID (Starts with: {service_account_json_debug}). Error: {e}"
         
         # Fallback to file path (Local)
         service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
