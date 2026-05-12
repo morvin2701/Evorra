@@ -29,8 +29,14 @@ def _init_firebase_admin():
                 import json
                 # Strip potential surrounding quotes or whitespace
                 raw_json = service_account_json.strip()
-                if raw_json.startswith("'") or raw_json.startswith('"'):
+                
+                # Handle cases where the string might be double-quoted or single-quoted
+                if (raw_json.startswith("'") and raw_json.endswith("'")) or \
+                   (raw_json.startswith('"') and raw_json.endswith('"')):
                     raw_json = raw_json[1:-1]
+                
+                # Fix common issue where newlines are escaped as literal '\n'
+                raw_json = raw_json.replace('\\n', '\n')
                 
                 cred_dict = json.loads(raw_json)
                 cred = credentials.Certificate(cred_dict)
