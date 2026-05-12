@@ -51,15 +51,23 @@ def _init_firebase_admin():
             firebase_admin.initialize_app(cred)
             return firestore.client()
 
-        # If we reach here on Vercel, it's a configuration failure
-        if os.getenv('VERCEL') == '1':
-             raise Exception(f"FCM Configuration Error: FIREBASE_SERVICE_ACCOUNT_JSON is {'MISSING' if not service_account_json else 'INVALID'}. Check Vercel Env Settings.")
+        # If we reach here, neither the JSON env nor the local file worked.
+        # This is a critical failure for Push Notifications.
+        error_info = f"MISSING (Found variables: {[k for k in os.environ.keys() if 'FIREBASE' in k]})" if not service_account_json else "INVALID (Check JSON format)"
+        
+        # Log to server console
+        print(f"[Firebase] Critical Failure. Env JSON is {error_info}")
+        
+        # If we are not local, we MUST have the JSON env
+        if not os.path.exists(service_account_path or 'nonexistent'):
+            raise Exception(f"FCM Configuration Error: FIREBASE_SERVICE_ACCOUNT_JSON is {error_info}. Please check your Vercel Environment Variables.")
 
-        # Last resort (Default)
+        # Last resort (Default - only works if on Google Cloud)
         try:
             firebase_admin.initialize_app()
-        except:
-            pass
+        except Exception as e:
+            raise Exception(f"Firebase Default Init Failed: {e}. (Env JSON was {error_info})")
+            
     return firestore.client()
 
 
