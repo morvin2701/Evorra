@@ -37,11 +37,12 @@ def _init_firebase_admin():
                 if not raw_json.strip().startswith('{'):
                     try:
                         import base64
-                        # Strip whitespace and handle potential Vercel mangling
-                        b64_data = raw_json.replace(' ', '').replace('\n', '').replace('\r', '')
+                        import re
+                        # REMOVE ALL WHITESPACE (spaces, newlines, tabs)
+                        b64_data = re.sub(r'\s+', '', raw_json)
                         raw_json = base64.b64decode(b64_data).decode('utf-8')
                     except Exception as e:
-                        print(f"[Firebase] Base64 decode failed: {e}")
+                        raise Exception(f"Base64 Decode Failed: {e}. Data started with: {raw_json[:10]}")
                 
                 raw_json = raw_json.replace('\\n', '\n')
                 
