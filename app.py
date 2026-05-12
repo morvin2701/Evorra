@@ -32,6 +32,15 @@ def _init_firebase_admin():
                 if (raw_json.startswith("'") and raw_json.endswith("'")) or \
                    (raw_json.startswith('"') and raw_json.endswith('"')):
                     raw_json = raw_json[1:-1]
+                
+                # Check if it looks like Base64 (starts with 'ey' for '{' in JSON)
+                if raw_json.startswith('ey') and ' ' not in raw_json:
+                    try:
+                        import base64
+                        raw_json = base64.b64decode(raw_json).decode('utf-8')
+                    except:
+                        pass
+                
                 raw_json = raw_json.replace('\\n', '\n')
                 
                 cred_dict = json.loads(raw_json)
