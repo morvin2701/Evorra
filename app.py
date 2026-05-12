@@ -176,12 +176,13 @@ def send_fcm_notification(token, title, body, data=None):
                 priority='high',
                 notification=messaging.AndroidNotification(
                     channel_id='evorra_high_importance_v2',
-                    click_action='FLUTTER_NOTIFICATION_CLICK'
+                    click_action='FLUTTER_NOTIFICATION_CLICK',
+                    default_sound=True
                 ),
             ),
             apns=messaging.APNSConfig(
                 payload=messaging.APNSPayload(
-                    aps=messaging.Aps(badge=1, sound='default'),
+                    aps=messaging.Aps(badge=1, sound='default', content_available=True),
                 ),
             ),
         )
