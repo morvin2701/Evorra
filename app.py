@@ -224,22 +224,23 @@ def api_notify_purchase():
             return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
 
         user_data = user_doc.to_dict()
-        token = user_data.get('fcm_token')
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        if not tokens and user_data.get('fcm_token'): tokens = [user_data['fcm_token']]
 
-        if not token:
-            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200
+        if not tokens:
+            return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200
 
         title = "🎟️ Booking Confirmed!"
         msg_body = f"Success! Your {count} ticket(s) for {event_name} are ready. View them in 'My Tickets'."
         
-        success = send_fcm_notification(
-            token=token,
-            title=title,
-            body=msg_body,
-            data={'action_target': '/my-tickets'}
-        )
+        # Send to all devices
+        sent_any = False
+        for token in tokens:
+            if send_fcm_notification(token, title, msg_body, {'action_target': '/my-tickets'}):
+                sent_any = True
 
-        return jsonify({'ok': success})
+        return jsonify({'ok': sent_any})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 
@@ -298,17 +299,19 @@ def api_send_global_notification():
         if not user_doc.exists:
             return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
 
-        token = user_doc.to_dict().get('fcm_token')
-        if not token:
-            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200
+        user_data = user_doc.to_dict()
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        if not tokens and user_data.get('fcm_token'): tokens = [user_data['fcm_token']]
 
-        success = send_fcm_notification(
-            token=token,
-            title=conf['title'],
-            body=conf['body'],
-            data={'action_target': conf['target']}
-        )
-        return jsonify({'ok': success})
+        if not tokens:
+            return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200
+
+        sent_any = False
+        for token in tokens:
+            if send_fcm_notification(token, conf['title'], conf['body'], {'action_target': conf['target']}):
+                sent_any = True
+        return jsonify({'ok': sent_any})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 

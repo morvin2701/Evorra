@@ -62,14 +62,21 @@ async function saveTokenToDatabase(token) {
     }
 
     try {
+        // Use arrayUnion to store multiple device tokens (Web, iOS, Android)
+        await window.db.collection('users').doc(user.uid).update({
+            fcm_tokens: firebase.firestore.FieldValue.arrayUnion(token),
+            fcm_token_updated_at: new Date().toISOString(),
+            notifications_enabled: true
+        });
+        console.log("[FCM] Token synced to device list for user:", user.uid);
+    } catch (e) {
+        // If document doesn't exist, use set
         await window.db.collection('users').doc(user.uid).set({
-            fcm_token: token,
+            fcm_tokens: [token],
             fcm_token_updated_at: new Date().toISOString(),
             notifications_enabled: true
         }, { merge: true });
-        console.log("[FCM] Token saved to database for user:", user.uid);
-    } catch (e) {
-        console.error("[FCM] Error saving token to database:", e);
+        console.log("[FCM] Token list initialized for new user:", user.uid);
     }
 }
 
