@@ -244,6 +244,7 @@
                 </div>
             </div>
             <hr class="action-divider">
+            <hr class="action-divider">
             <div class="action-tile action-tile-support" onclick="location.href='/support'">
                 <div class="action-icon action-icon-sky"><i class="fa-solid fa-headset"></i></div>
                 <div class="action-tile-text">
@@ -251,6 +252,27 @@
                     <p class="action-row-desc">Get in touch with us</p>
                 </div>
                 <i class="fa-solid fa-chevron-right action-row-chevron"></i>
+            </div>
+            <hr class="action-divider">
+            <div class="action-tile" id="notif-action-tile">
+                <div class="action-icon action-icon-brand"><i class="fa-solid fa-bell"></i></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">Push Notifications</p>
+                    <p id="notif-status-text" class="action-row-desc">Enable push alerts for events</p>
+                </div>
+                <label class="toggle-switch" aria-label="Toggle notifications" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="notif-toggle" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <hr class="action-divider">
+            <div class="action-tile" onclick="testFCM()">
+                <div class="action-icon action-icon-mint"><i class="fa-solid fa-vial"></i></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">Test Push Alert</p>
+                    <p class="action-row-desc">Send a sample notification to this device</p>
+                </div>
+                <i class="fa-solid fa-paper-plane action-row-chevron"></i>
             </div>
             <hr class="action-divider">
             <div class="quick-action-row theme-toggle-row">
@@ -367,6 +389,83 @@
     }
 
 
+    // Notification Toggle Logic
+    async function initNotifToggle() {
+        const toggle = document.getElementById('notif-toggle');
+        const statusText = document.getElementById('notif-status-text');
+        
+        if (!toggle) return;
+
+        // Check current status from Firestore
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    const data = doc.data() || {};
+                    if (data.notifications_enabled) {
+                        toggle.checked = true;
+                        statusText.textContent = "Push notifications are active";
+                    } else {
+                        toggle.checked = false;
+                        statusText.textContent = "Enable push alerts for events";
+                    }
+                });
+            }
+        });
+
+        toggle.onchange = async () => {
+            if (toggle.checked) {
+                if (window.evorraMessaging) {
+                    statusText.textContent = "Requesting permission...";
+                    const token = await window.evorraMessaging.requestNotificationPermission();
+                    if (token) {
+                        statusText.textContent = "Push notifications are active";
+                    } else {
+                        toggle.checked = false;
+                        statusText.textContent = "Permission denied or error";
+                    }
+                }
+            } else {
+                // Disable in DB
+                const user = auth.currentUser;
+                if (user) {
+                    await db.collection('users').doc(user.uid).update({
+                        notifications_enabled: false
+                    });
+                    statusText.textContent = "Push alerts are disabled";
+                }
+            }
+        };
+    }
+
+    async function testFCM() {
+        const user = auth.currentUser;
+        if (!user) return alert("Please login first");
+        
+        try {
+            console.log("[FCM] Triggering test notification...");
+            const response = await fetch('/api/notify-purchase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.uid,
+                    event_title: "Test Notification",
+                    ticket_count: 1,
+                    amount: 0
+                })
+            });
+            const res = await response.json();
+            if (res.ok) {
+                console.log("[FCM] Test notification triggered successfully!");
+            } else {
+                console.error("[FCM] Test trigger failed:", res.error);
+                alert("Failed to send test: " + res.error);
+            }
+        } catch (e) {
+            console.error("[FCM] Test error:", e);
+        }
+    }
+
     loadProfile();
+    initNotifToggle();
 </script>
 {% endblock %}

@@ -148,6 +148,45 @@ def api_send_push():
     return jsonify({'ok': success})
 
 
+@app.route('/api/notify-purchase', methods=['POST'])
+def api_notify_purchase():
+    """
+    Endpoint called by the frontend after a successful purchase.
+    Expects: { "user_id": "...", "event_title": "...", "ticket_count": 1, "amount": 100 }
+    """
+    body = request.get_json(silent=True) or {}
+    user_id = body.get('user_id')
+    event_title = body.get('event_title', 'Your Event')
+    ticket_count = body.get('ticket_count', 1)
+    amount = body.get('amount', 0)
+
+    if not user_id:
+        return jsonify({'ok': False, 'error': 'MISSING_USER_ID'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(user_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+        
+        data = user_doc.to_dict()
+        token = data.get('fcm_token')
+        
+        if not token:
+            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200 # Silent fail if user hasn't enabled notifications
+
+        title = "🎟️ Booking Confirmed!"
+        msg = f"Success! Your {ticket_count} ticket(s) for {event_title} are ready. View them in 'My Tickets'."
+        
+        success = send_fcm_notification(token, title, msg, {
+            "action_target": "/my-tickets",
+            "type": "purchase_success"
+        })
+        return jsonify({'ok': success})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.context_processor
 def inject_public_runtime_config():
     return {
@@ -227,6 +266,12 @@ def favicon():
 def api_geocode_json():
     """Browser-safe proxy: same-origin fetch avoids CORS and keeps the API key on the server."""
     return _proxy_google_geocode()
+
+
+@app.route('/firebase-messaging-sw.js')
+def firebase_messaging_sw():
+    """Serve the Firebase Messaging service worker with injected config."""
+    return render_template('firebase-messaging-sw.js'), 200, {'Content-Type': 'application/javascript'}
 
 
 @app.route('/api/admin/sync-event-metrics', methods=['POST'])

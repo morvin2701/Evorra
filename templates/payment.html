@@ -685,6 +685,23 @@
                         is_archived: false,
                         created_time: firebase.firestore.FieldValue.serverTimestamp()
                     });
+
+                    // TRIGGER PUSH NOTIFICATION
+                    try {
+                        await fetch('/api/notify-purchase', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: user.uid,
+                                event_title: eventTitleForNotif,
+                                ticket_count: bookingData.qty,
+                                amount: bookingData.total
+                            })
+                        });
+                    } catch (e) {
+                        console.warn('[FCM] Push trigger failed:', e);
+                    }
+
                 } catch (notifErr) {
                     console.warn('[Evorra] Purchase notification:', notifErr?.code || notifErr?.message || notifErr);
                 }

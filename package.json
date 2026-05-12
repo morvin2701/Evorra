@@ -1,0 +1,12 @@
+{
+  "name": "evorra-web",
+  "version": "1.0.0",
+  "description": "Evorra Web Platform",
+  "main": "app.py",
+  "dependencies": {
+    "firebase": "^10.0.0"
+  },
+  "scripts": {
+    "start": "python3 app.py"
+  }
+}

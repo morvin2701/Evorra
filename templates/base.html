@@ -209,7 +209,7 @@
         window.CLOUDINARY_UPLOAD_FOLDER = "{{ cloudinary_upload_folder|default('events', true)|e }}";
         window.APP_PUBLIC_URL = "{{ app_public_url|default('', true)|e }}";
 
-        const firebaseConfig = {
+        window.firebaseConfig = {
             apiKey: "{{ firebase_api_key|default('', true)|e }}",
             authDomain: "{{ firebase_auth_domain|default('', true)|e }}",
             projectId: "{{ firebase_project_id|default('', true)|e }}",
@@ -218,9 +218,38 @@
             appId: "{{ firebase_app_id|default('', true)|e }}"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        firebase.initializeApp(window.firebaseConfig);
+        window.auth = firebase.auth();
+        window.db = firebase.firestore();
+
+        // Register Firebase Messaging Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                    .then((registration) => {
+                        console.log('[FCM] Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch((err) => {
+                        console.error('[FCM] Service Worker registration failed:', err);
+                    });
+            });
+        }
+
+        // Initialize Messaging Module
+        import("/static/js/firebase-messaging-init.js")
+            .then(m => {
+                window.evorraMessaging = m;
+                // Request permission automatically if user is logged in
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        // Small delay to ensure everything is ready
+                        setTimeout(() => {
+                            m.requestNotificationPermission();
+                        }, 2000);
+                    }
+                });
+            })
+            .catch(err => console.error("[FCM] Failed to load messaging module:", err));
 
         if (window.EvorraIpLocation && typeof window.EvorraIpLocation.ensureLoaded === 'function') {
             window.EvorraIpLocation.ensureLoaded().catch(function () {});
