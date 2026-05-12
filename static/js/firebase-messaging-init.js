@@ -92,15 +92,21 @@ onMessage(messaging, (payload) => {
     showInAppNotification(notifData);
 
     // Force System OS Notification
+    console.log("[FCM] System Permission State:", Notification.permission);
     if (Notification.permission === 'granted') {
         navigator.serviceWorker.ready.then(registration => {
+            console.log("[FCM] Triggering System Alert...");
             registration.showNotification(payload.notification.title || 'Evorra Update', {
                 body: payload.notification.body || '',
                 icon: '/static/favicon.svg',
                 badge: '/static/favicon.svg',
                 tag: 'foreground-push'
             });
+        }).catch(err => {
+            console.error("[FCM] ServiceWorker not ready for notification:", err);
         });
+    } else {
+        console.warn("[FCM] System notifications are BLOCKED. Please check Mac System Settings.");
     }
 });
 
