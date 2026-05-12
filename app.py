@@ -172,6 +172,18 @@ def send_fcm_notification(token, title, body, data=None):
             ),
             data=data or {},
             token=token,
+            android=messaging.AndroidConfig(
+                priority='high',
+                notification=messaging.AndroidNotification(
+                    channel_id='evorra_high_importance_v2',
+                    click_action='FLUTTER_NOTIFICATION_CLICK'
+                ),
+            ),
+            apns=messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(badge=1, sound='default'),
+                ),
+            ),
         )
         response = messaging.send(message)
         print(f'Successfully sent message: {response}')
