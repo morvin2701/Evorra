@@ -5,44 +5,25 @@
 {% block head %}
 <style>
     .profile-bg { background: transparent; min-height: 100vh; }
-    .profile-shell {
-        width: min(1260px, calc(100% - 36px));
-        margin: 0 auto;
-        padding: 24px 0 120px;
-        --profile-text: #0f172a;
-        --profile-muted: #475569;
-        --profile-border: rgba(148, 163, 184, 0.28);
-        --profile-surface: rgba(255, 255, 255, 0.88);
-        --profile-surface-soft: rgba(255, 255, 255, 0.6);
-        --profile-surface-strong: #ffffff;
-        --profile-chip-bg: rgba(255, 255, 255, 0.68);
-        --profile-chip-border: rgba(148, 163, 184, 0.22);
-        --profile-chip-text: #1e293b;
-        --profile-card-shadow: 0 18px 34px rgba(15, 23, 42, 0.14);
-        --profile-spot-icon: #ffffff;
-        --profile-spot-sub: rgba(255, 255, 255, 0.92);
-        --profile-spot-msg: rgba(255, 255, 255, 0.9);
-    }
+    .profile-shell { width: min(1260px, calc(100% - 36px)); margin: 0 auto; padding: 24px 0 120px; }
     .profile-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px; }
-    .profile-heading { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; color: var(--profile-text); }
+    .profile-heading { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.02em; }
     .profile-edit-btn { width: auto; padding: 10px 20px; font-size: 0.85rem; margin: 0; border-radius: 14px; }
     .profile-hero {
         display: grid; grid-template-columns: 96px 1fr; gap: 16px;
         padding: 20px; border-radius: 24px;
-        border: 1px solid var(--profile-border);
-        background: linear-gradient(145deg, var(--profile-surface) 0%, var(--profile-surface-soft) 100%);
-        box-shadow: var(--profile-card-shadow);
+        border: 1px solid rgba(255,255,255,0.13);
+        background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+        box-shadow: 0 18px 34px rgba(0,0,0,0.24);
     }
     .profile-avatar {
         width: 96px; height: 96px; border-radius: 50%; border: 2px solid rgba(142, 125, 255, 0.55);
-        overflow: hidden; background: var(--sm-surface); flex-shrink: 0;
+        overflow: hidden; background: #1B2640; flex-shrink: 0;
     }
-<<<<<<< Updated upstream
     .profile-role-badge { display: inline-flex; border-radius: 999px; padding: 6px 11px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(140, 240, 198, 0.13); color: #8CF0C6; border: 1px solid rgba(140,240,198,0.24); }
     .profile-name { color: white; font-size: 1.45rem; font-weight: 900; margin-top: 10px; line-height: 1.1; }
     .profile-email { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 6px; }
     .profile-city { color: var(--secondary); font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
-<<<<<<< Updated upstream
     .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; color: #fff; }
     .interest-chip {
         padding: 8px 14px;
@@ -50,30 +31,11 @@
         border: 1px solid rgba(255,255,255,0.12);
         background: rgba(255,255,255,0.06);
         color: rgba(234,243,255,0.9);
-=======
-    .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; }
-=======
-    .profile-role-badge { display: inline-flex; border-radius: 999px; padding: 6px 11px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(34, 197, 94, 0.12); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.2); }
-    .profile-name { color: var(--profile-text); font-size: 1.45rem; font-weight: 900; margin-top: 10px; line-height: 1.1; }
-    .profile-email { color: var(--profile-muted); font-size: 0.85rem; margin-top: 6px; }
-    .profile-city { color: var(--sm-primary); font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
-    .profile-section-title { margin: 28px 0 12px; font-size: 1.15rem; font-weight: 900; color: var(--profile-text); }
-    .interest-chip {
-        padding: 8px 14px;
-        border-radius: 999px;
-        border: 1px solid var(--profile-chip-border);
-        background: var(--profile-chip-bg);
-        color: var(--profile-chip-text);
->>>>>>> Stashed changes
         font-size: 0.75rem;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
     }
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     .spotlight-link { text-decoration: none; margin-top: 16px; display: block; }
     .profile-shell {
         --spot-bg: linear-gradient(135deg, rgba(96,83,255,0.4), rgba(13,178,235,0.28));
@@ -102,8 +64,8 @@
     .spot-msg { font-size: 0.8rem; color: var(--spot-msg) !important; }
     .spot-arrow { padding: 10px; background: var(--spot-arrow-bg); border-radius: 12px; color: var(--spot-arrow-color); border: 1px solid var(--spot-arrow-border); }
     .details-card, .actions-card {
-        border-radius: 18px; border: 1px solid var(--profile-border);
-        background: linear-gradient(145deg, var(--profile-surface) 0%, var(--profile-surface-soft) 100%);
+        border-radius: 18px; border: 1px solid rgba(255,255,255,0.12);
+        background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
     }
     .details-card { padding: 14px 16px; }
     .interests-wrap { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -111,7 +73,7 @@
         display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer;
         transition: background .2s ease;
     }
-    .action-tile:hover { background: rgba(148, 163, 184, 0.08); }
+    .action-tile:hover { background: rgba(255,255,255,0.04); }
     .action-icon {
         width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
         font-size: 1rem; flex-shrink: 0;
@@ -122,11 +84,6 @@
         display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer;
         transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
     }
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
     .logout-card:hover {
         border-color: rgba(220, 38, 38, 0.35);
         background: rgba(254, 226, 226, 0.35);
@@ -140,43 +97,17 @@
     .logout-chevron { color: #e11d48; font-size: 0.8rem; opacity: 0.85; }
     .logout-label { color: #be123c; }
     .logout-card-spaced { margin-top: 24px; }
-<<<<<<< Updated upstream
     .action-row-title { font-weight: 800; font-size: 0.95rem; margin: 0; color: #fff; line-height: 1.25; }
     .action-row-desc { font-size: 0.75rem; margin: 2px 0 0; color: rgba(255,255,255,0.55); line-height: 1.35; }
     .action-row-chevron { font-size: 0.8rem; opacity: 0.45; flex-shrink: 0; }
     .action-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 8px 0; }
     .logout-label { font-weight: 800; font-size: 0.95rem; margin: 0; }
-=======
-    .action-row-title { font-weight: 800; font-size: 0.95rem; margin: 0; color: var(--profile-text); line-height: 1.25; }
-    .action-row-desc { font-size: 0.75rem; margin: 2px 0 0; color: var(--profile-muted); line-height: 1.35; }
-    .action-row-chevron { font-size: 0.8rem; opacity: 0.45; flex-shrink: 0; }
-    .action-divider { border: none; border-top: 1px solid var(--profile-border); margin: 8px 0; }
-    .logout-label { font-weight: 800; font-size: 0.95rem; margin: 0; }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     @media (max-width: 640px) {
         .profile-shell { width: calc(100% - 20px); padding-top: 14px; }
         .profile-hero { grid-template-columns: 78px 1fr; padding: 16px; }
         .profile-avatar { width: 78px; height: 78px; }
         .profile-name { font-size: 1.2rem; }
     }
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
-
-    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .profile-shell {
-        --profile-text: #f8fafc;
-        --profile-muted: #cbd5e1;
-        --profile-border: rgba(148, 163, 184, 0.22);
-        --profile-surface: rgba(15, 23, 42, 0.9);
-        --profile-surface-soft: rgba(30, 41, 59, 0.82);
-        --profile-chip-bg: rgba(15, 23, 42, 0.8);
-        --profile-chip-border: rgba(148, 163, 184, 0.26);
-        --profile-chip-text: #e2e8f0;
-        --profile-card-shadow: 0 18px 34px rgba(2, 6, 23, 0.28);
-    }
->>>>>>> Stashed changes
 
     /* Theme-specific spotlight tuning */
     :is(html[data-theme="light"], body[data-theme="light"], body.theme-showmates[data-theme="light"]) .profile-shell {
@@ -205,10 +136,6 @@
         --spot-arrow-border: rgba(148,163,184,0.3);
         --spot-shadow: 0 16px 34px rgba(0,0,0,0.3);
     }
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 </style>
 {% endblock %}
 
