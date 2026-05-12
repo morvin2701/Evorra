@@ -77,26 +77,72 @@ async function saveTokenToDatabase(token) {
  * Handle foreground messages.
  * This is triggered when the app is open and in focus.
  */
+// Handle foreground messages
 onMessage(messaging, (payload) => {
     console.log("[FCM] Foreground message received:", payload);
     
-    // For a premium feel, show a custom in-app notification
-    showInAppNotification(payload);
+    const notifData = {
+        payload,
+        timestamp: Date.now(),
+        expiresAt: Date.now() + 6000, // 6 seconds total
+        isRestored: false
+    };
+    
+    localStorage.setItem('fcm_active_notif', JSON.stringify(notifData));
+    showInAppNotification(notifData);
+
+    // Force System OS Notification
+    if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(payload.notification.title || 'Evorra Update', {
+                body: payload.notification.body || '',
+                icon: '/static/favicon.svg',
+                badge: '/static/favicon.svg',
+                tag: 'foreground-push'
+            });
+        });
+    }
+});
+
+/**
+ * Check for active notifications on page load
+ */
+window.addEventListener('load', () => {
+    const raw = localStorage.getItem('fcm_active_notif');
+    if (!raw) return;
+
+    const notifData = JSON.parse(raw);
+    const now = Date.now();
+    
+    if (now < notifData.expiresAt) {
+        // Notification is still valid!
+        notifData.isRestored = true;
+        showInAppNotification(notifData);
+    } else {
+        localStorage.removeItem('fcm_active_notif');
+    }
 });
 
 /**
  * Show a premium in-app notification UI.
  */
-function showInAppNotification(payload) {
-    const { title, body, icon } = payload.notification || {};
+function showInAppNotification(notifData) {
+    if (document.querySelector('.fcm-in-app-notification')) return;
+
+    const { payload, expiresAt, isRestored } = notifData;
+    const remainingMs = expiresAt - Date.now();
+    if (remainingMs <= 0) return;
+
+    const { title, body } = payload.notification || {};
     
-    // Create notification element
     const notif = document.createElement('div');
     notif.className = 'fcm-in-app-notification';
+    if (isRestored) notif.style.animation = 'none'; // No entrance animation on reload
+    
     notif.innerHTML = `
         <div class="fcm-notif-content">
             <div class="fcm-notif-icon">
-                <img src="${icon || '/static/favicon.svg'}" alt="Notification Icon">
+                <img src="/static/favicon.svg" alt="Evorra">
             </div>
             <div class="fcm-notif-text">
                 <div class="fcm-notif-title">${title || 'New Update'}</div>
@@ -107,26 +153,32 @@ function showInAppNotification(payload) {
         <div class="fcm-notif-progress"></div>
     `;
 
+    // Calculate progress bar width based on remaining time
+    const progressBar = notif.querySelector('.fcm-notif-progress');
+    progressBar.style.transition = `width ${remainingMs}ms linear`;
+    setTimeout(() => { progressBar.style.width = '0%'; }, 50);
+
     document.body.appendChild(notif);
 
-    // Auto-remove after 6 seconds
     const timer = setTimeout(() => {
         notif.classList.add('fcm-notif-exit');
+        localStorage.removeItem('fcm_active_notif');
         setTimeout(() => notif.remove(), 500);
-    }, 6000);
+    }, remainingMs);
 
-    notif.querySelector('.fcm-notif-close').onclick = () => {
+    notif.querySelector('.fcm-notif-close').onclick = (e) => {
+        e.stopPropagation();
         clearTimeout(timer);
         notif.classList.add('fcm-notif-exit');
+        localStorage.removeItem('fcm_active_notif');
         setTimeout(() => notif.remove(), 500);
     };
 
-    notif.onclick = (e) => {
-        if (e.target.classList.contains('fcm-notif-close')) return;
+    notif.onclick = () => {
         const targetUrl = payload.data?.action_target || '/notifications';
         window.location.href = targetUrl;
     };
 }
 
-// Export for global access if needed (e.g. for simple script tags)
+// Export for global access
 window.requestNotificationPermission = requestNotificationPermission;

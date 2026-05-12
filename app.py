@@ -206,14 +206,13 @@ def api_send_push():
 @app.route('/api/notify-purchase', methods=['POST'])
 def api_notify_purchase():
     """
-    Endpoint called by the frontend after a successful purchase.
-    Expects: { "user_id": "...", "event_title": "...", "ticket_count": 1, "amount": 100 }
+    Endpoint called after a successful purchase.
+    Payload: { "user_id": "...", "event_name": "...", "ticket_count": 1 }
     """
     body = request.get_json(silent=True) or {}
     user_id = body.get('user_id')
-    event_title = body.get('event_title', 'Your Event')
-    ticket_count = body.get('ticket_count', 1)
-    amount = body.get('amount', 0)
+    event_name = body.get('event_name', 'your event')
+    count = body.get('ticket_count', 1)
 
     if not user_id:
         return jsonify({'ok': False, 'error': 'MISSING_USER_ID'}), 400
@@ -223,20 +222,92 @@ def api_notify_purchase():
         user_doc = db.collection('users').document(user_id).get()
         if not user_doc.exists:
             return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
-        
-        data = user_doc.to_dict()
-        token = data.get('fcm_token')
-        
+
+        user_data = user_doc.to_dict()
+        token = user_data.get('fcm_token')
+
         if not token:
-            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200 # Silent fail if user hasn't enabled notifications
+            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200
 
         title = "🎟️ Booking Confirmed!"
-        msg = f"Success! Your {ticket_count} ticket(s) for {event_title} are ready. View them in 'My Tickets'."
+        msg_body = f"Success! Your {count} ticket(s) for {event_name} are ready. View them in 'My Tickets'."
         
-        success = send_fcm_notification(token, title, msg, {
-            "action_target": "/my-tickets",
-            "type": "purchase_success"
-        })
+        success = send_fcm_notification(
+            token=token,
+            title=title,
+            body=msg_body,
+            data={'action_target': '/my-tickets'}
+        )
+
+        return jsonify({'ok': success})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@app.route('/api/send-global-notification', methods=['POST'])
+def api_send_global_notification():
+    """
+    Generic endpoint for all app notifications.
+    Types: 'share', 'accept', 'reject', 'cancel', 'qr_unlock', 'reminder'
+    """
+    body = request.get_json(silent=True) or {}
+    user_id = body.get('user_id')
+    notif_type = body.get('type') # 'share', 'accept', etc.
+    sender_name = body.get('sender_name', 'Someone')
+    event_name = body.get('event_name', 'Event')
+
+    if not user_id or not notif_type:
+        return jsonify({'ok': False, 'error': 'MISSING_PARAMS'}), 400
+
+    # Define notification content based on type
+    config = {
+        'share': {
+            'title': "🎁 Ticket Shared!",
+            'body': f"{sender_name} just shared a ticket for {event_name} with you!",
+            'target': '/shared-tickets'
+        },
+        'accept': {
+            'title': "✅ Share Accepted",
+            'body': f"Great news! {sender_name} accepted the ticket for {event_name}.",
+            'target': '/my-tickets'
+        },
+        'reject': {
+            'title': "❌ Share Declined",
+            'body': f"Notice: The ticket share for {event_name} was declined by {sender_name}.",
+            'target': '/my-tickets'
+        },
+        'cancel': {
+            'title': "⚠️ Order Cancelled",
+            'body': f"Your order for {event_name} has been cancelled successfully.",
+            'target': '/profile'
+        },
+        'qr_unlock': {
+            'title': "🔓 QR Code Unlocked!",
+            'body': f"Get ready! Your QR code for {event_name} is now active. See you there!",
+            'target': '/my-tickets'
+        }
+    }
+
+    conf = config.get(notif_type)
+    if not conf:
+        return jsonify({'ok': False, 'error': 'INVALID_TYPE'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(user_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        token = user_doc.to_dict().get('fcm_token')
+        if not token:
+            return jsonify({'ok': False, 'error': 'NO_FCM_TOKEN'}), 200
+
+        success = send_fcm_notification(
+            token=token,
+            title=conf['title'],
+            body=conf['body'],
+            data={'action_target': conf['target']}
+        )
         return jsonify({'ok': success})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500

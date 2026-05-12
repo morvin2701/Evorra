@@ -21,7 +21,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title || 'Evorra Update';
   const notificationOptions = {
     body: payload.notification.body || 'You have a new notification.',
-    icon: payload.notification.icon || '/static/favicon.svg',
+    icon: '/static/favicon.svg',
+    badge: '/static/favicon.svg',
     data: payload.data, // Preserve data for click handling
     tag: payload.notification.tag || 'evorra-notification'
   };
