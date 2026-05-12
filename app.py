@@ -33,13 +33,15 @@ def _init_firebase_admin():
                    (raw_json.startswith('"') and raw_json.endswith('"')):
                     raw_json = raw_json[1:-1]
                 
-                # Check if it looks like Base64 (starts with 'ey' for '{' in JSON)
-                if raw_json.startswith('ey') and ' ' not in raw_json:
+                # If it doesn't start with '{', it's likely Base64 encoded
+                if not raw_json.strip().startswith('{'):
                     try:
                         import base64
-                        raw_json = base64.b64decode(raw_json).decode('utf-8')
-                    except:
-                        pass
+                        # Strip whitespace and handle potential Vercel mangling
+                        b64_data = raw_json.replace(' ', '').replace('\n', '').replace('\r', '')
+                        raw_json = base64.b64decode(b64_data).decode('utf-8')
+                    except Exception as e:
+                        print(f"[Firebase] Base64 decode failed: {e}")
                 
                 raw_json = raw_json.replace('\\n', '\n')
                 
