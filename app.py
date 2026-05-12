@@ -53,8 +53,9 @@ def _init_firebase_admin():
                 # Log to Vercel console
                 print(f"[Firebase] JSON Parse Error: {e}")
                 service_account_json_debug = f"{service_account_json[:10]}...{service_account_json[-5:]}" if service_account_json else "NONE"
-                # Flag the error for the UI
-                error_info = f"INVALID (Starts with: {service_account_json_debug}). Error: {e}"
+                # Flag the error for the UI and STOP here
+                final_error = f"INVALID (Starts with: {service_account_json_debug}). Error: {e}"
+                raise Exception(f"FCM Configuration Error: FIREBASE_SERVICE_ACCOUNT_JSON is {final_error}")
         
         # Fallback to file path (Local)
         service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
