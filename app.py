@@ -24,41 +24,42 @@ def _init_firebase_admin():
     if not firebase_admin._apps:
         # Check for JSON string (Vercel/Production)
         service_account_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
+        
         if service_account_json and service_account_json.strip():
             try:
                 import json
-                # Strip potential surrounding quotes or whitespace
                 raw_json = service_account_json.strip()
-                
-                # Handle cases where the string might be double-quoted or single-quoted
                 if (raw_json.startswith("'") and raw_json.endswith("'")) or \
                    (raw_json.startswith('"') and raw_json.endswith('"')):
                     raw_json = raw_json[1:-1]
-                
-                # Fix common issue where newlines are escaped as literal '\n'
                 raw_json = raw_json.replace('\\n', '\n')
                 
                 cred_dict = json.loads(raw_json)
                 cred = credentials.Certificate(cred_dict)
                 firebase_admin.initialize_app(cred)
-                print("[Firebase] Initialized via FIREBASE_SERVICE_ACCOUNT_JSON")
                 return firestore.client()
             except Exception as e:
-                print(f"[Firebase] Critical: Failed to parse JSON from env: {e}")
-        else:
-            print("[Firebase] Warning: FIREBASE_SERVICE_ACCOUNT_JSON is missing or empty in environment.")
-
+                # Log to Vercel console
+                print(f"[Firebase] JSON Parse Error: {e}")
+                # We don't want to show the whole JSON in the UI for security, 
+                # but we'll flag it.
+        
         # Fallback to file path (Local)
         service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
         if service_account_path and os.path.exists(service_account_path):
             cred = credentials.Certificate(service_account_path)
             firebase_admin.initialize_app(cred)
-        else:
-            # Last resort: Default credentials
-            try:
-                firebase_admin.initialize_app()
-            except:
-                pass
+            return firestore.client()
+
+        # If we reach here on Vercel, it's a configuration failure
+        if os.getenv('VERCEL') == '1':
+             raise Exception(f"FCM Configuration Error: FIREBASE_SERVICE_ACCOUNT_JSON is {'MISSING' if not service_account_json else 'INVALID'}. Check Vercel Env Settings.")
+
+        # Last resort (Default)
+        try:
+            firebase_admin.initialize_app()
+        except:
+            pass
     return firestore.client()
 
 
