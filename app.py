@@ -24,15 +24,23 @@ def _init_firebase_admin():
     if not firebase_admin._apps:
         # Check for JSON string (Vercel/Production)
         service_account_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_JSON')
-        if service_account_json:
+        if service_account_json and service_account_json.strip():
             try:
                 import json
-                cred_dict = json.loads(service_account_json)
+                # Strip potential surrounding quotes or whitespace
+                raw_json = service_account_json.strip()
+                if raw_json.startswith("'") or raw_json.startswith('"'):
+                    raw_json = raw_json[1:-1]
+                
+                cred_dict = json.loads(raw_json)
                 cred = credentials.Certificate(cred_dict)
                 firebase_admin.initialize_app(cred)
+                print("[Firebase] Initialized via FIREBASE_SERVICE_ACCOUNT_JSON")
                 return firestore.client()
             except Exception as e:
-                print(f"[Firebase] Error loading JSON from env: {e}")
+                print(f"[Firebase] Critical: Failed to parse JSON from env: {e}")
+        else:
+            print("[Firebase] Warning: FIREBASE_SERVICE_ACCOUNT_JSON is missing or empty in environment.")
 
         # Fallback to file path (Local)
         service_account_path = (os.getenv('GOOGLE_APPLICATION_CREDENTIALS') or '').strip()
