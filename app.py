@@ -267,8 +267,9 @@ def api_notify_purchase():
             print(f"DEBUG: NO TOKENS FOUND for user {user_id}. Notifications cannot be sent.")
             return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200
 
-        title = "🎟️ Booking Confirmed!"
-        msg_body = f"Success! Your {count} ticket(s) for {event_name} are ready. View them in 'My Tickets'."
+        user_name = user_data.get('full_name') or user_data.get('name') or "Pass Holder"
+        title = "🎟️ Booking Confirmed"
+        msg_body = f"{user_name}, your {count} ticket(s) for {event_name} have been confirmed. View them in My Tickets."
         
         # Send to all devices
         sent_count = 0
@@ -304,81 +305,80 @@ def api_send_global_notification():
     if not user_id or not notif_type:
         return jsonify({'ok': False, 'error': 'MISSING_PARAMS'}), 400
 
-    # Define notification content based on type
-    config = {
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(user_id).get()
+        user_data = user_doc.to_dict() if user_doc.exists else {}
+        recipient_name = user_data.get('full_name') or user_data.get('name') or "User"
+
+        # Define notification content based on type
+        config = {
         'share': {
-            'title': "🎁 Ticket Shared!",
-            'body': f"{sender_name} just shared a ticket for {event_name} with you!",
+            'title': "🎁 Ticket Shared",
+            'body': f"{recipient_name}, {sender_name} just shared a ticket for {event_name} with you. View it in Shared Tickets.",
             'target': '/shared-tickets'
         },
         'accept': {
             'title': "✅ Share Accepted",
-            'body': f"Great news! {sender_name} accepted the ticket for {event_name}.",
+            'body': f"{recipient_name}, {sender_name} accepted the ticket for {event_name}. It's now in their hands!",
             'target': '/my-tickets'
         },
         'reject': {
             'title': "❌ Share Declined",
-            'body': f"Notice: The ticket share for {event_name} was declined by {sender_name}.",
+            'body': f"{recipient_name}, {sender_name} declined the ticket for {event_name}. It's back in your tickets.",
             'target': '/my-tickets'
         },
         'cancel': {
             'title': "⚠️ Order Cancelled",
-            'body': f"Your order for {event_name} has been cancelled successfully.",
+            'body': f"{recipient_name}, your order for {event_name} has been cancelled successfully.",
             'target': '/profile'
         },
         'qr_unlock': {
-            'title': "🔓 QR Code Unlocked!",
-            'body': f"Get ready! Your QR code for {event_name} is now active. See you there!",
+            'title': "🔓 QR Code Unlocked",
+            'body': f"{recipient_name}, your QR code for {event_name} is now active. Get ready!",
             'target': '/my-tickets'
         },
         'reminder': {
-            'title': "⏰ Event Coming Up",
-            'body': f"Reminder: {event_name} starts tomorrow. Have your pass ready!",
+            'title': "⏰ Event Tomorrow",
+            'body': f"{recipient_name}, reminder: {event_name} starts tomorrow. Have your pass ready!",
             'target': '/my-tickets'
         },
         'payment': {
-            'title': "💰 Payment Successful",
-            'body': f"Your payment for {event_name} was successful. Thank you!",
+            'title': "💰 Payment Success",
+            'body': f"{recipient_name}, your payment for {event_name} was successful. Thank you!",
             'target': '/profile'
         },
         'refund': {
             'title': "💸 Refund Processed",
-            'body': f"A refund for {event_name} has been processed successfully.",
+            'body': f"{recipient_name}, a refund for {event_name} has been processed successfully.",
             'target': '/profile'
         },
         'payout': {
             'title': "🏦 Payout Initiated",
-            'body': f"A payout for {event_name} has been initiated to your account.",
+            'body': f"{recipient_name}, a payout for {event_name} has been initiated to your account.",
             'target': '/profile'
         },
         'promo': {
-            'title': "✨ Special Offer!",
-            'body': f"Don't miss out! Check out the latest offers for {event_name}.",
+            'title': "✨ Special Offer",
+            'body': f"{recipient_name}, don't miss out! Check out the latest offers for {event_name}.",
             'target': '/explore'
         },
         'offer': {
-            'title': "🔥 New Drop!",
-            'body': f"A new event drop for {event_name} is live now!",
+            'title': "🔥 New Drop",
+            'body': f"{recipient_name}, a new event drop for {event_name} is live now!",
             'target': '/explore'
         },
         'general': {
-            'title': "📣 Update from Evorra",
-            'body': f"We have some news regarding {event_name}. Check it out!",
+            'title': "📣 Evorra Update",
+            'body': f"{recipient_name}, we have some news regarding {event_name}. Check it out!",
             'target': '/profile'
         }
     }
 
-    conf = config.get(notif_type)
-    if not conf:
-        return jsonify({'ok': False, 'error': 'INVALID_TYPE'}), 400
+        conf = config.get(notif_type)
+        if not conf:
+            return jsonify({'ok': False, 'error': 'INVALID_TYPE'}), 400
 
-    try:
-        db = _init_firebase_admin()
-        user_doc = db.collection('users').document(user_id).get()
-        if not user_doc.exists:
-            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
-
-        user_data = user_doc.to_dict()
         tokens = user_data.get('fcm_tokens', [])
         if not isinstance(tokens, list): tokens = [tokens] if tokens else []
         if not tokens and user_data.get('fcm_token'): tokens = [user_data['fcm_token']]
