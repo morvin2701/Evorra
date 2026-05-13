@@ -238,7 +238,8 @@ def api_notify_purchase():
     """
     body = request.get_json(silent=True) or {}
     user_id = body.get('user_id')
-    event_name = body.get('event_name', 'your event')
+    # Handle both 'event_name' and 'event_title' for backward compatibility
+    event_name = body.get('event_name') or body.get('event_title') or 'your event'
     count = body.get('ticket_count', 1)
 
     if not user_id:
@@ -267,7 +268,7 @@ def api_notify_purchase():
             print(f"DEBUG: NO TOKENS FOUND for user {user_id}. Notifications cannot be sent.")
             return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200
 
-        user_name = user_data.get('full_name') or user_data.get('name') or "Pass Holder"
+        user_name = user_data.get('full_name') or user_data.get('name') or user_data.get('displayName') or user_data.get('first_name') or "Pass Holder"
         title = "🎟️ Booking Confirmed"
         msg_body = f"{user_name}, your {count} ticket(s) for {event_name} have been confirmed. View them in My Tickets."
         
