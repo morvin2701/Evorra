@@ -181,8 +181,22 @@ def send_fcm_notification(token, title, body, data=None):
                 ),
             ),
             apns=messaging.APNSConfig(
+                headers={
+                    'apns-priority': '10',
+                    'apns-topic': 'com.morvinvekariya.evorra',
+                    'apns-push-type': 'alert',
+                },
                 payload=messaging.APNSPayload(
-                    aps=messaging.Aps(badge=1, sound='default', content_available=True),
+                    aps=messaging.Aps(
+                        alert=messaging.ApsAlert(
+                            title=title,
+                            body=body,
+                        ),
+                        badge=1,
+                        sound='default',
+                        content_available=True,
+                        mutable_content=True,
+                    ),
                 ),
             ),
         )
@@ -232,28 +246,45 @@ def api_notify_purchase():
 
     try:
         db = _init_firebase_admin()
+        print(f"DEBUG: Processing purchase notification for UserID: {user_id}")
+        
         user_doc = db.collection('users').document(user_id).get()
         if not user_doc.exists:
+            print(f"DEBUG: User document NOT FOUND for ID: {user_id}")
             return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
 
         user_data = user_doc.to_dict()
         tokens = user_data.get('fcm_tokens', [])
         if not isinstance(tokens, list): tokens = [tokens] if tokens else []
-        if not tokens and user_data.get('fcm_token'): tokens = [user_data['fcm_token']]
+        
+        # Also check the legacy single token field
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
 
+        print(f"DEBUG: Found {len(tokens)} tokens for user {user_id}")
         if not tokens:
+            print(f"DEBUG: NO TOKENS FOUND for user {user_id}. Notifications cannot be sent.")
             return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200
 
         title = "🎟️ Booking Confirmed!"
         msg_body = f"Success! Your {count} ticket(s) for {event_name} are ready. View them in 'My Tickets'."
         
         # Send to all devices
-        sent_any = False
-        for token in tokens:
+        sent_count = 0
+        for i, token in enumerate(tokens):
+            print(f"DEBUG: Sending to token {i+1}/{len(tokens)}: {token[:10]}...")
             if send_fcm_notification(token, title, msg_body, {'action_target': '/my-tickets'}):
-                sent_any = True
+                sent_count += 1
+                print(f"DEBUG: Token {i+1} sent successfully.")
+            else:
+                print(f"DEBUG: Token {i+1} FAILED to send.")
 
-        return jsonify({'ok': sent_any})
+        return jsonify({
+            'ok': sent_count > 0,
+            'tokens_found': len(tokens),
+            'tokens_sent': sent_count
+        })
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 
@@ -299,6 +330,41 @@ def api_send_global_notification():
             'title': "🔓 QR Code Unlocked!",
             'body': f"Get ready! Your QR code for {event_name} is now active. See you there!",
             'target': '/my-tickets'
+        },
+        'reminder': {
+            'title': "⏰ Event Coming Up",
+            'body': f"Reminder: {event_name} starts tomorrow. Have your pass ready!",
+            'target': '/my-tickets'
+        },
+        'payment': {
+            'title': "💰 Payment Successful",
+            'body': f"Your payment for {event_name} was successful. Thank you!",
+            'target': '/profile'
+        },
+        'refund': {
+            'title': "💸 Refund Processed",
+            'body': f"A refund for {event_name} has been processed successfully.",
+            'target': '/profile'
+        },
+        'payout': {
+            'title': "🏦 Payout Initiated",
+            'body': f"A payout for {event_name} has been initiated to your account.",
+            'target': '/profile'
+        },
+        'promo': {
+            'title': "✨ Special Offer!",
+            'body': f"Don't miss out! Check out the latest offers for {event_name}.",
+            'target': '/explore'
+        },
+        'offer': {
+            'title': "🔥 New Drop!",
+            'body': f"A new event drop for {event_name} is live now!",
+            'target': '/explore'
+        },
+        'general': {
+            'title': "📣 Update from Evorra",
+            'body': f"We have some news regarding {event_name}. Check it out!",
+            'target': '/profile'
         }
     }
 
@@ -325,6 +391,43 @@ def api_send_global_notification():
             if send_fcm_notification(token, conf['title'], conf['body'], {'action_target': conf['target']}):
                 sent_any = True
         return jsonify({'ok': sent_any})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@app.route('/api/test-all-notifications', methods=['POST'])
+def api_test_all_notifications():
+    """
+    Utility endpoint to test every notification type for a user.
+    """
+    body = request.get_json(silent=True) or {}
+    user_id = body.get('user_id')
+    if not user_id:
+        return jsonify({'ok': False, 'error': 'MISSING_USER_ID'}), 400
+
+    types = ['share', 'accept', 'reject', 'cancel', 'qr_unlock', 'reminder', 'payment', 'refund', 'promo', 'general']
+    results = {}
+    
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(user_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        for t in types:
+            # Trigger each one via the existing global endpoint logic
+            # (In a real scenario, we'd call the function directly)
+            res = app.test_client().post('/api/send-global-notification', 
+                json={
+                    'user_id': user_id,
+                    'type': t,
+                    'sender_name': 'Test Manager',
+                    'event_name': 'Global Debug Event'
+                }
+            )
+            results[t] = res.get_json().get('ok', False)
+
+        return jsonify({'ok': True, 'results': results})
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 

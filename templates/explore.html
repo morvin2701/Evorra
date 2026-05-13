@@ -822,24 +822,23 @@
         if (['closed', 'cancelled', 'completed', 'ended', 'archived'].includes(status)) return true;
         if (eventItem.is_published === false) return true;
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayMs = today.getTime();
+        const nowMs = Date.now();
+        // Add a 1-hour grace buffer so events don't vanish mid-day
+        const gracePeriodMs = 60 * 60 * 1000;
 
         const effectiveEnd = getEffectiveEventEndDate(eventItem);
 
         if (effectiveEnd && effectiveEnd.getTime() > 0) {
-            // Strict comparison: if end day has passed, it's closed.
-            if (effectiveEnd.getTime() < todayMs) return true;
+            // Event has an explicit end time — hide it once that time + grace period has passed
+            if (effectiveEnd.getTime() + gracePeriodMs < nowMs) return true;
         } else {
-            // Fallback to start_time: if start day has passed, it's closed.
+            // No end time — fall back to start_time + 23 hours as the implicit end
             const startDate = parseEventDateMaybe(
                 eventItem.start_time || eventItem.startTime || eventItem.date || null
             );
             if (startDate && startDate.getTime() > 0) {
-                const startDay = new Date(startDate.getTime());
-                startDay.setHours(0, 0, 0, 0);
-                if (startDay.getTime() < todayMs) return true;
+                const implicitEnd = startDate.getTime() + (23 * 60 * 60 * 1000);
+                if (implicitEnd + gracePeriodMs < nowMs) return true;
             }
         }
         return false;
