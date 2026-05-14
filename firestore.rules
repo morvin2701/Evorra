@@ -86,6 +86,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
+      // Allow any signed-in user to read user profiles (needed for sharing lookup)
       allow read: if signedIn();
       allow create: if isOwner(userId);
       allow update: if isOwner(userId);
@@ -199,6 +200,7 @@ service cloud.firestore {
     match /notifications/{notifId} {
       allow read: if signedIn() && resource.data.user_id == request.auth.uid;
 
+      // Allow creating notifications if the user is the recipient or if it's a valid ticket share event
       allow create: if signedIn() && (
         request.resource.data.user_id == request.auth.uid
         || canCreateTicketShareNotif()

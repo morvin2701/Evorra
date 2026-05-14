@@ -230,6 +230,71 @@ def api_send_push():
     return jsonify({'ok': success})
 
 
+@app.route('/api/resolve-recipient', methods=['POST'])
+def api_resolve_recipient():
+    """
+    Resolves a recipient's UID by email or phone via the Admin SDK.
+    Bypasses client-side Firestore security restrictions.
+    Payload: { "email": "...", "phone": "..." }
+    """
+    body = request.get_json(silent=True) or {}
+    email = body.get('email')
+    phone = body.get('phone')
+
+    if not email and not phone:
+        return jsonify({'ok': False, 'error': 'MISSING_DATA'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        users_ref = db.collection('users')
+        target_uid = None
+        
+        if email:
+            clean = email.strip().lower()
+            # Try email_lower
+            q = users_ref.where('email_lower', '==', clean).limit(1).get()
+            if q:
+                target_uid = q[0].id
+            else:
+                # Fallback to email (lowercased)
+                q = users_ref.where('email', '==', clean).limit(1).get()
+                if q:
+                    target_uid = q[0].id
+                else:
+                    # Fallback to original email
+                    q = users_ref.where('email', '==', email.strip()).limit(1).get()
+                    if q:
+                        target_uid = q[0].id
+        
+        elif phone:
+            d = str(phone).strip()
+            # Try exact match
+            q = users_ref.where('phone_normalized', '==', d).limit(1).get()
+            if q:
+                target_uid = q[0].id
+            elif len(d) >= 10:
+                tail = d[-10:]
+                # Try tail 10
+                q = users_ref.where('phone_normalized', '==', tail).limit(1).get()
+                if q:
+                    target_uid = q[0].id
+                else:
+                    with91 = '91' + tail
+                    if d != with91:
+                        q = users_ref.where('phone_normalized', '==', with91).limit(1).get()
+                        if q:
+                            target_uid = q[0].id
+
+        if target_uid:
+            return jsonify({'ok': True, 'uid': target_uid})
+        else:
+            return jsonify({'ok': False, 'error': 'NOT_FOUND'}), 404
+
+    except Exception as e:
+        print(f"Error in api_resolve_recipient: {e}")
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
 @app.route('/api/notify-purchase', methods=['POST'])
 def api_notify_purchase():
     """
@@ -291,6 +356,189 @@ def api_notify_purchase():
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 
+@app.route('/api/notify-share', methods=['POST'])
+def api_notify_share():
+    """
+    Called when a ticket is shared.
+    Payload: { sender_name, recipient_id, event_name, qty }
+    """
+    body = request.get_json(silent=True) or {}
+    recipient_id = body.get('recipient_id') or body.get('user_id')
+    sender_name = body.get('sender_name', 'Someone')
+    event_name = body.get('event_name', 'Event')
+    qty = body.get('qty') or body.get('quantity', 1)
+
+    if not recipient_id:
+        return jsonify({'ok': False, 'error': 'MISSING_RECIPIENT'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(recipient_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        user_data = user_doc.to_dict() or {}
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
+
+        if not tokens:
+            return jsonify({'ok': True, 'warning': 'NO_TOKENS_FOUND'}), 200
+
+        title = "🎁 Ticket Received"
+        message = f"You have received {qty} ticket(s) from {sender_name} for {event_name}. Kindly accept the ticket."
+        data = {'action_target': '/shared-tickets'}
+
+        sent_count = 0
+        for token in tokens:
+            if send_fcm_notification(token, title, message, data):
+                sent_count += 1
+
+        return jsonify({'ok': True, 'sent_count': sent_count})
+    except Exception as e:
+        print(f"Error in api_notify_share: {e}")
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+@app.route('/api/notify-accept', methods=['POST'])
+def api_notify_accept():
+    """
+    Called when a recipient accepts a shared ticket.
+    Payload: { sender_name, sender_id, event_name }
+    """
+    body = request.get_json(silent=True) or {}
+    sender_id = body.get('sender_id')
+    recipient_name = body.get('sender_name', 'Someone') # The person who accepted
+    event_name = body.get('event_name', 'Event')
+
+    if not sender_id:
+        return jsonify({'ok': False, 'error': 'MISSING_SENDER_ID'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(sender_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        user_data = user_doc.to_dict() or {}
+        original_sender_name = user_data.get('full_name') or user_data.get('name') or "User"
+        
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
+
+        if not tokens:
+            return jsonify({'ok': True, 'warning': 'NO_TOKENS_FOUND'}), 200
+
+        title = "✅ Share Accepted"
+        message = f"{original_sender_name}, {recipient_name} accepted the ticket for {event_name}. It's now in their hands!"
+        data = {'action_target': '/my-tickets'}
+
+        sent_count = 0
+        for token in tokens:
+            if send_fcm_notification(token, title, message, data):
+                sent_count += 1
+
+        return jsonify({'ok': True, 'sent_count': sent_count})
+    except Exception as e:
+        print(f"Error in api_notify_accept: {e}")
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+@app.route('/api/notify-reject', methods=['POST'])
+def api_notify_reject():
+    """
+    Called when a recipient rejects a shared ticket.
+    Payload: { sender_name, sender_id, event_name }
+    """
+    body = request.get_json(silent=True) or {}
+    sender_id = body.get('sender_id')
+    recipient_name = body.get('sender_name', 'Someone') # The person who rejected
+    event_name = body.get('event_name', 'Event')
+
+    if not sender_id:
+        return jsonify({'ok': False, 'error': 'MISSING_SENDER_ID'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(sender_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        user_data = user_doc.to_dict() or {}
+        original_sender_name = user_data.get('full_name') or user_data.get('name') or "User"
+        
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
+
+        if not tokens:
+            return jsonify({'ok': True, 'warning': 'NO_TOKENS_FOUND'}), 200
+
+        title = "❌ Share Declined"
+        message = f"{original_sender_name}, {recipient_name} declined the ticket for {event_name}. It's back in your tickets."
+        data = {'action_target': '/my-tickets'}
+
+        sent_count = 0
+        for token in tokens:
+            if send_fcm_notification(token, title, message, data):
+                sent_count += 1
+
+        return jsonify({'ok': True, 'sent_count': sent_count})
+    except Exception as e:
+        print(f"Error in api_notify_reject: {e}")
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+@app.route('/api/notify-cancel', methods=['POST'])
+def api_notify_cancel():
+    """
+    Called when a ticket is cancelled.
+    Payload: { user_id, event_name }
+    """
+    body = request.get_json(silent=True) or {}
+    user_id = body.get('user_id')
+    event_name = body.get('event_name', 'Event')
+
+    if not user_id:
+        return jsonify({'ok': False, 'error': 'MISSING_USER_ID'}), 400
+
+    try:
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(user_id).get()
+        if not user_doc.exists:
+            return jsonify({'ok': False, 'error': 'USER_NOT_FOUND'}), 404
+
+        user_data = user_doc.to_dict() or {}
+        recipient_name = user_data.get('full_name') or user_data.get('name') or "User"
+        
+        tokens = user_data.get('fcm_tokens', [])
+        if not isinstance(tokens, list): tokens = [tokens] if tokens else []
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
+
+        if not tokens:
+            return jsonify({'ok': True, 'warning': 'NO_TOKENS_FOUND'}), 200
+
+        title = "⚠️ Order Cancelled"
+        message = f"{recipient_name}, your order for {event_name} has been cancelled successfully."
+        data = {'action_target': '/profile'}
+
+        sent_count = 0
+        for token in tokens:
+            if send_fcm_notification(token, title, message, data):
+                sent_count += 1
+
+        return jsonify({'ok': True, 'sent_count': sent_count})
+    except Exception as e:
+        print(f"Error in api_notify_cancel: {e}")
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
 @app.route('/api/send-global-notification', methods=['POST'])
 def api_send_global_notification():
     """
@@ -302,6 +550,7 @@ def api_send_global_notification():
     notif_type = body.get('type') # 'share', 'accept', etc.
     sender_name = body.get('sender_name', 'Someone')
     event_name = body.get('event_name', 'Event')
+    quantity = body.get('quantity', 1)
 
     if not user_id or not notif_type:
         return jsonify({'ok': False, 'error': 'MISSING_PARAMS'}), 400
@@ -315,8 +564,8 @@ def api_send_global_notification():
         # Define notification content based on type
         config = {
         'share': {
-            'title': "🎁 Ticket Shared",
-            'body': f"{recipient_name}, {sender_name} just shared a ticket for {event_name} with you. View it in Shared Tickets.",
+            'title': "🎁 Ticket Received",
+            'body': f"You have received {quantity} ticket(s) from {sender_name} for {event_name}. Kindly accept the ticket.",
             'target': '/shared-tickets'
         },
         'accept': {
@@ -382,7 +631,10 @@ def api_send_global_notification():
 
         tokens = user_data.get('fcm_tokens', [])
         if not isinstance(tokens, list): tokens = [tokens] if tokens else []
-        if not tokens and user_data.get('fcm_token'): tokens = [user_data['fcm_token']]
+        
+        legacy_token = user_data.get('fcm_token')
+        if legacy_token and legacy_token not in tokens:
+            tokens.append(legacy_token)
 
         if not tokens:
             return jsonify({'ok': False, 'error': 'NO_TOKENS'}), 200

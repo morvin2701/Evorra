@@ -957,6 +957,18 @@
                     `${user.displayName || user.email || 'Recipient'} accepted your shared ticket for ${eventTitle}.`,
                     ticketId
                 );
+                try {
+                    await fetch('/api/send-global-notification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: senderUid,
+                            type: 'accept',
+                            sender_name: user.displayName || 'Someone',
+                            event_name: eventTitle
+                        })
+                    });
+                } catch (e) {}
                 alert('Ticket accepted successfully.');
             } else {
                 await notifyUser(
@@ -965,6 +977,18 @@
                     `${user.displayName || user.email || 'Recipient'} rejected the shared ticket for ${eventTitle}. It has been returned to you.`,
                     ticketId
                 );
+                try {
+                    await fetch('/api/send-global-notification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: senderUid,
+                            type: 'reject',
+                            sender_name: user.displayName || 'Someone',
+                            event_name: eventTitle
+                        })
+                    });
+                } catch (e) {}
                 alert('Ticket rejected. It has been returned to sender.');
             }
         } catch (err) {

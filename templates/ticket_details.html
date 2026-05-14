@@ -2577,6 +2577,23 @@
                 } catch (notifErr) {
                     console.warn("Notification write skipped:", notifErr?.code || notifErr?.message || notifErr);
                 }
+
+                // TRIGGER PUSH NOTIFICATION
+                try {
+                    await fetch('/api/send-global-notification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: targetUid,
+                            type: 'share',
+                            sender_name: user.displayName || 'Someone',
+                            event_name: activeTicket.event_title || (activeTicket.event_snapshot && activeTicket.event_snapshot.title) || 'an event',
+                            quantity: qty
+                        })
+                    });
+                } catch (pushErr) {
+                    console.warn('[FCM] Push trigger failed:', pushErr);
+                }
             }
 
             alert(`Successfully shared ${qty} ticket(s). Recipient must accept or reject from Shared Tickets.`);
