@@ -209,8 +209,48 @@
     }
     .ticket-select-card.active {
         border-color: rgba(220, 38, 38, 0.45);
-        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12) inset;
+        box-shadow: 0 8px 24px rgba(220, 38, 38, 0.1);
         background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+    }
+    .ticket-qty-embedded {
+        display: none;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--sm-border);
+        justify-content: space-between;
+        align-items: center;
+        animation: slideDown 0.25s ease-out;
+    }
+    .ticket-select-card.active .ticket-qty-embedded {
+        display: flex;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .qty-ctrl-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--sm-border);
+        background: var(--sm-surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    .qty-ctrl-btn:hover {
+        background: var(--sm-primary);
+        color: white;
+        border-color: var(--sm-primary);
+    }
+    .qty-val-display {
+        font-weight: 900;
+        font-size: 1.1rem;
+        min-width: 40px;
+        text-align: center;
     }
     .ticket-opt-row {
         display: flex;
@@ -463,7 +503,8 @@
                     <div class="booking-hero-body">
                         <h2 id="event-title" class="booking-title">Loading...</h2>
                         <p id="event-location" class="booking-sub">Venue • City</p>
-                        <p id="event-time" class="booking-time">Date TBA</p>
+                        <p id="event-time" class="booking-time">Starts: Loading...</p>
+                        <p id="event-end-time" class="booking-time" style="margin-top: 4px; opacity: 0.85;">Ends: Loading...</p>
                     </div>
                 </div>
                 <div class="booking-card booking-block">
@@ -478,17 +519,7 @@
                     </div>
                 </div>
 
-                <div class="booking-card booking-block">
-                    <h2 class="booking-section-title">Quantity</h2>
-                    <div class="qty-selector">
-                        <button type="button" class="qty-btn" onclick="updateQty(-1)" aria-label="Decrease quantity"><i class="fa-solid fa-minus"></i></button>
-                        <div class="qty-stack">
-                            <div id="qty-display" class="qty-display">1</div>
-                            <p id="qty-limit" class="qty-limit">Max 10 per user</p>
-                        </div>
-                        <button type="button" class="qty-btn" onclick="updateQty(1)" aria-label="Increase quantity"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                </div>
+
 
                 <div class="booking-card booking-block">
                     <h2 class="booking-section-title">Promo Code</h2>
@@ -656,7 +687,8 @@
             if (eventDays.length) {
                 selectEventDay(eventDays[0].day_index);
             } else {
-                document.getElementById('event-time').textContent = formatDate(event.start_time);
+                document.getElementById('event-time').textContent = "Starts: " + formatDate(event.start_time);
+                document.getElementById('event-end-time').textContent = "Ends: " + formatDate(event.end_time || event.endTime || event.date);
             }
 
             let ticketSnap = await db.collection('events').doc(eventId).collection('ticketTypes').get();
@@ -676,10 +708,18 @@
                 card.innerHTML = `
                     <div class="ticket-opt-row">
                         <div>
-                            <h4 class="ticket-opt-title">${t.name}</h4>
+                            <h4 class="ticket-opt-title">${escapeHtml(t.name)}</h4>
                             <p class="ticket-opt-meta">${getAvailableStock(t) > 0 ? getAvailableStock(t) + ' left' : 'Sold out'}</p>
                         </div>
                         <span class="ticket-opt-price">₹${t.price}</span>
+                    </div>
+                    <div class="ticket-qty-embedded" onclick="event.stopPropagation()">
+                        <span class="sum-label">Select Quantity</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button type="button" class="qty-ctrl-btn" onclick="updateQty(-1)"><i class="fa-solid fa-minus"></i></button>
+                            <span id="qty-val-${t.id}" class="qty-val-display">1</span>
+                            <button type="button" class="qty-ctrl-btn" onclick="updateQty(1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
                 `;
                 card.onclick = () => selectTicket(t);
@@ -703,10 +743,18 @@
                     card.innerHTML = `
                         <div class="ticket-opt-row">
                             <div>
-                                <h4 class="ticket-opt-title">${fallback.name}</h4>
+                                <h4 class="ticket-opt-title">${escapeHtml(fallback.name)}</h4>
                                 <p class="ticket-opt-meta">${getAvailableStock(fallback) > 0 ? getAvailableStock(fallback) + ' left' : 'Sold out'}</p>
                             </div>
                             <span class="ticket-opt-price">₹${fallback.price}</span>
+                        </div>
+                        <div class="ticket-qty-embedded" onclick="event.stopPropagation()">
+                            <span class="sum-label">Select Quantity</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <button type="button" class="qty-ctrl-btn" onclick="updateQty(-1)"><i class="fa-solid fa-minus"></i></button>
+                                <span id="qty-val-${fallback.id}" class="qty-val-display">1</span>
+                                <button type="button" class="qty-ctrl-btn" onclick="updateQty(1)"><i class="fa-solid fa-plus"></i></button>
+                            </div>
                         </div>
                     `;
                     card.onclick = () => selectTicket(fallback);
@@ -733,16 +781,26 @@
         if (getAvailableStock(t) <= 0) return;
         selectedTicket = t;
         document.querySelectorAll('.ticket-select-card').forEach(c => c.classList.remove('active'));
-        document.getElementById(`t-${t.id}`).classList.add('active');
+        const activeCard = document.getElementById(`t-${t.id}`);
+        if (activeCard) activeCard.classList.add('active');
+
+        // Reset quantity to 1 when switching tickets
+        quantity = 1;
+        
+        // Update all embedded quantity displays
+        document.querySelectorAll('.qty-val-display').forEach(el => el.textContent = '1');
         
         // Reset promo when ticket changes
         promoData = null;
         appliedDiscount = 0;
         const pm = document.getElementById('promo-msg');
-        pm.classList.add('hide');
-        pm.classList.remove('promo-msg--error', 'promo-msg--success');
-        pm.textContent = '';
-        document.getElementById('promo-code').value = '';
+        if (pm) {
+            pm.classList.add('hide');
+            pm.classList.remove('promo-msg--error', 'promo-msg--success');
+            pm.textContent = '';
+        }
+        const pCode = document.getElementById('promo-code');
+        if (pCode) pCode.value = '';
 
         updateSummary();
     }
@@ -820,18 +878,27 @@
         document.querySelectorAll('.day-select-card').forEach((c) => c.classList.remove('active'));
         const active = document.getElementById(`d-${day.day_index}`);
         if (active) active.classList.add('active');
-        document.getElementById('event-time').textContent = formatDate(day.start_at);
+        document.getElementById('event-time').textContent = "Starts: " + formatDate(day.start_at);
+        document.getElementById('event-end-time').textContent = "Ends: " + formatDate(day.end_at);
     }
 
     function updateQty(delta) {
+        if (!selectedTicket) return;
         const newVal = quantity + delta;
         if (newVal < 1) return;
         if (selectedTicket && newVal > (selectedTicket.max_per_user || 10)) return;
         if (selectedTicket && newVal > getAvailableStock(selectedTicket)) return;
         
         quantity = newVal;
-        document.getElementById('qty-display').textContent = quantity;
-        document.getElementById('sum-qty').textContent = quantity;
+        
+        // Update the specific display for the selected ticket
+        const display = document.getElementById(`qty-val-${selectedTicket.id}`);
+        if (display) display.textContent = quantity;
+        
+        // Update order summary
+        const sumQty = document.getElementById('sum-qty');
+        if (sumQty) sumQty.textContent = quantity;
+        
         updateSummary();
     }
 
