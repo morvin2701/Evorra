@@ -212,6 +212,14 @@
         box-shadow: 0 8px 24px rgba(220, 38, 38, 0.1);
         background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .ticket-select-card {
+        background: #0b1220 !important;
+        border-color: #1f2a3d !important;
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .ticket-select-card.active {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+        border-color: rgba(96, 165, 250, 0.4) !important;
+    }
     .ticket-qty-embedded {
         display: none;
         margin-top: 16px;
@@ -240,17 +248,31 @@
         cursor: pointer;
         font-size: 0.8rem;
         transition: all 0.2s ease;
+        color: var(--sm-text);
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .qty-ctrl-btn {
+        background: #1e293b;
+        border-color: #334155;
+        color: #f8fafc;
     }
     .qty-ctrl-btn:hover {
         background: var(--sm-primary);
         color: white;
         border-color: var(--sm-primary);
     }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .qty-ctrl-btn:hover {
+        background: #3b82f6;
+        border-color: #3b82f6;
+    }
     .qty-val-display {
         font-weight: 900;
         font-size: 1.1rem;
         min-width: 40px;
         text-align: center;
+        color: var(--sm-text);
+    }
+    :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .qty-val-display {
+        color: #f8fafc;
     }
     .ticket-opt-row {
         display: flex;
