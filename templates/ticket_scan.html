@@ -1026,6 +1026,10 @@
             const match = text.match(/scan-pass\/([^/?#]+)/);
             if (match && match[1]) return match[1];
         }
+        // If it's a simple alphanumeric string (no slashes), treat it as a raw ticket ID
+        if (/^[a-zA-Z0-9_-]+$/.test(text) && !text.includes('/')) {
+            return text;
+        }
         return '';
     }
 
