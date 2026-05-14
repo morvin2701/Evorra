@@ -1622,6 +1622,8 @@
         return startMs - QR_UNLOCK_HOURS_BEFORE * 60 * 60 * 1000;
     }
 
+    let cachedEventEndMs = null;
+
     function getEventEndMs(ticket) {
         const created = ticketCreatedMs(ticket);
         const createdYear = created !== null ? new Date(created).getFullYear() : null;
@@ -1640,6 +1642,8 @@
             const legacyMs = parseLegacyDisplayDateMs(en, createdYear);
             if (legacyMs !== null) return legacyMs;
         }
+        if (cachedEventEndMs !== null) return cachedEventEndMs;
+
         const startMs = getEventStartMs(ticket);
         if (startMs === null) return null;
         const d = new Date(startMs);
@@ -1650,16 +1654,20 @@
     function eventIsCompleted(ticket) {
         const status = String((ticket && ticket.status) || '').toLowerCase();
         if (['completed', 'ended', 'closed', 'archived'].includes(status)) return true;
+        
+        const endMs = getEventEndMs(ticket);
+        if (endMs !== null) {
+            return Date.now() > endMs;
+        }
+        
+        // Fallback to start day boundary ONLY if no endMs is available at all
         const startMs = getEventStartMs(ticket);
-        // Product rule: once the event date has passed, ticket is completed.
-        // This intentionally prioritizes start-date day boundary over any end_time drift.
         if (startMs !== null) {
             const d = new Date(startMs);
             d.setHours(23, 59, 59, 999);
             return Date.now() > d.getTime();
         }
-        const endMs = getEventEndMs(ticket);
-        return endMs !== null && Date.now() > endMs;
+        return false;
     }
 
     function qrIsUnlocked(ticket) {
@@ -1674,16 +1682,23 @@
      * display string), fetch the real Timestamp directly from the events collection.
      * Called once in applyTicketSnapshot when the snapshot parse fails.
      */
-    async function resolveEventStartMs(eventId) {
+    async function resolveEventTimings(eventId) {
         if (!eventId) return;
         try {
             const evDoc = await db.collection('events').doc(eventId).get();
             if (!evDoc.exists) return;
-            const st = (evDoc.data() || {}).start_time;
-            if (!st) return;
-            const d = st.toDate ? st.toDate() : new Date(st);
-            if (!Number.isNaN(d.getTime())) {
-                cachedEventStartMs = d.getTime();
+            const data = evDoc.data() || {};
+            
+            const st = data.start_time;
+            if (st) {
+                const d = st.toDate ? st.toDate() : new Date(st);
+                if (!Number.isNaN(d.getTime())) cachedEventStartMs = d.getTime();
+            }
+            
+            const et = data.end_time || data.endTime;
+            if (et) {
+                const d = et.toDate ? et.toDate() : new Date(et);
+                if (!Number.isNaN(d.getTime())) cachedEventEndMs = d.getTime();
             }
         } catch (e) {}
     }
@@ -2152,10 +2167,10 @@
         document.getElementById('hero-title').textContent = ticket.event_title || eventData.title;
         document.getElementById('hero-location').textContent = `${eventData.venue} • ${eventData.city}`;
         document.getElementById('hero-time').textContent = formatEventDayDisplay(ticket, eventData);
-        // If event_snapshot.start_time is an old display string (not a real Timestamp),
-        // fetch the real date from the event document so time-locked/completed states are accurate.
-        if (getEventStartMs(ticket) === null && ticket.event_id) {
-            await resolveEventStartMs(ticket.event_id);
+        // If event_snapshot timings are missing or legacy strings, fetch the real 
+        // Timestamps from the event document so logic is accurate.
+        if ((getEventStartMs(ticket) === null || getEventEndMs(ticket) === null) && ticket.event_id) {
+            await resolveEventTimings(ticket.event_id);
         }
 
         const completed = eventIsCompleted(ticket);
