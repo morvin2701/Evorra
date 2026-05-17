@@ -533,7 +533,6 @@
     <div class="tabs-row" id="status-tabs">
         <div class="tab-chip active" onclick="setActiveTab('all', this)">All <span class="tab-count" id="count-all">0</span></div>
         <div class="tab-chip" onclick="setActiveTab('confirmed', this)">Confirmed <span class="tab-count" id="count-confirmed">0</span></div>
-        <div class="tab-chip" onclick="setActiveTab('used', this)">Used <span class="tab-count" id="count-used">0</span></div>
         <div class="tab-chip" onclick="setActiveTab('cancelled', this)">Cancelled <span class="tab-count" id="count-cancelled">0</span></div>
     </div>
 
@@ -612,12 +611,25 @@
                   .where('user_id', '==', user.uid)
                   .onSnapshot(snapshot => {
                       allTickets = [];
+                      const now = Date.now();
                       snapshot.forEach(doc => {
                           const data = doc.data();
                           data.id = doc.id;
                           const status = String(data.status || '').toLowerCase();
                           // Pending shared tickets should stay in Shared Tickets page only.
                           if (status === 'shared_pending') return;
+
+                          // Filter out used tickets
+                          if (status === 'used' || data.checked_in === true) return;
+
+                          // Filter out completed events
+                          const eventData = data.event_snapshot || {};
+                          const timeVal = eventData.end_time || eventData.start_time;
+                          if (timeVal) {
+                              const eventDate = timeVal.toDate ? timeVal.toDate() : new Date(timeVal);
+                              if (eventDate.getTime() < now) return; // Event completed
+                          }
+
                           allTickets.push(data);
                       });
                       updateCounts();
@@ -632,7 +644,6 @@
     function updateCounts() {
         document.getElementById('count-all').textContent = allTickets.length;
         document.getElementById('count-confirmed').textContent = allTickets.filter(isTicketConfirmedTab).length;
-        document.getElementById('count-used').textContent = allTickets.filter(isTicketUsed).length;
         document.getElementById('count-cancelled').textContent = allTickets.filter(isTicketCancelled).length;
     }
 
