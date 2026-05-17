@@ -172,54 +172,69 @@
     }
 
     .spotlight-card {
-        border-radius: 20px;
-        padding: 16px;
+        border-radius: 24px;
+        padding: 24px 28px;
         display: grid;
-        grid-template-columns: 68px 1fr auto;
-        gap: 14px;
+        grid-template-columns: 72px 1fr auto;
+        gap: 20px;
         align-items: center;
         border: 1px solid var(--spot-border);
         background: var(--spot-bg);
         color: var(--spot-text);
         box-shadow: var(--spot-shadow);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
     }
 
     .spot-icon {
-        width: 68px;
-        height: 68px;
-        background: var(--spot-icon-bg);
-        border-radius: 20px;
+        width: 72px;
+        height: 72px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 22px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.8rem;
-        color: var(--spot-icon-color);
+        font-size: 2rem;
+        color: #ffffff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
 
     .spot-sub {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--spot-sub) !important;
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: rgba(255, 255, 255, 0.85) !important;
     }
 
     .spot-count {
-        font-size: 2.1rem;
+        font-size: 2.6rem;
         font-weight: 900;
-        margin: 3px 0;
+        margin: 4px 0 2px 0;
         line-height: 1;
+        letter-spacing: -1px;
     }
 
     .spot-msg {
-        font-size: 0.8rem;
-        color: var(--spot-msg) !important;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9) !important;
     }
 
     .spot-arrow {
-        padding: 10px;
-        background: var(--spot-arrow-bg);
-        border-radius: 12px;
-        color: var(--spot-arrow-color);
-        border: 1px solid var(--spot-arrow-border);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body.theme-showmates .details-card,
@@ -410,49 +425,89 @@
 
     /* Theme-specific spotlight tuning */
     :is(html[data-theme="light"], body[data-theme="light"], body.theme-showmates[data-theme="light"]) .profile-shell {
-        --spot-bg: linear-gradient(135deg, #fecaca 0%, #fdba74 52%, #fb923c 100%);
-        --spot-border: rgba(251, 113, 133, 0.24);
+        --spot-bg: linear-gradient(135deg, #b91c1c 0%, #dc2626 40%, #ea580c 100%);
+        --spot-border: rgba(220, 38, 38, 0.2);
         --spot-text: #ffffff;
         --spot-sub: rgba(255, 255, 255, 0.95);
-        --spot-msg: rgba(255, 255, 255, 0.9);
-        --spot-icon-bg: rgba(255, 255, 255, 0.8);
-        --spot-arrow-bg: rgba(255, 255, 255, 0.72);
-        --spot-icon-color: #ef4444;
+        --spot-msg: rgba(255, 255, 255, 0.88);
+        --spot-icon-bg: rgba(255, 255, 255, 0.18);
+        --spot-arrow-bg: rgba(255, 255, 255, 0.18);
+        --spot-icon-color: #ffffff;
         --spot-arrow-color: #ffffff;
-        --spot-arrow-border: rgba(255, 255, 255, 0.35);
-        --spot-shadow: 0 12px 28px rgba(15, 23, 42, 0.09);
+        --spot-arrow-border: rgba(255, 255, 255, 0.4);
+        --spot-shadow: 0 12px 28px rgba(220, 38, 38, 0.15);
+
+        --gold-bg: rgba(180, 83, 9, 0.08);
+        --gold-text: #b45309;
+        --gold-border: rgba(180, 83, 9, 0.25);
+        --gold-card-bg: linear-gradient(135deg, rgba(180, 83, 9, 0.03), rgba(142, 125, 255, 0.02));
+        --gold-btn-bg: linear-gradient(135deg, rgba(180, 83, 9, 0.12), rgba(180, 83, 9, 0.04));
+        --gold-shadow: 0 4px 15px rgba(180, 83, 9, 0.05);
     }
 
     :is(html[data-theme="dark"], body[data-theme="dark"], body.theme-showmates[data-theme="dark"]) .profile-shell {
-        --spot-bg: linear-gradient(135deg, rgba(96, 83, 255, 0.42), rgba(13, 178, 235, 0.3));
-        --spot-border: rgba(148, 163, 184, 0.3);
-        --spot-text: #f8fafc;
-        --spot-sub: rgba(241, 245, 249, 0.9);
-        --spot-msg: rgba(226, 232, 240, 0.86);
+        --spot-bg: linear-gradient(135deg, #dc2626 0%, #ef4444 40%, #f97316 100%);
+        --spot-border: rgba(239, 68, 68, 0.2);
+        --spot-text: #ffffff;
+        --spot-sub: rgba(255, 255, 255, 0.95);
+        --spot-msg: rgba(255, 255, 255, 0.88);
         --spot-icon-bg: rgba(255, 255, 255, 0.18);
-        --spot-arrow-bg: rgba(2, 6, 23, 0.26);
-        --spot-icon-color: #f8fafc;
-        --spot-arrow-color: #f8fafc;
-        --spot-arrow-border: rgba(148, 163, 184, 0.3);
-        --spot-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+        --spot-arrow-bg: rgba(255, 255, 255, 0.18);
+        --spot-icon-color: #ffffff;
+        --spot-arrow-color: #ffffff;
+        --spot-arrow-border: rgba(255, 255, 255, 0.4);
+        --spot-shadow: 0 12px 28px rgba(239, 68, 68, 0.25);
+
+        --gold-bg: rgba(234, 179, 8, 0.15);
+        --gold-text: #eab308;
+        --gold-border: rgba(234, 179, 8, 0.24);
+        --gold-card-bg: linear-gradient(135deg, rgba(234, 179, 8, 0.03), rgba(142, 125, 255, 0.03));
+        --gold-btn-bg: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(234, 179, 8, 0.05));
+        --gold-shadow: 0 4px 15px rgba(234, 179, 8, 0.1);
     }
 
-    @keyframes cardShine {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
+    @keyframes sweepShine {
+        0% { left: -150%; }
+        35% { left: 150%; }
+        100% { left: 150%; }
     }
     
     body.theme-showmates .spotlight-card {
-        background: linear-gradient(120deg, rgba(220, 38, 38, 0.9) 0%, rgba(234, 88, 12, 0.75) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(234, 88, 12, 0.75) 60%, rgba(220, 38, 38, 0.9) 100%) !important;
-        background-size: 200% 100% !important;
-        animation: cardShine 6s infinite linear !important;
+        background: var(--spot-bg) !important;
+        position: relative !important;
+        overflow: hidden !important;
         transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease !important;
+        box-shadow: var(--spot-shadow) !important;
+    }
+
+    body.theme-showmates .spotlight-card::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -150% !important;
+        width: 60% !important;
+        height: 100% !important;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.22) 50%,
+            rgba(255, 255, 255, 0) 100%
+        ) !important;
+        transform: skewX(-20deg) !important;
+        animation: sweepShine 6s infinite ease-in-out !important;
     }
     
     body.theme-showmates .spotlight-card:hover {
         transform: translateY(-4px) scale(1.01) !important;
-        box-shadow: 0 20px 35px rgba(220, 38, 38, 0.25) !important;
-     }
+        box-shadow: var(--spot-shadow) !important;
+    }
+
+    body.theme-showmates .spotlight-card:hover .spot-arrow {
+        background: #ffffff !important;
+        color: #dc2626 !important;
+        transform: translateX(4px) scale(1.05) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
 
     body.theme-showmates .detail-item {
         display: flex !important;
@@ -636,14 +691,14 @@
         </div>
 
         <div id="admin-management-section" class="hide" style="margin-top: 28px;">
-            <div class="actions-card" style="border: 1px solid rgba(234, 179, 8, 0.25) !important; background: linear-gradient(135deg, rgba(234, 179, 8, 0.03), rgba(142, 125, 255, 0.03)) !important; box-shadow: 0 12px 30px rgba(234, 179, 8, 0.03) !important;">
+            <div class="actions-card" style="border: 1px solid var(--gold-border) !important; background: var(--gold-card-bg) !important; box-shadow: 0 12px 30px rgba(234, 179, 8, 0.03) !important;">
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;">
                     <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: rgba(234, 179, 8, 0.15) !important; color: #eab308 !important;">
+                        <div style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: var(--gold-bg) !important; color: var(--gold-text) !important;">
                             <i class="fa-solid fa-crown"></i>
                         </div>
                         <div>
-                            <h3 class="action-row-title" style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">Master Console <span style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; background: rgba(234, 179, 8, 0.15); color: #eab308; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(234, 179, 8, 0.24);">Super Admin</span></h3>
+                            <h3 class="action-row-title" style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">Master Console <span style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; background: var(--gold-bg); color: var(--gold-text); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--gold-border);">Super Admin</span></h3>
                             <p class="action-row-desc" style="margin-top: 4px;">Provision authorized organizer credentials</p>
                         </div>
                     </div>
@@ -946,7 +1001,7 @@
                     
                     if (user.uid === 'hFUiPomQXxgevadKdIJ44bA8wLI2' || user.email === 'vekariyamorvin@gmail.com') {
                         adminSection.classList.remove('hide');
-                        adminContainer.innerHTML = '<button onclick="openCreateOrganiserModal()" style="padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(234, 179, 8, 0.4); background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(234, 179, 8, 0.05)); color: #eab308; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.1);"><i class=\"fa-solid fa-user-plus\"></i> Create Organiser</button>';
+                        adminContainer.innerHTML = '<button onclick="openCreateOrganiserModal()" style="padding: 10px 20px; border-radius: 12px; border: 1px solid var(--gold-border); background: var(--gold-btn-bg); color: var(--gold-text); font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: var(--gold-shadow);"><i class=\"fa-solid fa-user-plus\"></i> Create Organiser</button>';
                     } else {
                         adminSection.classList.add('hide');
                     }
