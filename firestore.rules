@@ -88,13 +88,24 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow any signed-in user to read user profiles (needed for sharing lookup)
       allow read: if signedIn();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
+      allow create: if isOwner(userId)
+          && !request.resource.data.keys().hasAny(['role']);
+      allow update: if isOwner(userId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'createdAt']);
       allow delete: if false;
 
       match /share_rejections/{rejId} {
         allow read, write: if isOwner(userId);
       }
+    }
+
+    match /organiserRequests/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+          && request.resource.data.status == "pending"
+          && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if false;
     }
 
     match /categories/{categoryId} {

@@ -8,7 +8,7 @@ import urllib.request
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 import firebase_admin
-from firebase_admin import credentials, firestore, messaging
+from firebase_admin import credentials, firestore, messaging, auth as firebase_auth
 
 load_dotenv()
 
@@ -685,6 +685,251 @@ def api_test_all_notifications():
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 
+@app.route('/api/create-user', methods=['POST'])
+def api_create_user():
+    """
+    Called from frontend after successful Firebase registration.
+    Creates the user document with role: 'attendee'.
+    """
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'success': False, 'error': 'Missing token'}), 401
+
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        email = decoded_token.get('email', '')
+        
+        db = _init_firebase_admin()
+        
+        # Support displayName from the body or token
+        body = request.get_json(silent=True) or {}
+        display_name = body.get('displayName') or decoded_token.get('name', '')
+        
+        user_ref = db.collection('users').document(uid)
+        user_doc = user_ref.get()
+        
+        if not user_doc.exists:
+            user_ref.set({
+                'uid': uid,
+                'displayName': display_name,
+                'email': email,
+                'role': 'attendee',
+                'createdAt': firestore.SERVER_TIMESTAMP
+            })
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error in api_create_user: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/organiser-request', methods=['POST'])
+def api_organiser_request():
+    """Submit a request to become an organiser."""
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'success': False, 'error': 'Missing token'}), 401
+
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        
+        body = request.get_json(silent=True) or {}
+        brand_name = body.get('brandName')
+        reason = body.get('reason')
+        contact = body.get('contact', '')
+        invite_code = body.get('invite_code', '')
+        
+        if not brand_name or not reason or not invite_code:
+            return jsonify({'success': False, 'error': 'Missing required fields'}), 400
+            
+        import os
+        expected_code = os.environ.get('ORGANISER_INVITE_CODE', 'EVORRA-HOST-2026')
+        if invite_code != expected_code:
+            return jsonify({'success': False, 'error': 'Invalid secret invite code'}), 403
+            
+        db = _init_firebase_admin()
+        
+        # Check existing request
+        req_ref = db.collection('organiserRequests').document(uid)
+        req_doc = req_ref.get()
+        
+        if req_doc.exists:
+            status = req_doc.to_dict().get('status')
+            if status == 'approved':
+                return jsonify({'success': False, 'error': 'You are already an approved organiser'}), 400
+                
+        req_ref.set({
+            'uid': uid,
+            'brandName': brand_name,
+            'reason': reason,
+            'contact': contact,
+            'status': 'approved',
+            'submittedAt': firestore.SERVER_TIMESTAMP,
+            'approvedAt': firestore.SERVER_TIMESTAMP
+        })
+        
+        db.collection('users').document(uid).update({
+            'role': 'organiser'
+        })
+        
+        return jsonify({'success': True, 'message': 'Welcome! You are now an organiser.'})
+    except Exception as e:
+        print(f"Error in api_organiser_request: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/organiser-requests', methods=['GET'])
+def api_admin_organiser_requests():
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(uid).get()
+        if not user_doc.exists or user_doc.to_dict().get('role') != 'admin':
+            return jsonify({'error': 'Forbidden'}), 403
+            
+        requests_query = db.collection('organiserRequests').where('status', '==', 'pending').stream()
+        requests_list = []
+        for doc in requests_query:
+            req_data = doc.to_dict()
+            # Convert timestamp to ISO string
+            if 'submittedAt' in req_data and hasattr(req_data['submittedAt'], 'timestamp'):
+                dt = datetime.fromtimestamp(req_data['submittedAt'].timestamp(), tz=timezone.utc)
+                req_data['submittedAt'] = dt.isoformat()
+            elif 'submittedAt' in req_data and hasattr(req_data['submittedAt'], 'isoformat'):
+                req_data['submittedAt'] = req_data['submittedAt'].isoformat()
+            else:
+                 req_data['submittedAt'] = str(req_data.get('submittedAt'))
+                 
+            # Also get user info
+            u_doc = db.collection('users').document(req_data['uid']).get()
+            if u_doc.exists:
+                u_data = u_doc.to_dict()
+                req_data['userName'] = u_data.get('displayName') or u_data.get('name') or u_data.get('full_name') or 'Unknown'
+                req_data['userEmail'] = u_data.get('email', '')
+                
+            requests_list.append(req_data)
+            
+        return jsonify({'requests': requests_list})
+    except Exception as e:
+        print(f"Error in api_admin_organiser_requests: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/organiser-requests/approve', methods=['POST'])
+def api_admin_organiser_requests_approve():
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(uid).get()
+        if not user_doc.exists or user_doc.to_dict().get('role') != 'admin':
+            return jsonify({'success': False, 'error': 'Forbidden'}), 403
+            
+        body = request.get_json(silent=True) or {}
+        target_uid = body.get('targetUid')
+        
+        if not target_uid:
+            return jsonify({'success': False, 'error': 'Missing targetUid'}), 400
+            
+        db.collection('organiserRequests').document(target_uid).update({
+            'status': 'approved',
+            'approvedAt': firestore.SERVER_TIMESTAMP
+        })
+        
+        db.collection('users').document(target_uid).update({
+            'role': 'organiser'
+        })
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error in approve: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/organiser-requests/reject', methods=['POST'])
+def api_admin_organiser_requests_reject():
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        
+        db = _init_firebase_admin()
+        user_doc = db.collection('users').document(uid).get()
+        if not user_doc.exists or user_doc.to_dict().get('role') != 'admin':
+            return jsonify({'success': False, 'error': 'Forbidden'}), 403
+            
+        body = request.get_json(silent=True) or {}
+        target_uid = body.get('targetUid')
+        
+        if not target_uid:
+            return jsonify({'success': False, 'error': 'Missing targetUid'}), 400
+            
+        db.collection('organiserRequests').document(target_uid).update({
+            'status': 'rejected',
+            'rejectedAt': firestore.SERVER_TIMESTAMP
+        })
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error in reject: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/create-organiser', methods=['POST'])
+def api_admin_create_organiser():
+    token = _extract_bearer_token()
+    if not token:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        
+    try:
+        decoded_token = firebase_auth.verify_id_token(token)
+        uid = decoded_token['uid']
+        email_sender = decoded_token.get('email', '')
+        
+        # Only allow the superadmin
+        if uid != 'hFUiPomQXxgevadKdIJ44bA8wLI2' and email_sender != 'vekariyamorvin@gmail.com':
+            return jsonify({'success': False, 'error': 'Forbidden: Only super-admin can create organisers'}), 403
+            
+        body = request.get_json(silent=True) or {}
+        email = body.get('email')
+        password = body.get('password')
+        
+        if not email or not password:
+            return jsonify({'success': False, 'error': 'Missing email or password'}), 400
+            
+        db = _init_firebase_admin()
+        
+        # Create user in Firebase Auth
+        new_user = firebase_auth.create_user(
+            email=email,
+            password=password
+        )
+        
+        # Create user document in Firestore
+        db.collection('users').document(new_user.uid).set({
+            'uid': new_user.uid,
+            'email': email,
+            'role': 'organiser',
+            'createdAt': firestore.SERVER_TIMESTAMP,
+            'displayName': email.split('@')[0]
+        })
+        
+        return jsonify({'success': True, 'message': f'Organiser account for {email} created successfully.'})
+    except Exception as e:
+        print(f"Error in create-organiser: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.context_processor
 def inject_public_runtime_config():
     return {
@@ -960,6 +1205,10 @@ def notifications():
 @app.route('/profile/edit')
 def edit_profile():
     return render_template('edit_profile.html')
+
+@app.route('/admin/organiser-requests')
+def admin_organiser_requests():
+    return render_template('admin/organiser_requests.html')
 
 
 @app.route('/profile/change-password')

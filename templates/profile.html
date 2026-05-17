@@ -37,25 +37,49 @@
         border-radius: 14px;
     }
 
-    .profile-hero {
-        display: grid;
-        grid-template-columns: 96px 1fr;
-        gap: 16px;
-        padding: 20px;
-        border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.13);
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
-        box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+    body.theme-showmates .profile-hero {
+        display: grid !important;
+        grid-template-columns: 104px 1fr !important;
+        gap: 20px !important;
+        padding: 24px !important;
+        border-radius: 28px !important;
+        border: 1px solid var(--sm-border) !important;
+        background: var(--sm-surface) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    body.theme-showmates .profile-hero::before {
+        content: '' !important;
+        position: absolute !important;
+        top: -50px !important;
+        right: -50px !important;
+        width: 150px !important;
+        height: 150px !important;
+        background: var(--sm-primary) !important;
+        filter: blur(80px) !important;
+        opacity: 0.15 !important;
+        border-radius: 50% !important;
+        z-index: 0 !important;
     }
 
-    .profile-avatar {
-        width: 96px;
-        height: 96px;
-        border-radius: 50%;
-        border: 2px solid rgba(142, 125, 255, 0.55);
-        overflow: hidden;
-        background: #1B2640;
-        flex-shrink: 0;
+    body.theme-showmates .profile-avatar {
+        width: 104px !important;
+        height: 104px !important;
+        border-radius: 50% !important;
+        border: 3px solid var(--sm-surface) !important;
+        box-shadow: 0 0 0 2px var(--sm-primary), 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+        overflow: hidden !important;
+        background: var(--sm-bg) !important;
+        flex-shrink: 0 !important;
+        position: relative !important;
+        z-index: 1 !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+    
+    body.theme-showmates .profile-avatar:hover {
+        transform: scale(1.05) rotate(-2deg) !important;
     }
 
     .profile-role-badge {
@@ -71,32 +95,48 @@
         border: 1px solid rgba(140, 240, 198, 0.24);
     }
 
-    .profile-name {
-        color: white;
-        font-size: 1.45rem;
-        font-weight: 900;
-        margin-top: 10px;
-        line-height: 1.1;
+    .role-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .badge-attendee  { background: rgba(148,163,184,0.15); color: #94a3b8; }
+    .badge-organiser { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .badge-admin     { background: rgba(239,68,68,0.15);   color: #ef4444; }
+    .badge-pending   { background: rgba(234,179,8,0.15);   color: #eab308; }
+    .badge-rejected  { background: rgba(239,68,68,0.15);   color: #ef4444; }
+    #organiser-modal.hide { display: none !important; }
+
+    body.theme-showmates .profile-name {
+        color: var(--sm-text) !important;
+        font-size: 1.6rem !important;
+        font-weight: 900 !important;
+        margin-top: 10px !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.02em !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
-    .profile-email {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.85rem;
-        margin-top: 6px;
+    body.theme-showmates .profile-email {
+        color: var(--sm-muted) !important;
+        font-size: 0.9rem !important;
+        margin-top: 6px !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
-    .profile-city {
-        color: var(--secondary);
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-top: 4px;
+    body.theme-showmates .profile-city {
+        color: var(--sm-primary) !important;
+        font-size: 0.85rem !important;
+        font-weight: 800 !important;
+        margin-top: 4px !important;
+        position: relative !important;
+        z-index: 1 !important;
     }
 
-    .profile-section-title {
-        margin: 28px 0 12px;
-        font-size: 1.15rem;
-        font-weight: 900;
-        color: #fff;
+    body.theme-showmates .profile-section-title {
+        margin: 32px 0 14px 4px !important;
+        font-size: 1.2rem !important;
+        font-weight: 900 !important;
+        color: var(--sm-text) !important;
+        letter-spacing: -0.01em !important;
     }
 
     .interest-chip {
@@ -182,63 +222,84 @@
         border: 1px solid var(--spot-arrow-border);
     }
 
-    .details-card,
-    .actions-card {
-        border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    body.theme-showmates .details-card,
+    body.theme-showmates .actions-card {
+        border-radius: 24px !important;
+        border: 1px solid var(--sm-border) !important;
+        background: var(--sm-surface) !important;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04) !important;
+        padding: 24px !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    .details-card {
-        padding: 14px 16px;
+    body.theme-showmates .interests-wrap {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
     }
 
-    .interests-wrap {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
+    body.theme-showmates .action-tile {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease, transform 0.2s ease !important;
     }
 
-    .action-tile {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: background .2s ease;
+    body.theme-showmates .action-tile:hover {
+        background: var(--sm-bg) !important;
+    }
+    
+    body.theme-showmates .action-tile:active {
+        background: var(--sm-border) !important;
     }
 
-    .action-tile:hover {
-        background: rgba(255, 255, 255, 0.04);
+    body.theme-showmates .action-tile-support {
+        background: transparent !important;
+        border-radius: 12px !important;
+        border: none !important;
     }
 
-    .action-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        flex-shrink: 0;
+    body.theme-showmates .action-tile:hover .action-icon {
+        transform: scale(1.1) !important;
     }
 
-    .logout-card {
-        border-radius: 16px;
-        border: 1px solid rgba(255, 165, 186, 0.32);
-        background: linear-gradient(145deg, rgba(255, 165, 186, 0.1), rgba(255, 165, 186, 0.03));
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
-        cursor: pointer;
-        transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    body.theme-showmates .action-icon {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.1rem !important;
+        flex-shrink: 0 !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     }
 
-    .logout-card:hover {
-        border-color: rgba(220, 38, 38, 0.35);
-        background: rgba(254, 226, 226, 0.35);
+    body.theme-showmates .logout-card {
+        border-radius: 24px !important;
+        border: 1px solid rgba(225, 29, 72, 0.15) !important;
+        background: var(--sm-surface) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 20px 20px !important;
+        cursor: pointer !important;
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        box-shadow: 0 12px 30px rgba(225, 29, 72, 0.04) !important;
+    }
+
+    body.theme-showmates .logout-card:hover {
+        border-color: rgba(225, 29, 72, 0.3) !important;
+        background: rgba(254, 226, 226, 0.05) !important;
+        transform: translateY(-2px) !important;
     }
 
     .actions-card-pad {
@@ -285,31 +346,38 @@
         margin-top: 24px;
     }
 
-    .action-row-title {
-        font-weight: 800;
-        font-size: 0.95rem;
-        margin: 0;
-        color: #fff;
-        line-height: 1.25;
+    body.theme-showmates .action-row-title {
+        font-weight: 800 !important;
+        font-size: 1rem !important;
+        margin: 0 !important;
+        color: var(--sm-text) !important;
+        line-height: 1.25 !important;
+        letter-spacing: -0.01em !important;
     }
 
-    .action-row-desc {
-        font-size: 0.75rem;
-        margin: 2px 0 0;
-        color: rgba(255, 255, 255, 0.55);
-        line-height: 1.35;
+    body.theme-showmates .action-row-desc {
+        font-size: 0.8rem !important;
+        margin: 3px 0 0 !important;
+        color: var(--sm-muted) !important;
+        line-height: 1.35 !important;
     }
 
-    .action-row-chevron {
-        font-size: 0.8rem;
-        opacity: 0.45;
-        flex-shrink: 0;
+    body.theme-showmates .action-row-chevron {
+        font-size: 0.85rem !important;
+        color: var(--sm-muted) !important;
+        opacity: 0.6 !important;
+        flex-shrink: 0 !important;
+        transition: transform 0.2s ease !important;
+    }
+    
+    body.theme-showmates .action-tile:hover .action-row-chevron {
+        transform: translateX(4px) !important;
     }
 
-    .action-divider {
-        border: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        margin: 8px 0;
+    body.theme-showmates .action-divider {
+        border: none !important;
+        border-top: 1px solid var(--sm-border) !important;
+        margin: 6px 16px 6px 72px !important;
     }
 
     .logout-label {
@@ -320,22 +388,23 @@
 
     @media (max-width: 640px) {
         .profile-shell {
-            width: calc(100% - 20px);
-            padding-top: 14px;
+            width: calc(100% - 32px);
+            padding-top: 16px;
         }
 
         .profile-hero {
-            grid-template-columns: 78px 1fr;
-            padding: 16px;
+            grid-template-columns: 84px 1fr;
+            padding: 20px;
+            gap: 16px;
         }
 
         .profile-avatar {
-            width: 78px;
-            height: 78px;
+            width: 84px;
+            height: 84px;
         }
 
         .profile-name {
-            font-size: 1.2rem;
+            font-size: 1.35rem;
         }
     }
 
@@ -366,6 +435,117 @@
         --spot-arrow-color: #f8fafc;
         --spot-arrow-border: rgba(148, 163, 184, 0.3);
         --spot-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes cardShine {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    
+    body.theme-showmates .spotlight-card {
+        background: linear-gradient(120deg, rgba(220, 38, 38, 0.9) 0%, rgba(234, 88, 12, 0.75) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(234, 88, 12, 0.75) 60%, rgba(220, 38, 38, 0.9) 100%) !important;
+        background-size: 200% 100% !important;
+        animation: cardShine 6s infinite linear !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease !important;
+    }
+    
+    body.theme-showmates .spotlight-card:hover {
+        transform: translateY(-4px) scale(1.01) !important;
+        box-shadow: 0 20px 35px rgba(220, 38, 38, 0.25) !important;
+     }
+
+    body.theme-showmates .detail-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        transition: background 0.2s ease !important;
+    }
+
+    body.theme-showmates .detail-item:hover {
+        background: var(--sm-bg) !important;
+    }
+
+    body.theme-showmates .detail-icon {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.1rem !important;
+        flex-shrink: 0 !important;
+        background: rgba(142, 125, 255, 0.1) !important;
+        color: var(--sm-primary) !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+
+    body.theme-showmates .detail-item:hover .detail-icon {
+        transform: scale(1.08) !important;
+    }
+
+    body.theme-showmates .detail-content {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    body.theme-showmates .detail-label {
+        font-size: 0.72rem !important;
+        color: var(--sm-muted) !important;
+        margin: 0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        font-weight: 700 !important;
+    }
+
+    body.theme-showmates .detail-value {
+        font-size: 0.95rem !important;
+        font-weight: 800 !important;
+        color: var(--sm-text) !important;
+        margin: 4px 0 0 !important;
+        word-break: break-all !important;
+    }
+
+    body.theme-showmates .detail-divider {
+        border: none !important;
+        border-top: 1px solid var(--sm-border) !important;
+        margin: 6px 16px !important;
+    }
+
+    /* Premium Modal Styling */
+    body.theme-showmates .organiser-modal-card {
+        border-radius: 24px !important;
+        border: 1px solid var(--sm-border) !important;
+        background: var(--sm-surface) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
+        padding: 32px !important;
+        width: 90% !important;
+        max-width: 420px !important;
+        position: relative !important;
+        animation: modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+
+    @keyframes modalFadeIn {
+        from { transform: scale(0.9) translateY(20px); opacity: 0; }
+        to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    body.theme-showmates .organiser-modal-input {
+        width: 100% !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        border: 1px solid var(--sm-border) !important;
+        background: var(--sm-bg) !important;
+        color: var(--sm-text) !important;
+        font-size: 0.95rem !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        outline: none !important;
+    }
+
+    body.theme-showmates .organiser-modal-input:focus {
+        border-color: var(--sm-primary) !important;
+        box-shadow: 0 0 0 3px rgba(142, 125, 255, 0.15) !important;
     }
 </style>
 {% endblock %}
@@ -414,13 +594,68 @@
 
         <h2 class="profile-section-title">Profile Details</h2>
         <div class="details-card">
-            <div class="summary-row"><span>Display Name</span><span id="d-name" style="font-weight: 800;">-</span></div>
-            <div class="summary-row"><span>Email</span><span id="d-email" style="font-weight: 800;">-</span></div>
-            <div class="summary-row"><span>Phone</span><span id="d-phone" style="font-weight: 800;">-</span></div>
-            <div class="summary-row"><span>City</span><span id="d-city" style="font-weight: 800;">-</span></div>
-            <div class="summary-row" style="margin-bottom: 0;"><span>Role</span><span id="d-role"
-                    style="font-weight: 800; color: var(--secondary);">Attendee</span></div>
+            <div class="detail-item">
+                <div class="detail-icon" style="background: rgba(142, 125, 255, 0.14) !important; color: #8E7DFF !important;"><i class="fa-solid fa-user"></i></div>
+                <div class="detail-content">
+                    <p class="detail-label">Display Name</p>
+                    <p id="d-name" class="detail-value">-</p>
+                </div>
+            </div>
+            <hr class="detail-divider">
+            <div class="detail-item">
+                <div class="detail-icon" style="background: rgba(14, 165, 233, 0.12) !important; color: #0284c7 !important;"><i class="fa-solid fa-envelope"></i></div>
+                <div class="detail-content">
+                    <p class="detail-label">Email</p>
+                    <p id="d-email" class="detail-value">-</p>
+                </div>
+            </div>
+            <hr class="detail-divider">
+            <div class="detail-item">
+                <div class="detail-icon" style="background: rgba(140, 240, 198, 0.14) !important; color: #0d9488 !important;"><i class="fa-solid fa-phone"></i></div>
+                <div class="detail-content">
+                    <p class="detail-label">Phone</p>
+                    <p id="d-phone" class="detail-value">-</p>
+                </div>
+            </div>
+            <hr class="detail-divider">
+            <div class="detail-item">
+                <div class="detail-icon" style="background: rgba(234, 179, 8, 0.1) !important; color: #eab308 !important;"><i class="fa-solid fa-location-dot"></i></div>
+                <div class="detail-content">
+                    <p class="detail-label">City</p>
+                    <p id="d-city" class="detail-value">-</p>
+                </div>
+            </div>
+            <hr class="detail-divider">
+            <div class="detail-item" style="border-bottom: none !important;">
+                <div class="detail-icon" style="background: rgba(139, 92, 246, 0.12) !important; color: #8b5cf6 !important;"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="detail-content">
+                    <p class="detail-label">Role</p>
+                    <p id="d-role" class="detail-value">-</p>
+                </div>
+            </div>
         </div>
+
+        <div id="admin-management-section" class="hide" style="margin-top: 28px;">
+            <div class="actions-card" style="border: 1px solid rgba(234, 179, 8, 0.25) !important; background: linear-gradient(135deg, rgba(234, 179, 8, 0.03), rgba(142, 125, 255, 0.03)) !important; box-shadow: 0 12px 30px rgba(234, 179, 8, 0.03) !important;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 24px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; background: rgba(234, 179, 8, 0.15) !important; color: #eab308 !important;">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div>
+                            <h3 class="action-row-title" style="font-size: 1.05rem; display: flex; align-items: center; gap: 8px;">Master Console <span style="font-size: 0.65rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; background: rgba(234, 179, 8, 0.15); color: #eab308; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(234, 179, 8, 0.24);">Super Admin</span></h3>
+                            <p class="action-row-desc" style="margin-top: 4px;">Provision authorized organizer credentials</p>
+                        </div>
+                    </div>
+                    <div id="admin-management-container">
+                        <!-- Button injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+                <div id="organiser-status-container">
+                    <!-- Badges or buttons will be injected here via JS -->
+                </div>
 
         <div id="interests-section" class="hide">
             <h2 class="profile-section-title">Interests</h2>
@@ -430,7 +665,7 @@
         </div>
 
         <h2 class="profile-section-title">Quick Actions</h2>
-        <div class="actions-card actions-card-pad">
+        <div class="actions-card">
             <div class="action-tile" onclick="location.href='/profile/edit'">
                 <div class="action-icon action-icon-brand"><i class="fa-solid fa-user-pen"></i></div>
                 <div class="action-tile-text">
@@ -478,7 +713,6 @@
                 </div>
             </div>
             <hr class="action-divider">
-            <hr class="action-divider">
             <div class="action-tile action-tile-support" onclick="location.href='/support'">
                 <div class="action-icon action-icon-sky"><i class="fa-solid fa-headset"></i></div>
                 <div class="action-tile-text">
@@ -509,12 +743,13 @@
                 <i class="fa-solid fa-paper-plane action-row-chevron"></i>
             </div>
             <hr class="action-divider">
-            <div class="quick-action-row theme-toggle-row">
-                <div class="quick-action-left">
-                    <span class="quick-action-icon" id="theme-icon">☀️</span>
-                    <span class="quick-action-label">Dark Mode</span>
+            <div class="action-tile">
+                <div class="action-icon action-icon-brand" style="background: rgba(234, 179, 8, 0.1) !important; color: #eab308 !important;"><span id="theme-icon" style="font-size: 1.1rem; line-height: 1;">☀️</span></div>
+                <div class="action-tile-text">
+                    <p class="action-row-title">Dark Mode</p>
+                    <p class="action-row-desc">Toggle light and dark theme</p>
                 </div>
-                <label class="toggle-switch" aria-label="Toggle dark mode">
+                <label class="toggle-switch" aria-label="Toggle dark mode" onclick="event.stopPropagation()">
                     <input type="checkbox" id="theme-toggle" />
                     <span class="toggle-slider"></span>
                 </label>
@@ -523,11 +758,36 @@
 
         <!-- Logout -->
         <div class="logout-card animate-evorra logout-card-spaced" onclick="handleLogout()">
-            <i class="fa-solid fa-right-from-bracket logout-icon"></i>
-            <div class="action-tile-text">
-                <p class="logout-label">Logout</p>
+            <div class="action-icon" style="background: rgba(239, 68, 68, 0.12) !important; color: #ef4444 !important; font-size: 1.1rem !important;">
+                <i class="fa-solid fa-right-from-bracket"></i>
             </div>
-            <i class="fa-solid fa-chevron-right logout-chevron"></i>
+            <div class="action-tile-text">
+                <p class="logout-label" style="color: #ef4444 !important; font-weight: 800 !important; margin: 0 !important; font-size: 0.95rem !important;">Logout</p>
+            </div>
+            <i class="fa-solid fa-chevron-right logout-chevron" style="color: #ef4444 !important;"></i>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<div id="create-organiser-modal" class="modal-backdrop hide" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 30, 0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="organiser-modal-card">
+        <h2 style="margin: 0 0 8px; color: var(--sm-text, #fff); font-size: 1.4rem; font-weight: 900; letter-spacing: -0.02em;">Create Organiser</h2>
+        <p style="margin: 0 0 24px; color: var(--sm-muted); font-size: 0.85rem; line-height: 1.4;">Provision a secure admin account for the new event coordinator.</p>
+        
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: var(--sm-text); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Organiser Email *</label>
+            <input type="email" id="new-org-email" required class="organiser-modal-input" placeholder="name@evorra.com" />
+        </div>
+        <div class="form-group" style="margin-bottom: 32px;">
+            <label style="display: block; margin-bottom: 8px; color: var(--sm-text); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Temporary Password *</label>
+            <input type="text" id="new-org-password" required class="organiser-modal-input" placeholder="Minimum 6 characters" />
+        </div>
+        
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button onclick="closeCreateOrganiserModal()" style="padding: 12px 20px; border-radius: 12px; border: 1px solid var(--sm-border); background: transparent; color: var(--sm-text); font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease;">Cancel</button>
+            <button id="create-org-submit-btn" class="btn-evorra" onclick="submitCreateOrganiser()" style="padding: 12px 20px; border-radius: 12px; border: none; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; width: auto; margin: 0;">Create Account</button>
         </div>
     </div>
 </div>
@@ -572,7 +832,26 @@
 
                     // Header Info
                     const role = data.role || 'Attendee';
-                    document.getElementById('p-role').textContent = role.toUpperCase();
+                    const roleBadge = document.getElementById('p-role');
+                    roleBadge.textContent = role.toUpperCase();
+                    
+                    // Reset styles and apply dynamic role colors
+                    roleBadge.style.background = '';
+                    roleBadge.style.color = '';
+                    roleBadge.style.borderColor = '';
+                    if (/admin/i.test(role)) {
+                        roleBadge.style.background = 'rgba(234, 179, 8, 0.15) !important';
+                        roleBadge.style.color = '#eab308 !important';
+                        roleBadge.style.borderColor = 'rgba(234, 179, 8, 0.28) !important';
+                    } else if (/org/i.test(role)) {
+                        roleBadge.style.background = 'rgba(34, 197, 94, 0.15) !important';
+                        roleBadge.style.color = '#22c55e !important';
+                        roleBadge.style.borderColor = 'rgba(34, 197, 94, 0.28) !important';
+                    } else {
+                        roleBadge.style.background = 'rgba(142, 125, 255, 0.14) !important';
+                        roleBadge.style.color = '#8E7DFF !important';
+                        roleBadge.style.borderColor = 'rgba(142, 125, 255, 0.28) !important';
+                    }
                     document.getElementById('p-name').textContent = data.display_name || user.displayName || 'Guest';
                     document.getElementById('p-email').textContent = data.email || user.email;
                     var showCity =
@@ -590,7 +869,15 @@
                     document.getElementById('d-email').textContent = data.email || user.email;
                     document.getElementById('d-phone').textContent = data.phone_number || 'N/A';
                     document.getElementById('d-city').textContent = showCity || 'N/A';
-                    document.getElementById('d-role').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                    const dRole = document.getElementById('d-role');
+                    dRole.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                    if (/admin/i.test(role)) {
+                        dRole.style.color = '#eab308';
+                    } else if (/org/i.test(role)) {
+                        dRole.style.color = '#22c55e';
+                    } else {
+                        dRole.style.color = '#8E7DFF';
+                    }
 
                     // Interests
                     if (data.interests && data.interests.length > 0) {
@@ -608,6 +895,17 @@
                     // Organizer Actions
                     if (/organiz/.test(role.toLowerCase())) {
                         document.getElementById('organizer-actions').classList.remove('hide');
+                    }
+                    
+                    // Admin Management Section
+                    const adminContainer = document.getElementById('admin-management-container');
+                    const adminSection = document.getElementById('admin-management-section');
+                    
+                    if (user.uid === 'hFUiPomQXxgevadKdIJ44bA8wLI2' || user.email === 'vekariyamorvin@gmail.com') {
+                        adminSection.classList.remove('hide');
+                        adminContainer.innerHTML = '<button onclick="openCreateOrganiserModal()" style="padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(234, 179, 8, 0.4); background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(234, 179, 8, 0.05)); color: #eab308; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.1);"><i class=\"fa-solid fa-user-plus\"></i> Create Organiser</button>';
+                    } else {
+                        adminSection.classList.add('hide');
                     }
                 });
 
@@ -696,6 +994,75 @@
             }
         } catch (e) {
             console.error("[FCM] Test error:", e);
+        }
+    }
+
+    function showToast(message, isSuccess = true) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.color = '#fff';
+        toast.style.fontWeight = 'bold';
+        toast.style.background = isSuccess ? '#22c55e' : '#ef4444';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        toast.style.transition = 'opacity 0.3s ease';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function openCreateOrganiserModal() {
+        document.getElementById('new-org-email').value = '';
+        document.getElementById('new-org-password').value = '';
+        document.getElementById('create-organiser-modal').classList.remove('hide');
+    }
+
+    function closeCreateOrganiserModal() {
+        document.getElementById('create-organiser-modal').classList.add('hide');
+    }
+
+    async function submitCreateOrganiser() {
+        const email = document.getElementById('new-org-email').value.trim();
+        const password = document.getElementById('new-org-password').value.trim();
+        
+        if (!email || !password) {
+            showToast("Email and password are required", false);
+            return;
+        }
+        
+        const btn = document.getElementById('create-org-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+        
+        try {
+            const token = await auth.currentUser.getIdToken(true);
+            const response = await fetch('/api/admin/create-organiser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                closeCreateOrganiserModal();
+                showToast(data.message || "Account created successfully!");
+            } else {
+                showToast(data.error || "Failed to create account", false);
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("An error occurred", false);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Create Account';
         }
     }
 

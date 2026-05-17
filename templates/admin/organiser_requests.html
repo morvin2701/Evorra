@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Evorra | Organiser Requests{% endblock %}
+
+{% block head %}
+<style>
+    .admin-root {
+        min-height: 100vh;
+        background: var(--bg);
+        padding-bottom: max(96px, env(safe-area-inset-bottom, 24px));
+        color: #fff;
+    }
+
+    .admin-shell {
+        width: min(1000px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 40px 0 32px;
+    }
+
+    .admin-header {
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .admin-title {
+        font-size: 2rem;
+        font-weight: 900;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .request-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .request-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .req-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .req-brand {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0 0 4px;
+    }
+
+    .req-user {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin: 0;
+    }
+
+    .req-date {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .req-body {
+        margin-bottom: 20px;
+    }
+
+    .req-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+        color: #8E7DFF;
+        margin-bottom: 4px;
+    }
+
+    .req-text {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .req-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .btn-approve {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .btn-approve:hover:not(:disabled) {
+        background: rgba(34, 197, 94, 0.25);
+    }
+
+    .btn-reject {
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .btn-reject:hover:not(:disabled) {
+        background: rgba(239, 68, 68, 0.25);
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .loading-state {
+        text-align: center;
+        padding: 60px 0;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 0;
+        color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 16px;
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-root">
+    <div class="admin-shell">
+        <div class="admin-header">
+            <h1 class="admin-title">Organiser Requests</h1>
+            <a href="/profile" style="color: #8E7DFF; text-decoration: none; font-weight: bold;">&larr; Back to Profile</a>
+        </div>
+
+        <div id="requests-container">
+            <div class="loading-state">
+                <i class="fa-solid fa-spinner fa-spin fa-2x" style="margin-bottom: 16px;"></i>
+                <p>Loading requests...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showToast(message, isSuccess = true) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.style.padding = '12px 20px';
+        toast.style.borderRadius = '8px';
+        toast.style.color = '#fff';
+        toast.style.fontWeight = 'bold';
+        toast.style.background = isSuccess ? '#22c55e' : '#ef4444';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        toast.style.transition = 'opacity 0.3s ease';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    async function checkAdminAndLoad() {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                location.href = '/auth';
+                return;
+            }
+
+            try {
+                // Check if user is admin
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (!doc.exists || doc.data().role !== 'admin') {
+                    location.href = '/';
+                    return;
+                }
+
+                loadRequests(user);
+            } catch (e) {
+                console.error(e);
+                location.href = '/';
+            }
+        });
+    }
+
+    async function loadRequests(user) {
+        try {
+            const token = await user.getIdToken(true);
+            const res = await fetch('/api/admin/organiser-requests', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+
+            const container = document.getElementById('requests-container');
+            
+            if (!res.ok) {
+                container.innerHTML = `<div class="empty-state"><p>Error: ${data.error}</p></div>`;
+                return;
+            }
+
+            if (!data.requests || data.requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-inbox fa-3x" style="margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3 style="margin: 0 0 8px; color: #fff;">No pending requests</h3>
+                        <p style="margin: 0;">You're all caught up!</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            data.requests.forEach(req => {
+                const dateStr = new Date(req.submittedAt).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+                
+                html += `
+                    <div class="request-card" id="req-${req.uid}">
+                        <div class="req-header">
+                            <div>
+                                <h3 class="req-brand">${req.brandName}</h3>
+                                <p class="req-user">${req.userName} &bull; ${req.userEmail}</p>
+                            </div>
+                            <span class="req-date">${dateStr}</span>
+                        </div>
+                        
+                        <div class="req-body">
+                            <div class="req-label">Reason</div>
+                            <div class="req-text" style="margin-bottom: 12px;">${req.reason}</div>
+                            
+                            ${req.contact ? `
+                            <div class="req-label">Contact</div>
+                            <div class="req-text">${req.contact}</div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="req-actions">
+                            <button class="btn-reject" onclick="handleAction('${req.uid}', 'reject')" id="btn-reject-${req.uid}">
+                                <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                            <button class="btn-approve" onclick="handleAction('${req.uid}', 'approve')" id="btn-approve-${req.uid}">
+                                <i class="fa-solid fa-check"></i> Approve
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('requests-container').innerHTML = `
+                <div class="empty-state"><p>Failed to load requests</p></div>
+            `;
+        }
+    }
+
+    async function handleAction(targetUid, action) {
+        if (!confirm(`Are you sure you want to ${action} this request?`)) return;
+
+        const btnApprove = document.getElementById(`btn-approve-${targetUid}`);
+        const btnReject = document.getElementById(`btn-reject-${targetUid}`);
+        const activeBtn = action === 'approve' ? btnApprove : btnReject;
+        
+        btnApprove.disabled = true;
+        btnReject.disabled = true;
+        
+        const originalText = activeBtn.innerHTML;
+        activeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+        try {
+            const token = await auth.currentUser.getIdToken(true);
+            const res = await fetch(`/api/admin/organiser-requests/${action}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ targetUid })
+            });
+            
+            const data = await res.json();
+            if (data.success) {
+                showToast(`Request ${action}d successfully!`, true);
+                // Remove card
+                const card = document.getElementById(`req-${targetUid}`);
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 300);
+                
+                // Check if last
+                if (document.querySelectorAll('.request-card').length === 1) {
+                    setTimeout(() => {
+                        document.getElementById('requests-container').innerHTML = `
+                            <div class="empty-state">
+                                <i class="fa-solid fa-inbox fa-3x" style="margin-bottom: 16px; opacity: 0.5;"></i>
+                                <h3 style="margin: 0 0 8px; color: #fff;">No pending requests</h3>
+                                <p style="margin: 0;">You're all caught up!</p>
+                            </div>`;
+                    }, 300);
+                }
+            } else {
+                showToast(data.error || "Action failed", false);
+                btnApprove.disabled = false;
+                btnReject.disabled = false;
+                activeBtn.innerHTML = originalText;
+            }
+        } catch (e) {
+            console.error(e);
+            showToast("An error occurred", false);
+            btnApprove.disabled = false;
+            btnReject.disabled = false;
+            activeBtn.innerHTML = originalText;
+        }
+    }
+
+    checkAdminAndLoad();
+</script>
+{% endblock %}
