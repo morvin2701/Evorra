@@ -814,6 +814,40 @@
                 return;
             }
 
+            // Sync super admin/organiser role to database
+            if (user.uid === 'hFUiPomQXxgevadKdIJ44bA8wLI2' || user.email === 'vekariyamorvin@gmail.com') {
+                try {
+                    const userRef = db.collection('users').doc(user.uid);
+                    const docSnap = await userRef.get();
+                    if (docSnap.exists) {
+                        const d = docSnap.data() || {};
+                        if (d.role !== 'Super Admin & Organiser' || !d.is_admin || !d.is_organiser) {
+                            await userRef.set({
+                                role: 'Super Admin & Organiser',
+                                is_admin: true,
+                                is_organiser: true,
+                                admin: true,
+                                organizer: true
+                            }, { merge: true });
+                            console.log('[Evorra] Firestore database upgraded for Super Admin.');
+                        }
+                    } else {
+                        await userRef.set({
+                            email: user.email,
+                            display_name: user.displayName || 'Morvin Vekariya',
+                            role: 'Super Admin & Organiser',
+                            is_admin: true,
+                            is_organiser: true,
+                            admin: true,
+                            organizer: true
+                        });
+                        console.log('[Evorra] Firestore database initialized for Super Admin.');
+                    }
+                } catch (e) {
+                    console.error('[Evorra] Error syncing admin privileges:', e);
+                }
+            }
+
             try {
                 // Listen for User Data
                 db.collection('users').doc(user.uid).onSnapshot(doc => {
@@ -831,7 +865,10 @@
                     }
 
                     // Header Info
-                    const role = data.role || 'Attendee';
+                    let role = data.role || 'Attendee';
+                    if (user.uid === 'hFUiPomQXxgevadKdIJ44bA8wLI2' || user.email === 'vekariyamorvin@gmail.com') {
+                        role = 'Super Admin & Organiser';
+                    }
                     const roleBadge = document.getElementById('p-role');
                     roleBadge.textContent = role.toUpperCase();
                     
@@ -839,7 +876,11 @@
                     roleBadge.style.background = '';
                     roleBadge.style.color = '';
                     roleBadge.style.borderColor = '';
-                    if (/admin/i.test(role)) {
+                    if (role === 'Super Admin & Organiser') {
+                        roleBadge.style.background = 'linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(34, 197, 94, 0.15)) !important';
+                        roleBadge.style.color = '#eab308 !important';
+                        roleBadge.style.borderColor = 'rgba(234, 179, 8, 0.28) !important';
+                    } else if (/admin/i.test(role)) {
                         roleBadge.style.background = 'rgba(234, 179, 8, 0.15) !important';
                         roleBadge.style.color = '#eab308 !important';
                         roleBadge.style.borderColor = 'rgba(234, 179, 8, 0.28) !important';
@@ -870,8 +911,10 @@
                     document.getElementById('d-phone').textContent = data.phone_number || 'N/A';
                     document.getElementById('d-city').textContent = showCity || 'N/A';
                     const dRole = document.getElementById('d-role');
-                    dRole.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-                    if (/admin/i.test(role)) {
+                    dRole.textContent = role;
+                    if (role === 'Super Admin & Organiser') {
+                        dRole.style.color = '#eab308';
+                    } else if (/admin/i.test(role)) {
                         dRole.style.color = '#eab308';
                     } else if (/org/i.test(role)) {
                         dRole.style.color = '#22c55e';
@@ -893,7 +936,7 @@
                     }
 
                     // Organizer Actions
-                    if (/organiz/.test(role.toLowerCase())) {
+                    if (/organi/i.test(role)) {
                         document.getElementById('organizer-actions').classList.remove('hide');
                     }
                     
